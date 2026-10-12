@@ -15,6 +15,7 @@
     "@unocss/nuxt": "^66.5.10",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "^0.5.31",
+    "nuxt-i18n-micro": "^3.30.0",
     "temporal-polyfill": "^0.3.2",
     "vue": "^3.5.43",
     "vue-router": "^5.3.1"

@@ -1,22 +1,22 @@
 <template>
   <main class="page-wrap play-page">
-    <NuxtLink class="soft-link back-link" to="/archive">
-      ← Revenir aux jours précédents
+    <NuxtLink class="soft-link back-link" :to="$localePath({ name: 'archive' })">
+      {{ t('play.back') }}
     </NuxtLink>
     <header class="play-heading">
       <div>
-        <p class="section-kicker">{{ formatPuzzleDate(puzzle.date) }}</p>
-        <h1>{{ puzzle.title }}</h1>
-        <p class="play-note">{{ puzzle.note }}</p>
+        <p class="section-kicker">{{ formatPuzzleDate(puzzle.date, undefined, language) }}</p>
+        <h1>{{ displayedTitle }}</h1>
+        <p class="play-note">{{ displayedNote }}</p>
       </div>
-      <a class="source-link" :href="`https://zimablue.cc/illustrations/${puzzle.imageSlug}`" target="_blank" rel="noreferrer">Voir l’illustration <span aria-hidden="true">↗</span></a>
+      <a class="source-link" :href="`https://zimablue.cc/illustrations/${puzzle.imageSlug}`" target="_blank" rel="noreferrer">{{ t('play.viewIllustration') }} <span aria-hidden="true">↗</span></a>
     </header>
     <div class="play-layout">
       <PuzzleBoard :puzzle="puzzle" />
       <aside class="reference-panel">
-        <span class="reference-label">L’image à retrouver</span>
-        <img :src="puzzle.imageUrl" :alt="`Aperçu de ${puzzle.imageName}`">
-        <p>Observe les couleurs, puis échange les pièces en deux touches.</p>
+        <span class="reference-label">{{ t('play.reference') }}</span>
+        <img :src="puzzle.imageUrl" :alt="t('play.referenceAlt', { name: puzzle.imageName })">
+        <p>{{ t('play.referenceHelp') }}</p>
       </aside>
     </div>
   </main>
@@ -25,10 +25,18 @@
 <script setup lang="ts">
 import type { DailyPuzzle } from '#shared/types/puzzle'
 import { formatPuzzleDate } from '#shared/types/puzzle'
+definePageMeta({ name: 'play' })
+const { $getLocale, $t } = useI18n()
+const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
+const { $defineI18nRoute } = useNuxtApp()
+await $defineI18nRoute({ localeRoutes: { en: '/play/[date]' } })
 
 const route = useRoute()
 const { data: puzzleData, error } = await useFetch<DailyPuzzle>(`/api/puzzles/${route.params.date}`)
-if (error.value || !puzzleData.value) throw createError({ statusCode: 404, statusMessage: 'Ce puzzle n’est pas encore dans l’archive.' })
+if (error.value || !puzzleData.value) throw createError({ statusCode: 404, statusMessage: t('play.notFound') })
 const puzzle = computed(() => puzzleData.value!)
-useSeoMeta({ title: () => puzzle.value.title, description: () => `Reconstitue l’illustration ${puzzle.value.imageName}.` })
+const language = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
+const displayedTitle = computed(() => $getLocale() === 'en' && puzzle.value.titleEn ? puzzle.value.titleEn : puzzle.value.title)
+const displayedNote = computed(() => $getLocale() === 'en' && puzzle.value.noteEn ? puzzle.value.noteEn : puzzle.value.note)
+useSeoMeta({ title: () => displayedTitle.value, description: () => t('play.seoDescription', { name: puzzle.value.imageName }) })
 </script>

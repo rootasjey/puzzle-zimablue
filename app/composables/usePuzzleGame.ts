@@ -33,12 +33,18 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
       selected.value = null
       return
     }
+    swap(selected.value, slot)
+    selected.value = null
+  }
+
+  function swap(first: number, second: number) {
+    if (complete.value || first === second || first < 0 || second < 0 || first >= order.value.length || second >= order.value.length) return
     const next = [...order.value]
-    ;[next[selected.value], next[slot]] = [next[slot]!, next[selected.value]!]
+    ;[next[first], next[second]] = [next[second]!, next[first]!]
     order.value = next
     moves.value++
     selected.value = null
   }
 
-  return { order, selected, moves, complete, started, newBoard, choose }
+  return { order, selected, moves, complete, started, newBoard, choose, swap }
 }

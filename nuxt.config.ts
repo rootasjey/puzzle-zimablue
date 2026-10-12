@@ -2,11 +2,25 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-10-12',
   devtools: { enabled: true },
   css: ['@dayflow/core/dist/styles.css', '~/assets/css/main.css'],
-  modules: ['@unocss/nuxt', '@una-ui/nuxt', 'nuxt-auth-utils'],
+  modules: ['@unocss/nuxt', '@una-ui/nuxt', 'nuxt-auth-utils', 'nuxt-i18n-micro'],
   nitro: { preset: 'cloudflare_module' },
+  i18n: {
+    locales: [
+      { code: 'fr', iso: 'fr-FR', dir: 'ltr', displayName: 'Français' },
+      { code: 'en', iso: 'en-US', dir: 'ltr', displayName: 'English' },
+    ],
+    defaultLocale: 'fr',
+    strategy: 'prefix_except_default',
+    translationDir: 'locales',
+    disablePageLocales: true,
+    localeCookie: 'puzzle-locale',
+    autoDetectLanguage: true,
+    autoDetectPath: '/',
+    meta: true,
+    metaBaseUrl: 'https://puzzle.zimablue.cc',
+  },
   app: {
     head: {
-      htmlAttrs: { lang: 'fr' },
       title: 'Puzzle Zimablue',
       titleTemplate: '%s — Puzzle Zimablue',
       meta: [

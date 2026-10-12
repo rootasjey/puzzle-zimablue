@@ -6,6 +6,8 @@ interface PuzzleRow {
   date: string
   title: string
   note: string
+  title_en: string
+  note_en: string
   image_name: string
   image_slug: string
   image_url: string
@@ -18,6 +20,8 @@ export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
     date: row.date,
     title: row.title,
     note: row.note,
+    titleEn: row.title_en ?? '',
+    noteEn: row.note_en ?? '',
     imageName: row.image_name,
     imageSlug: row.image_slug,
     imageUrl: row.image_url,
@@ -28,7 +32,7 @@ export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
 
 export async function getPuzzleByDate(event: H3Event, date: string): Promise<DailyPuzzle | null> {
   const row = await getDatabase(event)
-    .prepare('SELECT date, title, note, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
     .bind(date, 'published', getParisDate())
     .first<PuzzleRow>()
   return row ? mapPuzzle(row) : null
@@ -36,7 +40,7 @@ export async function getPuzzleByDate(event: H3Event, date: string): Promise<Dai
 
 export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
     .bind('published', getParisDate())
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
@@ -44,7 +48,7 @@ export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]
 
 export async function getAdminPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, image_name, image_slug, image_url, grid_size, status FROM puzzles ORDER BY date')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles ORDER BY date')
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
 }
