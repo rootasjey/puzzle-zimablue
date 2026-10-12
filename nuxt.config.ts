@@ -37,7 +37,7 @@ export default defineNuxtConfig({
     initialAdminEmail: '',
     emailFrom: 'no-reply@zimablue.cc',
     public: {
-      registrationEnabled: false,
+      registrationEnabled: true,
       siteUrl: 'https://puzzle.zimablue.cc',
     },
   },

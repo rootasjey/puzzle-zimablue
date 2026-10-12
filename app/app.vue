@@ -2,32 +2,45 @@
   <div class="site-shell">
     <header class="site-header page-wrap">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
-        <span>zima</span><span class="wordmark-blue">blue</span><i aria-hidden="true">·</i>
+        <span>zima</span><span class="wordmark-blue">blue</span>
       </NuxtLink>
       <nav :aria-label="t('app.navigation')">
         <NuxtLink class="nav-link" :to="$localePath({ name: 'index' })">{{ t('app.home') }}</NuxtLink>
         <NuxtLink class="nav-link" :to="$localePath({ name: 'archive' })">{{ t('app.archive') }}</NuxtLink>
+        <NuxtLink v-if="loggedIn && user" class="nav-link" :to="$localePath({ name: 'account' })">{{ t('app.account') }}</NuxtLink>
+        <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
         <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-calendar' })">{{ t('app.admin') }}</NuxtLink>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
           {{ nextLanguageCode }}
         </button>
-        <details ref="themeMenu" class="theme-menu">
-          <summary :title="t('theme.label', { theme: themeLabels[theme] })" :aria-label="t('theme.choose')">
+        <div ref="themeMenu" class="theme-menu">
+          <button
+            ref="themeToggle"
+            class="theme-toggle"
+            type="button"
+            :title="t('theme.label', { theme: themeLabels[theme] })"
+            :aria-label="t('theme.choose')"
+            aria-controls="theme-options"
+            :aria-expanded="themeMenuOpen"
+            @click="themeMenuOpen = !themeMenuOpen"
+          >
             <span aria-hidden="true">◐</span>
             <span class="sr-only">{{ t('theme.label', { theme: themeLabels[theme] }) }}</span>
-          </summary>
-          <div class="theme-options" role="group" :aria-label="t('theme.choose')">
-            <button
-              v-for="option in themeOptions"
-              :key="option.value"
-              type="button"
-              :aria-pressed="theme === option.value"
-              @click="setTheme(option.value)"
-            >
-              {{ t(option.label) }}<span v-if="theme === option.value" aria-hidden="true">✓</span>
-            </button>
-          </div>
-        </details>
+          </button>
+          <Transition name="theme-pop">
+            <div v-if="themeMenuOpen" id="theme-options" class="theme-options" role="group" :aria-label="t('theme.choose')">
+              <button
+                v-for="option in themeOptions"
+                :key="option.value"
+                type="button"
+                :aria-pressed="theme === option.value"
+                @click="setTheme(option.value)"
+              >
+                {{ t(option.label) }}<span v-if="theme === option.value" aria-hidden="true">✓</span>
+              </button>
+            </div>
+          </Transition>
+        </div>
       </nav>
     </header>
     <NuxtPage />
@@ -51,7 +64,9 @@ const themeCookie = useCookie<ThemePreference>('puzzle-theme', {
 })
 const validThemes: ThemePreference[] = ['system', 'light', 'dark']
 const theme = computed<ThemePreference>(() => validThemes.includes(themeCookie.value) ? themeCookie.value : 'system')
-const themeMenu = ref<HTMLDetailsElement>()
+const themeMenu = ref<HTMLElement>()
+const themeToggle = ref<HTMLButtonElement>()
+const themeMenuOpen = ref(false)
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'theme.system' },
   { value: 'light', label: 'theme.light' },
@@ -66,8 +81,29 @@ useHead({ htmlAttrs: { 'data-theme': theme } })
 
 function setTheme(value: ThemePreference) {
   themeCookie.value = value
-  if (themeMenu.value) themeMenu.value.open = false
+  themeMenuOpen.value = false
 }
+
+function closeThemeMenu(event: PointerEvent | KeyboardEvent) {
+  if (event instanceof KeyboardEvent && event.key === 'Escape') {
+    themeMenuOpen.value = false
+    themeToggle.value?.focus()
+    return
+  }
+  if (event instanceof PointerEvent && event.target instanceof Node && !themeMenu.value?.contains(event.target)) {
+    themeMenuOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', closeThemeMenu)
+  document.addEventListener('keydown', closeThemeMenu)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', closeThemeMenu)
+  document.removeEventListener('keydown', closeThemeMenu)
+})
 
 function switchLanguage() {
   $switchLocale(currentLanguage.value === 'fr' ? 'en' : 'fr')

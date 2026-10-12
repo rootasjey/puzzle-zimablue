@@ -16,7 +16,6 @@
       <aside class="reference-panel">
         <span class="reference-label">{{ t('play.reference') }}</span>
         <img :src="puzzle.imageUrl" :alt="t('play.referenceAlt', { name: puzzle.imageName })">
-        <p>{{ t('play.referenceHelp') }}</p>
       </aside>
     </div>
   </main>

@@ -4,6 +4,8 @@
     "navigation": "Navigation principale",
     "home": "Le puzzle du jour",
     "archive": "Archives",
+    "account": "Mon espace",
+    "signIn": "Connexion",
     "admin": "Admin",
     "language": "Langue",
     "switchLanguage": "Passer en {language}",
@@ -63,10 +65,15 @@
     "restart": "Recommencer",
     "loading": "Préparation des pièces…",
     "imageError": "Impossible de charger cette illustration.",
+    "congratulations": "Bravo !",
     "caption": "Glisse-dépose une pièce ou touche deux pièces pour les échanger.",
     "successOne": "Image reconstituée en {count} coup.",
     "successMany": "Image reconstituée en {count} coups.",
-    "tomorrow": "Bien joué. À demain pour une nouvelle image."
+    "tomorrow": "Bien joué. À demain pour une nouvelle image.",
+    "saveProgress": "Garder ma progression",
+    "alreadyHaveAccount": "J’ai déjà un compte",
+    "progressSaved": "Résultat enregistré dans ton espace.",
+    "saveProgressError": "Impossible d’enregistrer ce résultat. Réessaie depuis ton espace."
   },
   "errors": {
     "notFoundTitle": "Puzzle introuvable",
@@ -170,5 +177,31 @@
     "savePassword": "Enregistrer le mot de passe",
     "savingPassword": "Enregistrement…",
     "resetError": "Ce lien est invalide ou expiré."
+  },
+  "account": {
+    "kicker": "Ton espace de jeu",
+    "title": "Ma progression",
+    "description": "Retrouve tes puzzles terminés et tes statistiques sur tous tes appareils.",
+    "signInDescription": "Connecte-toi pour retrouver tes puzzles terminés et tes statistiques.",
+    "createAccount": "Créer mon compte",
+    "registrationDescription": "Un compte facultatif pour garder tes puzzles terminés et tes statistiques. Nous confirmerons ton adresse email.",
+    "claimedPuzzle": "Ton puzzle du {date} sera ajouté à ta progression.",
+    "verificationSent": "Vérifie ta boîte email pour confirmer ton adresse. Le lien est valable 24 heures.",
+    "registrationError": "La création du compte n’a pas abouti. Vérifie les informations et réessaie.",
+    "verifyTitle": "Confirme ton adresse",
+    "verifying": "Vérification de ton adresse…",
+    "verifyError": "Ce lien est invalide ou expiré. Recommence l’inscription pour recevoir un nouveau lien.",
+    "verified": "Adresse confirmée. Ton espace est prêt.",
+    "goToStats": "Voir ma progression",
+    "verifyFirst": "Confirme ton adresse email depuis le lien reçu avant de te connecter.",
+    "alreadyHaveAccount": "Tu as déjà un compte ?",
+    "noAccount": "Pas encore de compte ?",
+    "signOut": "Se déconnecter",
+    "loadError": "Les statistiques n’ont pas pu être chargées.",
+    "puzzlesCompleted": "puzzles terminés",
+    "dayStreak": "jours de suite",
+    "bestMoves": "meilleur nombre de coups",
+    "history": "Puzzles terminés",
+    "empty": "Tes puzzles terminés apparaîtront ici."
   }
 }

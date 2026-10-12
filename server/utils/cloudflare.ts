@@ -24,7 +24,7 @@ export interface D1Database {
 
 export interface EmailBinding {
   send(message: {
-    from: string
+    from: string | { email: string; name?: string }
     to: string
     subject: string
     text: string

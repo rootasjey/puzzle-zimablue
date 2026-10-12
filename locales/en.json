@@ -4,6 +4,8 @@
     "navigation": "Main navigation",
     "home": "Today’s puzzle",
     "archive": "Archive",
+    "account": "My account",
+    "signIn": "Sign in",
     "admin": "Admin",
     "language": "Language",
     "switchLanguage": "Switch to {language}",
@@ -63,10 +65,15 @@
     "restart": "Start over",
     "loading": "Preparing the pieces…",
     "imageError": "This illustration could not be loaded.",
+    "congratulations": "Well done!",
     "caption": "Drag one piece onto another, or tap two pieces to swap them.",
     "successOne": "Picture restored in {count} move.",
     "successMany": "Picture restored in {count} moves.",
-    "tomorrow": "Well done. Come back tomorrow for a new image."
+    "tomorrow": "Well done. Come back tomorrow for a new image.",
+    "saveProgress": "Save my progress",
+    "alreadyHaveAccount": "I already have an account",
+    "progressSaved": "Result saved to your account.",
+    "saveProgressError": "Could not save this result. Try again from your account."
   },
   "errors": {
     "notFoundTitle": "Puzzle not found",
@@ -170,5 +177,31 @@
     "savePassword": "Save password",
     "savingPassword": "Saving…",
     "resetError": "This link is invalid or has expired."
+  },
+  "account": {
+    "kicker": "Your puzzle space",
+    "title": "My progress",
+    "description": "Find your completed puzzles and stats on all your devices.",
+    "signInDescription": "Sign in to find your completed puzzles and stats.",
+    "createAccount": "Create my account",
+    "registrationDescription": "An optional account to keep your completed puzzles and stats. We’ll verify your email address.",
+    "claimedPuzzle": "Your puzzle from {date} will be added to your progress.",
+    "verificationSent": "Check your inbox to verify your email. The link is valid for 24 hours.",
+    "registrationError": "We couldn’t create your account. Check your details and try again.",
+    "verifyTitle": "Verify your email",
+    "verifying": "Verifying your email…",
+    "verifyError": "This link is invalid or has expired. Sign up again to receive a new link.",
+    "verified": "Email verified. Your account is ready.",
+    "goToStats": "View my progress",
+    "verifyFirst": "Open the link we sent to your email before signing in.",
+    "alreadyHaveAccount": "Already have an account?",
+    "noAccount": "New here?",
+    "signOut": "Sign out",
+    "loadError": "We couldn’t load your stats.",
+    "puzzlesCompleted": "puzzles completed",
+    "dayStreak": "day streak",
+    "bestMoves": "best move count",
+    "history": "Completed puzzles",
+    "empty": "Your completed puzzles will appear here."
   }
 }
