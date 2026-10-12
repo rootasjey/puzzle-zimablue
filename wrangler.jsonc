@@ -12,6 +12,7 @@
     {
       "binding": "DB",
       "database_name": "puzzle-zimablue",
+      "database_id": "fb811fad-3c69-483c-92a8-5314de80dce1",
       "migrations_dir": "migrations"
     }
   ],
