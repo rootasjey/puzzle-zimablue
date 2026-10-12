@@ -7,12 +7,17 @@
       <nav aria-label="Navigation principale">
         <NuxtLink class="nav-link" to="/">Le puzzle du jour</NuxtLink>
         <NuxtLink class="nav-link" to="/archive">Archives</NuxtLink>
+        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" to="/admin/calendrier">Admin</NuxtLink>
       </nav>
     </header>
     <NuxtPage />
     <footer class="site-footer page-wrap">
       <span>Un jeu quotidien autour des illustrations de <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
-      <span>Une image, neuf pièces, un moment à soi.</span>
+      <span>Une image, un moment à soi.</span>
     </footer>
   </div>
 </template>
+
+<script setup lang="ts">
+const { loggedIn, user } = useUserSession()
+</script>

@@ -94,6 +94,63 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .reference-panel img { display: block; width: 100%; aspect-ratio: 1; border: 2px solid var(--ink); object-fit: cover; background: var(--white); }
 .reference-panel p { margin: 0; color: var(--ink); font-size: .75rem; line-height: 1.55; }
 .board-loading { display: grid; place-items: center; width: 100%; max-width: 590px; aspect-ratio: 1; margin-inline: auto; border: 2px solid var(--ink); background: var(--yellow); color: var(--ink); font-size: .88rem; font-weight: 700; }
+.admin-nav { padding: .45rem .65rem; border: 2px solid var(--ink); background: var(--yellow); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.auth-page { display: grid; flex: 1; place-items: center; padding: 3rem 1.2rem 5rem; }
+.auth-sheet { width: min(100%, 440px); padding: clamp(1.4rem, 5vw, 2.2rem); border: 2px solid var(--ink); background: var(--white); box-shadow: 6px 6px 0 var(--ink); }
+.auth-back { display: inline-block; margin-bottom: 2rem; color: var(--blue); font-size: .84rem; font-weight: 750; text-decoration: none; }
+.auth-sheet h1,.admin-topline h1 { margin: 0; font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 850; letter-spacing: -.065em; line-height: 1.05; }
+.auth-intro { margin: .8rem 0 1.5rem; color: var(--muted); font-size: .92rem; line-height: 1.65; }
+.auth-form,.puzzle-form { display: grid; gap: 1rem; }
+.auth-form label,.puzzle-form label { display: grid; gap: .4rem; color: var(--ink); font-size: .82rem; font-weight: 750; }
+.auth-form input,.puzzle-form input,.puzzle-form textarea,.puzzle-form select { width: 100%; min-height: 2.8rem; padding: .65rem .75rem; border: 2px solid var(--ink); border-radius: 0; background: #fff; color: var(--ink); font: inherit; font-size: .9rem; }
+.puzzle-form textarea { resize: vertical; }
+.auth-form input:focus,.puzzle-form input:focus,.puzzle-form textarea:focus,.puzzle-form select:focus { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.admin-primary,.admin-secondary,.admin-delete { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; gap: .4rem; padding: .55rem .9rem; border: 2px solid var(--ink); border-radius: 0; font: inherit; font-size: .84rem; font-weight: 800; cursor: pointer; }
+.admin-primary { background: var(--blue); color: white; box-shadow: 3px 3px 0 var(--ink); }
+.admin-secondary { background: var(--yellow); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.admin-delete { background: #fff; color: #a7332e; }
+.admin-primary:disabled,.admin-secondary:disabled { cursor: wait; opacity: .65; }
+.auth-small-link { display: inline-block; margin-top: 1.25rem; color: var(--blue); font-size: .82rem; font-weight: 700; }
+.form-error { margin: 0; color: #ad2e2a; font-size: .82rem; font-weight: 700; line-height: 1.5; }
+.auth-confirmation { padding: .8rem; border-left: 4px solid #2d7c59; background: #e7f3eb; color: #205b42; font-size: .87rem; line-height: 1.5; }
+.admin-page { flex: 1; width: min(100%, 1320px); margin: 0 auto; padding: clamp(1.3rem, 4vw, 3rem) clamp(1rem, 4vw, 3rem) 4rem; }
+.admin-topline { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; }
+.admin-topline .auth-back { margin-bottom: 1.15rem; }
+.admin-topline .section-kicker { margin-bottom: .45rem; }
+.admin-topline h1 { font-size: clamp(2rem, 4vw, 3.25rem); }
+.admin-intro { max-width: 55ch; margin: .7rem 0 0; color: var(--muted); font-size: .9rem; line-height: 1.6; }
+.admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; }
+.calendar-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.3rem; margin: 1.7rem 0 .8rem; color: var(--muted); font-size: .77rem; }
+.calendar-legend > span:not(.legend-tip) { display: inline-flex; align-items: center; gap: .4rem; }
+.calendar-legend i { width: .7rem; height: .7rem; border: 1px solid var(--ink); }
+.legend-published { background: var(--blue); }
+.legend-draft { background: var(--coral); }
+.legend-tip { margin-left: auto; }
+.calendar-frame { min-width: 0; min-height: 620px; overflow: hidden; border: 2px solid var(--ink); background: white; box-shadow: 5px 5px 0 var(--ink); --df-primary: #254be8; --df-primary-foreground: #fff; --df-border: #dedbd2; }
+.calendar-frame [class*="calendar"] { font-family: inherit; }
+.calendar-frame button { font-family: inherit; }
+#dayflow-add-event-btn { display: none !important; }
+.calendar-loading { display: grid; min-height: 300px; place-items: center; border: 2px dashed var(--line); color: var(--muted); font-weight: 700; }
+.admin-alert,.admin-notice { margin: .8rem 0; padding: .75rem 1rem; border: 2px solid var(--ink); font-size: .84rem; font-weight: 700; }
+.admin-alert { background: #fde6df; color: #8c2923; }
+.admin-notice { background: #e7f3eb; color: #205b42; }
+.puzzle-drawer { width: min(100vw, 500px) !important; max-width: 100vw !important; border-left: 2px solid var(--ink); background: var(--paper); }
+.puzzle-form { padding: .8rem 1.15rem 1.4rem; }
+.illustration-results { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .55rem; max-height: 245px; overflow-y: auto; padding: .2rem .15rem .35rem; }
+.illustration-option { min-width: 0; padding: .35rem; border: 2px solid transparent; background: white; text-align: left; cursor: pointer; }
+.illustration-option.selected { border-color: var(--blue); box-shadow: 2px 2px 0 var(--ink); }
+.illustration-option img { display: block; width: 100%; aspect-ratio: 1.25; object-fit: cover; background: var(--yellow); }
+.illustration-option span { display: block; overflow: hidden; margin-top: .35rem; font-size: .69rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.empty-illustrations { grid-column: 1/-1; color: var(--muted); font-size: .8rem; }
+.drawer-actions { display: grid; gap: .7rem; padding-top: .5rem; }
+.is-fullscreen { position: fixed; z-index: 50; inset: 0; display: flex; width: 100%; max-width: none; flex-direction: column; overflow: auto; padding: 1rem clamp(1rem, 3vw, 2.5rem); background: var(--paper); }
+.is-fullscreen .admin-topline { align-items: center; }
+.is-fullscreen .admin-topline .auth-back,.is-fullscreen .admin-topline .section-kicker,.is-fullscreen .admin-intro { display: none; }
+.is-fullscreen .admin-topline h1 { font-size: 1.5rem; }
+.is-fullscreen .calendar-legend { margin: .6rem 0; }
+.is-fullscreen .calendar-frame { flex: 1; min-height: 0; }
+.is-fullscreen .calendar-frame .df-calendar-wrapper { height: 100% !important; min-height: 0 !important; }
+html.calendar-fullscreen-open,html.calendar-fullscreen-open body { overflow: hidden; }
 @media (max-width: 760px) {
   .site-header { height: 68px; }
   .daily-feature { grid-template-columns: 1fr; gap: 1.4rem; }
@@ -109,6 +166,11 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
   .reference-panel img { grid-column: 2; grid-row: 1 / span 2; width: 96px; height: 96px; }
   .reference-panel p { grid-column: 1; }
   .play-heading { align-items: start; }
+  .admin-topline { align-items: start; flex-direction: column; }
+  .admin-actions { width: 100%; }
+  .admin-actions > button { flex: 1; }
+  .legend-tip { width: 100%; margin: 0; }
+  .calendar-frame { min-height: 570px; }
 }
 @media (max-width: 470px) {
   .site-header { padding-inline: 1.1rem; }
@@ -124,6 +186,13 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
   .archive-list .archive-card { grid-template-columns: 80px minmax(0,1fr) auto; min-height: 98px; }
   .archive-list .archive-card img { width: 80px; height: 80px; }
   .play-heading { display: block; }
+  .admin-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .admin-actions button { min-height: 2.6rem; padding-inline: .45rem; font-size: .74rem; }
+  .calendar-legend { gap: .7rem; }
+  .calendar-frame { min-height: 540px; }
+  .illustration-results { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .is-fullscreen { padding: .7rem; }
+  .is-fullscreen .admin-topline h1 { font-size: 1.2rem; }
   .source-link { display: inline-block; margin-top: .9rem; }
   .game-status { align-items: start; }
   .game-status p { max-width: 23ch; line-height: 1.45; }

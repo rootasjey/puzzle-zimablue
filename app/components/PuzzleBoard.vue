@@ -11,9 +11,9 @@
     <div
       v-else
       class="puzzle-board"
-      :style="{ '--grid-size': puzzle.size, '--image-url': `url('${puzzle.imageUrl}')` }"
+      :style="{ '--grid-size': puzzle.gridSize, '--image-url': `url('${puzzle.imageUrl}')` }"
       role="group"
-      :aria-label="`Puzzle ${puzzle.size} par ${puzzle.size} de ${puzzle.title}`"
+      :aria-label="`Puzzle ${puzzle.gridSize} par ${puzzle.gridSize} de ${puzzle.title}`"
     >
       <button
         v-for="(piece, slot) in order"
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DailyPuzzle } from '~/data/puzzles'
+import type { DailyPuzzle } from '#shared/types/puzzle'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
 const props = defineProps<{ puzzle: DailyPuzzle }>()
@@ -41,11 +41,11 @@ const imageLoaded = ref(false)
 const imageError = ref(false)
 
 function pieceStyle(piece: number) {
-  const column = piece % props.puzzle.size
-  const row = Math.floor(piece / props.puzzle.size)
-  const last = (props.puzzle.size - 1) * 100
+  const column = piece % props.puzzle.gridSize
+  const row = Math.floor(piece / props.puzzle.gridSize)
+  const last = (props.puzzle.gridSize - 1) * 100
   return {
-    backgroundPosition: `${last ? column / (props.puzzle.size - 1) * 100 : 0}% ${last ? row / (props.puzzle.size - 1) * 100 : 0}%`,
+    backgroundPosition: `${last ? column / (props.puzzle.gridSize - 1) * 100 : 0}% ${last ? row / (props.puzzle.gridSize - 1) * 100 : 0}%`,
   }
 }
 

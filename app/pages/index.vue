@@ -1,18 +1,19 @@
 <template>
   <main class="page-wrap home-page">
-    <section class="daily-feature">
+    <section v-if="featured" class="daily-feature">
       <div class="feature-art">
-        <img :src="today.imageUrl" :alt="`Illustration ${today.imageName}`" fetchpriority="high">
-        <span class="art-index">12 / 10</span>
+        <img :src="featured.imageUrl" :alt="`Illustration ${featured.imageName}`" fetchpriority="high">
+        <span class="art-index">{{ formatPuzzleDate(featured.date, { day: 'numeric', month: 'numeric' }) }}</span>
       </div>
       <div class="feature-copy">
         <p class="section-kicker">L’illustration du jour</p>
         <h1>Quelques pièces<br>de <em>bleu.</em></h1>
         <p class="feature-description">Chaque jour, une illustration de Zimablue à reconstituer. Prends une minute, retrouve l’image, puis reviens demain.</p>
-        <div class="today-line"><span class="today-dot" />{{ formatPuzzleDate(today.date) }} <span class="line-divider">·</span> 9 pièces</div>
-        <NuxtLink class="play-link" :to="`/jouer/${today.date}`">Jouer au puzzle du jour <span aria-hidden="true">↗</span></NuxtLink>
+        <div class="today-line"><span class="today-dot" />{{ formatPuzzleDate(featured.date) }} <span class="line-divider">·</span> {{ featured.gridSize ** 2 }} pièces</div>
+        <NuxtLink class="play-link" :to="`/jouer/${featured.date}`">Jouer au puzzle du jour <span aria-hidden="true">↗</span></NuxtLink>
       </div>
     </section>
+    <p v-else class="empty-state">Le prochain puzzle est en préparation.</p>
 
     <section class="archive-preview" aria-labelledby="archive-title">
       <div class="section-heading">
@@ -34,13 +35,17 @@
       </div>
     </section>
 
-    <p class="prototype-note">Prototype — illustrations sélectionnées manuellement · images chargées depuis zimablue.cc</p>
+    <p class="prototype-note">Une sélection manuelle d’illustrations, chargées depuis zimablue.cc.</p>
   </main>
 </template>
 
 <script setup lang="ts">
-import { dailyPuzzles, today, formatPuzzleDate } from '~/data/puzzles'
+import type { DailyPuzzle } from '#shared/types/puzzle'
+import { formatPuzzleDate } from '#shared/types/puzzle'
 
-const archive = dailyPuzzles.slice(1)
+const { data: puzzles } = await useFetch<DailyPuzzle[]>('/api/puzzles', { key: 'published-puzzles-home' })
+const parisToday = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris' }).format(new Date())
+const featured = computed(() => puzzles.value?.find(puzzle => puzzle.date === parisToday))
+const archive = computed(() => puzzles.value?.filter(puzzle => puzzle.date < parisToday).slice(0, 2) ?? [])
 useSeoMeta({ title: 'Un puzzle par jour', description: 'Une illustration de Zimablue à reconstituer chaque jour.' })
 </script>

@@ -1,4 +1,4 @@
-import type { DailyPuzzle } from '~/data/puzzles'
+import type { DailyPuzzle } from '#shared/types/puzzle'
 
 export function usePuzzleGame(puzzle: DailyPuzzle) {
   const order = ref<number[]>([])
@@ -9,7 +9,7 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
   const complete = computed(() => order.value.length > 0 && order.value.every((piece, slot) => piece === slot))
 
   function newBoard() {
-    const pieces = Array.from({ length: puzzle.size ** 2 }, (_, index) => index)
+    const pieces = Array.from({ length: puzzle.gridSize ** 2 }, (_, index) => index)
     let seed = [...puzzle.date].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 7)
     for (let i = pieces.length - 1; i > 0; i--) {
       seed = (seed * 1664525 + 1013904223) >>> 0

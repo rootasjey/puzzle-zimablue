@@ -1,7 +1,7 @@
 <template>
   <main class="page-wrap play-page">
-    <NuxtLink class="soft-link back-link" :to="puzzle.date === today.date ? '/' : '/archive'">
-      {{ puzzle.date === today.date ? '← Retour au puzzle du jour' : '← Revenir aux jours précédents' }}
+    <NuxtLink class="soft-link back-link" to="/archive">
+      ← Revenir aux jours précédents
     </NuxtLink>
     <header class="play-heading">
       <div>
@@ -23,10 +23,12 @@
 </template>
 
 <script setup lang="ts">
-import { getPuzzle, formatPuzzleDate, today } from '~/data/puzzles'
+import type { DailyPuzzle } from '#shared/types/puzzle'
+import { formatPuzzleDate } from '#shared/types/puzzle'
 
 const route = useRoute()
-const puzzle = getPuzzle(String(route.params.date))
-if (!puzzle) throw createError({ statusCode: 404, statusMessage: 'Ce puzzle n’est pas encore dans l’archive.' })
-useSeoMeta({ title: puzzle.title, description: `Reconstitue l’illustration ${puzzle.imageName} de Zimablue.` })
+const { data: puzzleData, error } = await useFetch<DailyPuzzle>(`/api/puzzles/${route.params.date}`)
+if (error.value || !puzzleData.value) throw createError({ statusCode: 404, statusMessage: 'Ce puzzle n’est pas encore dans l’archive.' })
+const puzzle = computed(() => puzzleData.value!)
+useSeoMeta({ title: () => puzzle.value.title, description: () => `Reconstitue l’illustration ${puzzle.value.imageName}.` })
 </script>

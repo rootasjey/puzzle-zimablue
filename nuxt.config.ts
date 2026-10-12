@@ -1,8 +1,8 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-12',
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
-  modules: ['@unocss/nuxt', '@una-ui/nuxt'],
+  css: ['@dayflow/core/dist/styles.css', '~/assets/css/main.css'],
+  modules: ['@unocss/nuxt', '@una-ui/nuxt', 'nuxt-auth-utils'],
   nitro: { preset: 'cloudflare_module' },
   app: {
     head: {
@@ -17,6 +17,15 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://zimablue.cc' },
         { rel: 'icon', href: 'https://zimablue.cc/favicon.ico' },
       ],
+    },
+  },
+  runtimeConfig: {
+    adminBootstrapKey: '',
+    initialAdminEmail: '',
+    emailFrom: 'no-reply@zimablue.cc',
+    public: {
+      registrationEnabled: false,
+      siteUrl: 'https://puzzle.zimablue.cc',
     },
   },
 })
