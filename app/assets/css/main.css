@@ -142,6 +142,8 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .illustration-option img { display: block; width: 100%; aspect-ratio: 1.25; object-fit: cover; background: var(--yellow); }
 .illustration-option span { display: block; overflow: hidden; margin-top: .35rem; font-size: .69rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 .empty-illustrations { grid-column: 1/-1; color: var(--muted); font-size: .8rem; }
+.illustrations-more { min-height: 2.4rem; border: 1px dashed var(--ink); background: transparent; color: var(--blue); font: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
+.illustrations-more:disabled { cursor: wait; opacity: .65; }
 .drawer-actions { display: grid; gap: .7rem; padding-top: .5rem; }
 .is-fullscreen { position: fixed; z-index: 50; inset: 0; display: flex; width: 100%; max-width: none; flex-direction: column; overflow: auto; padding: 1rem clamp(1rem, 3vw, 2.5rem); background: var(--paper); }
 .is-fullscreen .admin-topline { align-items: center; }

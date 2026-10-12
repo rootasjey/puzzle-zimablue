@@ -34,11 +34,11 @@
         <form class="puzzle-form" @submit.prevent="savePuzzle">
           <label>Date de publication<input v-model="form.date" type="date" required></label>
           <label>Illustration
-            <input v-model="illustrationSearch" type="search" placeholder="Rechercher une illustration" @input="loadIllustrations(true)">
+            <input v-model="illustrationSearch" type="search" placeholder="Rechercher une illustration">
           </label>
           <div class="illustration-results" :aria-busy="illustrationsLoading">
             <button
-              v-for="image in illustrations"
+              v-for="image in filteredIllustrations"
               :key="image.slug"
               type="button"
               class="illustration-option"
@@ -48,8 +48,11 @@
               <img :src="image.url" :alt="''" loading="lazy">
               <span>{{ image.name }}</span>
             </button>
-            <p v-if="!illustrations.length && !illustrationsLoading" class="empty-illustrations">Aucune illustration trouvée.</p>
+            <p v-if="!filteredIllustrations.length && !illustrationsLoading" class="empty-illustrations">Aucune illustration trouvée.</p>
           </div>
+          <button v-if="illustrationsOffset < illustrationTotal" type="button" class="illustrations-more" :disabled="illustrationsLoading" @click="loadIllustrations()">
+            {{ illustrationsLoading ? 'Chargement…' : 'Charger plus d’illustrations' }}
+          </button>
           <label>Titre<input v-model="form.title" maxlength="120" required></label>
           <label>Petit mot<textarea v-model="form.note" rows="2" maxlength="500" /></label>
           <label>Nombre de pièces
@@ -109,8 +112,14 @@ const saving = ref(false)
 const formError = ref('')
 const illustrationSearch = ref('')
 const illustrations = ref<Illustration[]>([])
+const illustrationsOffset = ref(0)
+const illustrationTotal = ref(0)
 const illustrationsLoading = ref(false)
 const form = reactive<PuzzleForm>(emptyForm())
+const filteredIllustrations = computed(() => {
+  const query = illustrationSearch.value.trim().toLocaleLowerCase('fr')
+  return illustrations.value.filter(image => !query || image.name.toLocaleLowerCase('fr').includes(query) || image.slug.toLowerCase().includes(query))
+})
 const calendars: CalendarType[] = [
   { id: 'published', name: 'Publié', colors: { eventColor: '#254be8', eventSelectedColor: '#1738bd', lineColor: '#1839bd', textColor: '#fff' } },
   { id: 'draft', name: 'Brouillon', colors: { eventColor: '#ed6554', eventSelectedColor: '#cc493d', lineColor: '#c84c40', textColor: '#fff' } },
@@ -221,13 +230,11 @@ async function loadIllustrations(reset = false) {
   if (illustrationsLoading.value) return
   illustrationsLoading.value = true
   try {
-    const result = await $fetch<{ items: Illustration[] }>('/api/admin/illustrations', { query: { limit: 100, offset: 0 } })
-    const query = illustrationSearch.value.trim().toLocaleLowerCase('fr')
-    illustrations.value = result.items.filter(item => !query || item.name.toLocaleLowerCase('fr').includes(query) || item.slug.toLowerCase().includes(query))
-    if (!reset && !form.imageSlug) {
-      const chosen = illustrations.value.find(item => item.slug === form.imageSlug)
-      if (chosen) selectIllustration(chosen)
-    }
+    const offset = reset ? 0 : illustrationsOffset.value
+    const result = await $fetch<{ items: Illustration[]; total: number; nextOffset: number }>('/api/admin/illustrations', { query: { limit: 100, offset } })
+    illustrations.value = reset ? result.items : [...illustrations.value, ...result.items]
+    illustrationsOffset.value = result.nextOffset
+    illustrationTotal.value = result.total
   } catch (cause: any) {
     error.value = cause?.data?.statusMessage || 'Les illustrations Zimablue sont momentanément inaccessibles.'
   } finally {
