@@ -73,7 +73,8 @@
     "saveProgress": "Save my progress",
     "alreadyHaveAccount": "I already have an account",
     "progressSaved": "Result saved to your account.",
-    "saveProgressError": "Could not save this result. Try again from your account."
+    "saveProgressError": "Could not save this result. Try again from your account.",
+    "previewNoProgress": "Preview mode: this playthrough will not save any progress."
   },
   "errors": {
     "notFoundTitle": "Puzzle not found",
@@ -100,6 +101,9 @@
     "noEvents": "No puzzles on this day",
     "calendarError": "The calendar could not be loaded.",
     "editPuzzle": "Edit puzzle",
+    "playPreview": "Play preview",
+    "previewLabel": "Puzzle preview",
+    "backToCalendar": "← Back to calendar",
     "preparePuzzle": "Prepare a puzzle",
     "dialogDescription": "Choose an illustration, date, and piece count.",
     "steps": "Puzzle setup steps",

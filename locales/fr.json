@@ -73,7 +73,8 @@
     "saveProgress": "Garder ma progression",
     "alreadyHaveAccount": "J’ai déjà un compte",
     "progressSaved": "Résultat enregistré dans ton espace.",
-    "saveProgressError": "Impossible d’enregistrer ce résultat. Réessaie depuis ton espace."
+    "saveProgressError": "Impossible d’enregistrer ce résultat. Réessaie depuis ton espace.",
+    "previewNoProgress": "Mode aperçu : cette partie n’enregistre aucune progression."
   },
   "errors": {
     "notFoundTitle": "Puzzle introuvable",
@@ -100,6 +101,9 @@
     "noEvents": "Aucun puzzle ce jour-là",
     "calendarError": "Le calendrier n’a pas pu être chargé.",
     "editPuzzle": "Modifier le puzzle",
+    "playPreview": "Jouer un aperçu",
+    "previewLabel": "Aperçu du puzzle",
+    "backToCalendar": "← Retour au calendrier",
     "preparePuzzle": "Préparer un puzzle",
     "dialogDescription": "Choisis une illustration, une date et un nombre de pièces.",
     "steps": "Étapes de préparation du puzzle",

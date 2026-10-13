@@ -57,10 +57,11 @@
             </div>
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
-            <p v-if="completionSaved" class="completion-account-note" role="status">{{ t('game.progressSaved') }}</p>
-            <NuxtLink v-else-if="!loggedIn" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
-            <NuxtLink v-if="!loggedIn" class="completion-login-link" :to="signInLink">{{ t('account.alreadyHaveAccount') }}</NuxtLink>
-            <p v-else-if="completionSaveError" class="completion-account-note" role="status">{{ t('game.saveProgressError') }}</p>
+            <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
+            <p v-else-if="completionSaved" class="completion-account-note" role="status">{{ t('game.progressSaved') }}</p>
+            <NuxtLink v-else-if="!loggedIn && progressEnabled" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
+            <NuxtLink v-if="!loggedIn && progressEnabled" class="completion-login-link" :to="signInLink">{{ t('account.alreadyHaveAccount') }}</NuxtLink>
+            <p v-else-if="completionSaveError && progressEnabled" class="completion-account-note" role="status">{{ t('game.saveProgressError') }}</p>
             <button class="restart-button completion-restart" type="button" @click="newBoard">{{ t('game.restart') }}</button>
           </div>
         </section>
@@ -74,7 +75,7 @@ import type { ComponentPublicInstance } from 'vue'
 import type { DailyPuzzle } from '#shared/types/puzzle'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
-const props = defineProps<{ puzzle: DailyPuzzle }>()
+const props = withDefaults(defineProps<{ puzzle: DailyPuzzle; progressEnabled?: boolean }>(), { progressEnabled: true })
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
@@ -119,7 +120,7 @@ watch(complete, async (isComplete) => {
   document.querySelector('.site-shell')?.toggleAttribute('inert', isComplete)
 
   if (isComplete) {
-    if (loggedIn.value) {
+    if (loggedIn.value && props.progressEnabled) {
       try {
         await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, moves: moves.value } })
         completionSaved.value = true

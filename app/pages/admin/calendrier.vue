@@ -147,7 +147,7 @@
                 </span>
               </label>
               <p class="english-optional">{{ t('admin.englishOptional') }}</p>
-              <p v-if="draftSaveState !== 'idle'" class="draft-autosave" role="status">{{ draftSaveState === 'saving' ? t('admin.autosaving') : t('admin.autosaved') }}</p>
+              <p v-if="draftSaveState === 'saving' || draftSaveState === 'saved'" class="draft-autosave" role="status">{{ draftSaveState === 'saving' ? t('admin.autosaving') : t('admin.autosaved') }}</p>
             </div>
           </NTabsContent>
         </div>
@@ -156,6 +156,7 @@
       <template #footer>
         <div class="dialog-actions">
           <button v-if="hasDraft" type="button" class="admin-delete" :disabled="saving" @click="deletePuzzle">{{ t('admin.deleteDraft') }}</button>
+          <button v-if="form.imageSlug" type="button" class="admin-secondary" :disabled="saving || draftSaveState === 'saving' || draftSaveState === 'error'" @click="openPuzzlePreview">{{ t('admin.playPreview') }}</button>
           <button type="button" class="admin-cancel" :disabled="saving" @click="dialogOpen = false">{{ t('admin.cancel') }}</button>
           <button type="submit" form="puzzle-editor-form" class="admin-primary" :disabled="saving || !form.imageSlug">
             {{ saving ? t('admin.saving') : t('admin.publish') }}
@@ -177,7 +178,7 @@ import { formatPuzzleDate } from '#shared/types/puzzle'
 definePageMeta({ name: 'admin-calendar', middleware: 'admin' })
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
-const { $defineI18nRoute } = useNuxtApp()
+const { $defineI18nRoute, $localePath } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/admin/calendar' } })
 
 interface Illustration { name: string; slug: string; url: string }
@@ -208,7 +209,7 @@ const titleLanguage = ref<'fr' | 'en'>('fr')
 const noteLanguage = ref<'fr' | 'en'>('fr')
 const choosingIllustration = ref(false)
 const hasDraft = ref(false)
-const draftSaveState = ref<'idle' | 'saving' | 'saved'>('idle')
+const draftSaveState = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
 const saving = ref(false)
 const formError = ref('')
 const illustrationSearch = ref('')
@@ -417,6 +418,14 @@ function openIllustrationEditor(puzzle: DailyPuzzle) {
   previewOpen.value = false
 }
 
+async function openPuzzlePreview() {
+  if (!form.imageSlug || saving.value || draftSaveState.value === 'saving' || draftSaveState.value === 'error') return
+  if (!editingDate.value && !hasDraft.value) return
+  const date = form.date
+  dialogOpen.value = false
+  await navigateTo($localePath({ name: 'admin-preview', params: { date } }))
+}
+
 function focusIllustrationTabStop() {
   const grid = illustrationSearchInput.value?.parentElement?.querySelector<HTMLElement>('.illustration-results')
   const first = grid?.querySelector<HTMLButtonElement>('.illustration-option[tabindex="0"]')
@@ -617,7 +626,7 @@ async function autosaveDraft() {
     await loadPuzzles()
   } catch {
     formError.value = t('admin.autosaveError')
-    draftSaveState.value = 'idle'
+    draftSaveState.value = 'error'
   } finally {
     autosaveRunning = false
     saving.value = false
