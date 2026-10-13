@@ -33,7 +33,7 @@
         @pointerup="finishDrag"
         @pointercancel="cancelDrag"
         @lostpointercapture="cancelDrag"
-        @click="choosePiece(slot)"
+        @click="choosePiece(slot, $event)"
       />
     </TransitionGroup>
     <Teleport to="body">
@@ -46,11 +46,37 @@
     <div class="board-tools">
       <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
       <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
-      <button class="restart-button" type="button" @click="newBoard">{{ t('game.restart') }}</button>
+      <div class="board-tool-actions">
+        <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11 5 6 9H3v6h3l5 4z" />
+            <template v-if="soundEnabled">
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+            </template>
+            <template v-else>
+              <path d="m16 9 5 6m0-6-5 6" />
+            </template>
+          </svg>
+        </button>
+        <button class="restart-button" type="button" @click="newBoard">{{ t('game.restart') }}</button>
+      </div>
     </div>
     <Teleport to="body">
       <Transition name="completion">
         <section v-if="complete && completionOrigin" class="completion-screen" role="region" aria-labelledby="completion-title">
+          <button class="sound-toggle completion-sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4z" />
+              <template v-if="soundEnabled">
+                <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+              </template>
+              <template v-else>
+                <path d="m16 9 5 6m0-6-5 6" />
+              </template>
+            </svg>
+          </button>
           <div class="completion-content">
             <div class="completion-board" :style="completionBoardStyle" aria-hidden="true">
               <div v-for="piece in order" :key="piece" class="completion-piece" :style="pieceStyle(piece)" />
@@ -93,6 +119,7 @@ const t = (key: string, params?: Record<string, string | number>): string => Str
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
+const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
 const completionSaved = ref(false)
 const completionSaveError = ref(false)
 const shareFeedback = ref('')
@@ -101,7 +128,7 @@ const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: 
 const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
 const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
 const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
-const { order, selected, moves, complete, started, newBoard, choose, swap } = usePuzzleGame(props.puzzle)
+const { order, selected, moves, complete, started, newBoard, swap } = usePuzzleGame(props.puzzle)
 const imageLoaded = ref(false)
 const imageError = ref(false)
 const board = ref<ComponentPublicInstance | null>(null)
@@ -136,6 +163,7 @@ watch(complete, async (isComplete) => {
   document.querySelector('.site-shell')?.toggleAttribute('inert', isComplete)
 
   if (isComplete) {
+    playSound('complete')
     if (loggedIn.value && props.progressEnabled) {
       try {
         await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, moves: moves.value } })
@@ -180,6 +208,7 @@ function startDrag(slot: number, event: PointerEvent) {
   const rect = button.getBoundingClientRect()
   const piece = order.value[slot]
   if (piece === undefined) return
+  playSound('move')
   button.setPointerCapture(event.pointerId)
   dragging.value = {
     pointerId: event.pointerId,
@@ -219,7 +248,7 @@ function finishDrag(event: PointerEvent) {
     const targetSlot = target ? Number(target.dataset.slot) : null
     const settleElement = targetSlot !== null && targetSlot !== drag.from ? target : board.value?.$el?.querySelector(`[data-slot="${drag.from}"]`)
     const rect = settleElement instanceof HTMLElement ? settleElement.getBoundingClientRect() : null
-    if (targetSlot !== null && targetSlot !== drag.from) swap(drag.from, targetSlot)
+    if (targetSlot !== null && targetSlot !== drag.from) swapWithFeedback(drag.from, targetSlot)
     dragging.value = {
       ...drag,
       phase: 'settling',
@@ -247,13 +276,33 @@ function cancelDrag() {
   dragging.value = null
 }
 
-function choosePiece(slot: number) {
+function choosePiece(slot: number, event: MouseEvent) {
   if (ignoreClick.value) {
     ignoreClick.value = false
     if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
     return
   }
-  choose(slot)
+  const first = selected.value
+  if (first === null) {
+    if (event.detail === 0) playSound('move')
+    selected.value = slot
+    return
+  }
+  if (first === slot) {
+    selected.value = null
+    return
+  }
+  swapWithFeedback(first, slot)
+}
+
+function swapWithFeedback(first: number, second: number) {
+  const firstPiece = order.value[first]
+  const secondPiece = order.value[second]
+  if (firstPiece === undefined || secondPiece === undefined || first === second) return
+
+  swap(first, second)
+  if (complete.value) return
+  playSound(firstPiece === second || secondPiece === first ? 'placed' : 'misplaced')
 }
 
 async function sharePuzzle() {

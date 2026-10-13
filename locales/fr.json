@@ -63,6 +63,8 @@
     "movesOne": "{count} coup",
     "movesMany": "{count} coups",
     "restart": "Recommencer",
+    "enableSounds": "Activer les sons",
+    "muteSounds": "Couper les sons",
     "loading": "Préparation des pièces…",
     "imageError": "Impossible de charger cette illustration.",
     "congratulations": "Bravo !",

@@ -148,6 +148,14 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .play-layout { display: grid; grid-template-columns: minmax(0,1fr) 230px; align-items: start; gap: clamp(1rem, 4vw, 2.5rem); }
 .game-panel { min-width: 0; }
 .board-tools { display: flex; width: 100%; max-width: 590px; min-height: 2.5rem; align-items: center; justify-content: space-between; gap: .8rem; margin: .55rem auto 0; }
+.board-tool-actions { display: flex; align-items: center; gap: .6rem; }
+.sound-toggle { display: grid; width: 2.15rem; height: 2.15rem; flex: none; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--muted); cursor: pointer; transition: transform .15s ease, border-color .15s ease, background-color .15s ease, color .15s ease; }
+.sound-toggle[aria-pressed="true"] { border-color: var(--blue); background: var(--paper); color: var(--blue); }
+.sound-toggle:hover { transform: translateY(-1px); color: var(--ink); }
+.sound-toggle:active { transform: translateY(1px); }
+.sound-toggle:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.sound-toggle svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.completion-sound-toggle { position: fixed; z-index: 1001; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); width: 2.5rem; height: 2.5rem; box-shadow: 2px 2px 0 var(--ink); }
 .move-count,.success-note { margin: 0; color: var(--muted); font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .success-note { color: var(--success); }
 .restart-button { min-height: 2rem; padding: .2rem .4rem; border: 0; background: transparent; color: var(--blue); font: inherit; font-size: .8rem; font-weight: 750; cursor: pointer; transition: color .14s ease, transform .14s ease; }
@@ -337,7 +345,7 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .is-fullscreen .calendar-frame { flex: 1; min-height: 0; }
 .is-fullscreen .calendar-frame .df-calendar-wrapper { height: 100% !important; min-height: 0 !important; }
 html.calendar-fullscreen-open,html.calendar-fullscreen-open body { overflow: hidden; }
-button:not(.puzzle-piece):not(.theme-toggle):not(.restart-button):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink) !important; }
+button:not(.puzzle-piece):not(.theme-toggle):not(.sound-toggle):not(.restart-button):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink) !important; }
 .play-link:active,.archive-card:active,.admin-nav:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !important; }
 @media (max-width: 760px) {

@@ -63,6 +63,8 @@
     "movesOne": "{count} move",
     "movesMany": "{count} moves",
     "restart": "Start over",
+    "enableSounds": "Turn sounds on",
+    "muteSounds": "Turn sounds off",
     "loading": "Preparing the pieces…",
     "imageError": "This illustration could not be loaded.",
     "congratulations": "Well done!",
