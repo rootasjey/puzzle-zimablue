@@ -25,12 +25,24 @@ export default defineEventHandler(async (event) => {
   let imageResponse: Response
   try {
     imageResponse = await fetch(imageUrl, { redirect: 'error' })
-  } catch {
+  } catch (error) {
+    console.error('[puzzle-download] Upstream fetch failed', {
+      date,
+      host: imageUrl.hostname,
+      pathname: imageUrl.pathname,
+      error: error instanceof Error ? error.message : String(error),
+    })
     throw createError({ statusCode: 502, statusMessage: 'Le téléchargement de l’illustration a échoué.' })
   }
 
   const contentType = imageResponse.headers.get('content-type')?.split(';')[0]?.trim()
   if (!imageResponse.ok || !contentType?.startsWith('image/') || !imageResponse.body) {
+    console.error('[puzzle-download] Upstream response rejected', {
+      date,
+      status: imageResponse.status,
+      contentType,
+      hasBody: Boolean(imageResponse.body),
+    })
     throw createError({ statusCode: 502, statusMessage: 'Le téléchargement de l’illustration a échoué.' })
   }
 
