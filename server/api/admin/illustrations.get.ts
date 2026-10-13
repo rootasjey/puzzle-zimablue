@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   })
   const images = Array.isArray(response.data) ? response.data : []
   return {
-    nextOffset: offset + limit,
+    nextOffset: (response.pagination?.offset ?? offset) + (response.pagination?.limit ?? limit),
     items: images.flatMap((image) => {
       const pathname = pickVariantPath(image)
       const url = publicImageUrl(pathname)

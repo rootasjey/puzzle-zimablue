@@ -43,7 +43,7 @@
         </div>
       </nav>
     </header>
-    <NuxtPage />
+    <NuxtPage :page-key="route => route.fullPath" />
     <footer class="site-footer page-wrap">
       <span>{{ t('app.footerLine') }} <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
       <span>{{ t('app.footerTagline') }}</span>

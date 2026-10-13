@@ -21,7 +21,7 @@
         :class="{
           'is-selected': selected === slot,
           'is-placed': piece === slot && !complete,
-          'is-dragging': dragging?.from === slot && dragging.moved,
+          'is-dragging': dragging?.piece === piece && dragging.moved,
           'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
         }"
         :style="[pieceStyle(piece), dragStyle(slot)]"
@@ -32,9 +32,17 @@
         @pointerdown="startDrag(slot, $event)"
         @pointerup="finishDrag"
         @pointercancel="cancelDrag"
+        @lostpointercapture="cancelDrag"
         @click="choosePiece(slot)"
       />
     </TransitionGroup>
+    <Teleport to="body">
+      <Transition name="ghost-lift" appear>
+        <div v-if="dragging?.moved" class="puzzle-drag-ghost" :class="{ settling: dragging.phase === 'settling', touch: dragging.pointerType === 'touch' }" :style="dragGhostStyle" aria-hidden="true">
+          <div class="puzzle-drag-ghost-image" :style="[pieceStyle(dragging.piece), { '--image-url': `url('${puzzle.imageUrl}')`, '--grid-size': puzzle.gridSize } ]" />
+        </div>
+      </Transition>
+    </Teleport>
     <div class="board-tools">
       <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
       <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
@@ -82,9 +90,21 @@ const imageError = ref(false)
 const board = ref<ComponentPublicInstance | null>(null)
 const completionHeading = ref<HTMLHeadingElement | null>(null)
 const completionOrigin = ref<{ x: number; y: number; scale: number } | null>(null)
-const dragging = ref<{ pointerId: number; from: number; startX: number; startY: number; x: number; y: number; moved: boolean; target: number | null } | null>(null)
+const dragging = ref<{ pointerId: number; pointerType: string; from: number; piece: number; startX: number; startY: number; x: number; y: number; width: number; height: number; grabX: number; grabY: number; moved: boolean; target: number | null; phase: 'dragging' | 'settling' } | null>(null)
 const ignoreClick = ref(false)
 let ignoreClickTimer: ReturnType<typeof setTimeout> | undefined
+let dragSettleTimer: ReturnType<typeof setTimeout> | undefined
+
+const dragGhostStyle = computed(() => {
+  if (!dragging.value) return {}
+  const drag = dragging.value
+  return {
+    left: `${drag.x - (drag.phase === 'settling' ? drag.width / 2 : drag.grabX)}px`,
+    top: `${drag.y - (drag.phase === 'settling' ? drag.height / 2 : drag.grabY)}px`,
+    width: `${drag.width}px`,
+    height: `${drag.height}px`,
+  }
+})
 
 const completionBoardStyle = computed(() => completionOrigin.value ? {
   '--grid-size': props.puzzle.gridSize,
@@ -137,16 +157,27 @@ function startDrag(slot: number, event: PointerEvent) {
   if (complete.value || event.button !== 0) return
   const button = event.currentTarget
   if (!(button instanceof HTMLButtonElement)) return
+  if (event.pointerType === 'mouse' && event.button !== 0) return
+  const rect = button.getBoundingClientRect()
+  const piece = order.value[slot]
+  if (piece === undefined) return
   button.setPointerCapture(event.pointerId)
   dragging.value = {
     pointerId: event.pointerId,
+    pointerType: event.pointerType,
     from: slot,
+    piece,
     startX: event.clientX,
     startY: event.clientY,
     x: event.clientX,
     y: event.clientY,
+    width: rect.width,
+    height: rect.height,
+    grabX: event.clientX - rect.left,
+    grabY: event.clientY - rect.top,
     moved: false,
     target: null,
+    phase: 'dragging',
   }
 }
 
@@ -163,14 +194,25 @@ function movePiece(event: PointerEvent) {
 
 function finishDrag(event: PointerEvent) {
   const drag = dragging.value
-  if (!drag || drag.pointerId !== event.pointerId) return
+  if (!drag || drag.pointerId !== event.pointerId || drag.phase !== 'dragging') return
   if (drag.moved) {
     const target = pieceAtPoint(event.clientX, event.clientY)
     const targetSlot = target ? Number(target.dataset.slot) : null
+    const settleElement = targetSlot !== null && targetSlot !== drag.from ? target : board.value?.$el?.querySelector(`[data-slot="${drag.from}"]`)
+    const rect = settleElement instanceof HTMLElement ? settleElement.getBoundingClientRect() : null
     if (targetSlot !== null && targetSlot !== drag.from) swap(drag.from, targetSlot)
+    dragging.value = {
+      ...drag,
+      phase: 'settling',
+      x: rect ? rect.left + rect.width / 2 : event.clientX,
+      y: rect ? rect.top + rect.height / 2 : event.clientY,
+    }
+    if (dragSettleTimer) clearTimeout(dragSettleTimer)
+    dragSettleTimer = setTimeout(() => { dragging.value = null; dragSettleTimer = undefined }, 250)
     ignoreClick.value = true
     if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
     ignoreClickTimer = setTimeout(() => { ignoreClick.value = false }, 0)
+    return
   }
   dragging.value = null
 }
@@ -182,6 +224,7 @@ function pieceAtPoint(x: number, y: number) {
 }
 
 function cancelDrag() {
+  if (dragging.value?.phase === 'settling') return
   dragging.value = null
 }
 
@@ -197,7 +240,7 @@ function choosePiece(slot: number) {
 function dragStyle(slot: number) {
   const drag = dragging.value
   if (!drag || drag.from !== slot || !drag.moved) return {}
-  return { transform: `translate(${drag.x - drag.startX}px, ${drag.y - drag.startY}px) scale(.96)` }
+  return { opacity: 0 }
 }
 
 function pieceStyle(piece: number) {
@@ -223,6 +266,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
+  if (dragSettleTimer) clearTimeout(dragSettleTimer)
   if (import.meta.client) document.querySelector('.site-shell')?.removeAttribute('inert')
 })
 </script>

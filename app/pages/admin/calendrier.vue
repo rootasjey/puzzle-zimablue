@@ -3,9 +3,7 @@
     <div class="admin-topline">
       <div>
         <NuxtLink class="auth-back" :to="$localePath({ name: 'index' })">{{ t('admin.back') }}</NuxtLink>
-        <p class="section-kicker">{{ t('admin.kicker') }}</p>
         <h1>{{ t('admin.calendarTitle') }}</h1>
-        <p class="admin-intro">{{ t('admin.calendarIntro') }}</p>
       </div>
       <div class="admin-actions">
         <button class="admin-secondary" @click="toggleFullscreen">{{ fullscreen ? t('admin.exitFullscreen') : t('admin.fullscreen') }}</button>
@@ -16,30 +14,60 @@
     <div class="calendar-legend">
       <span><i class="legend-published" />{{ t('admin.published') }}</span>
       <span><i class="legend-draft" />{{ t('admin.draft') }}</span>
-      <span class="legend-tip">{{ t('admin.dragCalendar') }}</span>
     </div>
 
     <div v-if="error" class="admin-alert" role="alert">{{ error }}</div>
     <div v-if="notice" class="admin-notice" role="status">{{ notice }}</div>
     <div v-if="loading" class="calendar-loading">{{ t('admin.loading') }}</div>
     <ClientOnly v-else>
-      <div class="calendar-frame">
+      <div class="calendar-frame" @pointerover="handleCalendarPointerOver" @pointerout="handleCalendarPointerOut" @focusin="handleCalendarFocusIn" @focusout="handleCalendarFocusOut">
         <DayFlowCalendar v-if="calendarApp" :calendar="calendarApp" />
       </div>
       <template #fallback><div class="calendar-loading">{{ t('admin.loading') }}</div></template>
     </ClientOnly>
 
+    <NTooltip v-model:open="previewOpen" :delay-duration="0" :_tooltip-content="{ class: 'calendar-event-tooltip' }">
+      <span class="calendar-tooltip-anchor" :style="previewAnchorStyle" aria-hidden="true" />
+      <template #content>
+        <div v-if="previewPuzzle" class="calendar-event-preview" @pointerenter="keepCalendarPreviewOpen" @pointerleave="scheduleCalendarPreviewClose" @focusin="keepCalendarPreviewOpen" @focusout="handlePreviewFocusOut">
+          <img :src="previewPuzzle.imageUrl" :alt="previewPuzzle.imageName">
+          <div>
+            <div class="calendar-event-title-row">
+              <strong>{{ displayTitle(previewPuzzle) }}</strong>
+              <button type="button" class="calendar-preview-edit" :aria-label="t('admin.editPuzzleIllustration')" :title="t('admin.editPuzzleIllustration')" @click.stop="openIllustrationEditor(previewPuzzle)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" /></svg>
+              </button>
+            </div>
+            <span>{{ formatPuzzleDate(previewPuzzle.date, { day: 'numeric', month: 'long' }, $getLocale() === 'en' ? 'en-US' : 'fr-FR') }}</span>
+            <span>{{ t('admin.eventDescription', { count: previewPuzzle.gridSize ** 2, image: previewPuzzle.imageName }) }}</span>
+          </div>
+        </div>
+      </template>
+    </NTooltip>
+
+    <NTabs v-model="editorTab" class="editor-tabs" :unmount-on-hide="false">
     <NDialog
       v-model:open="dialogOpen"
       :title="editingDate ? t('admin.editPuzzle') : t('admin.preparePuzzle')"
       :description="t('admin.dialogDescription')"
       scrollable
+      :_dialog-overlay="{ class: 'puzzle-dialog-overlay' }"
       :_dialog-content="{ class: 'puzzle-dialog' }"
       :_dialog-header="{ class: 'puzzle-dialog-header' }"
       :_dialog-footer="{ class: 'puzzle-dialog-footer' }"
     >
-      <form id="puzzle-editor-form" class="puzzle-form" @submit.prevent="savePuzzle">
-        <NTabs v-model="editorTab" class="editor-tabs" :unmount-on-hide="false">
+      <template #header>
+        <div class="puzzle-dialog-heading">
+          <div class="puzzle-dialog-title-block">
+            <NDialogTitle class="puzzle-dialog-title">{{ editingDate ? t('admin.editPuzzle') : t('admin.preparePuzzle') }}</NDialogTitle>
+            <NDialogDescription class="puzzle-dialog-description">{{ t('admin.dialogDescription') }}</NDialogDescription>
+          </div>
+          <button v-if="form.imageUrl" type="button" class="dialog-art-preview" :aria-label="t('admin.editPuzzleIllustration')" :title="t('admin.editPuzzleIllustration')" @click="openIllustrationPicker">
+            <img :src="form.imageUrl" :alt="form.imageName">
+            <span>{{ form.imageName }}</span>
+          </button>
+        </div>
+        <div class="editor-tabs-header">
           <NTabsList class="editor-tabs-list" :aria-label="t('admin.steps')">
             <NTabsTrigger value="illustration" class="editor-tab-trigger">
               <span>{{ t('admin.illustration') }}</span>
@@ -47,71 +75,95 @@
             </NTabsTrigger>
             <NTabsTrigger value="details" class="editor-tab-trigger">{{ t('admin.details') }}</NTabsTrigger>
           </NTabsList>
-
-          <NTabsContent value="illustration" class="editor-tab-panel">
-            <div v-if="form.imageUrl" class="selected-illustration">
+        </div>
+      </template>
+      <form id="puzzle-editor-form" class="puzzle-form" @submit.prevent="savePuzzle">
+        <div ref="panelStage" class="dialog-panel-stage">
+          <NTabsContent v-if="editorTab === 'illustration'" value="illustration" class="editor-tab-panel">
+            <div v-if="form.imageUrl && !choosingIllustration" class="selected-illustration is-compact">
               <img :src="form.imageUrl" :alt="form.imageName">
               <div><span>{{ t('admin.selectedIllustration') }}</span><strong>{{ form.imageName }}</strong></div>
+              <button type="button" class="admin-secondary change-illustration" @click="choosingIllustration = true">{{ t('admin.chooseAnother') }}</button>
             </div>
-            <label for="illustration-search">{{ t('admin.searchIllustrations') }}</label>
-            <input id="illustration-search" v-model="illustrationSearch" type="search" :placeholder="t('admin.searchPlaceholder')">
-            <div class="illustration-results" :aria-busy="illustrationsLoading">
-              <button
-                v-for="image in filteredIllustrations"
-                :key="image.slug"
-                type="button"
-                class="illustration-option"
-                :class="{ selected: form.imageSlug === image.slug }"
-                :aria-pressed="form.imageSlug === image.slug"
-                @click="selectIllustration(image)"
-              >
-                <img :src="image.url" :alt="image.name" loading="lazy">
-                <span>{{ image.name }}</span>
-              </button>
-              <p v-if="!filteredIllustrations.length && !illustrationsLoading" class="empty-illustrations">{{ t('admin.noIllustrations') }}</p>
-            </div>
-            <button v-if="illustrationsOffset < illustrationTotal" type="button" class="illustrations-more" :disabled="illustrationsLoading" @click="loadIllustrations()">
-              {{ illustrationsLoading ? t('admin.loading') : t('admin.loadMore') }}
-            </button>
+            <template v-if="!form.imageUrl || choosingIllustration">
+              <label for="illustration-search">{{ t('admin.searchIllustrations') }}</label>
+              <input id="illustration-search" ref="illustrationSearchInput" v-model="illustrationSearch" type="search" :placeholder="t('admin.searchPlaceholder')" @keydown.down.prevent="focusIllustrationTabStop">
+              <p class="illustration-keyboard-hint">{{ t('admin.illustrationKeyboardHint') }}</p>
+              <div class="illustration-results" role="group" :aria-busy="illustrationsLoading" :aria-label="t('admin.illustrationChoices')" @keydown="handleIllustrationGridKeydown">
+                <button
+                  v-for="image in filteredIllustrations"
+                  :key="image.slug"
+                  type="button"
+                  class="illustration-option"
+                  :class="{ selected: form.imageSlug === image.slug }"
+                  :tabindex="image.slug === illustrationTabStopSlug ? 0 : -1"
+                  :aria-pressed="form.imageSlug === image.slug"
+                  @focus="focusedIllustrationSlug = image.slug"
+                  @click="selectIllustration(image)"
+                >
+                  <img :src="image.url" :alt="image.name" loading="lazy">
+                  <span>{{ image.name }}</span>
+                </button>
+                <p v-if="!filteredIllustrations.length && !illustrationsLoading" class="empty-illustrations">{{ t('admin.noIllustrations') }}</p>
+                <p v-if="illustrationsLoading" class="illustration-loading" role="status">{{ t('admin.loading') }}</p>
+                <div ref="illustrationSentinel" class="illustration-sentinel" aria-hidden="true" />
+              </div>
+            </template>
             <button class="editor-continue" type="button" :disabled="!form.imageSlug" @click="editorTab = 'details'">{{ t('admin.continue') }} <span aria-hidden="true">→</span></button>
           </NTabsContent>
 
-          <NTabsContent value="details" class="editor-tab-panel">
+          <NTabsContent v-else value="details" class="editor-tab-panel" key="details">
             <div class="puzzle-details-grid">
-              <label>{{ t('admin.date') }}<input v-model="form.date" type="date" required></label>
-              <label>{{ t('admin.title') }}<input v-model="form.title" maxlength="120" required></label>
-              <label class="puzzle-note-field">{{ t('admin.note') }}<textarea v-model="form.note" rows="3" maxlength="500" /></label>
-              <label>{{ t('admin.titleEnglish') }}<input v-model="form.titleEn" maxlength="120"></label>
-              <label class="puzzle-note-field">{{ t('admin.noteEnglish') }}<textarea v-model="form.noteEn" rows="3" maxlength="500" /></label>
-              <p class="english-optional">{{ t('admin.englishOptional') }}</p>
-              <label>{{ t('admin.pieceCount') }}
+              <label class="detail-meta-field">{{ t('admin.date') }}<input v-model="form.date" type="date" required></label>
+              <label class="detail-meta-field">{{ t('admin.pieceCount') }}
                 <select v-model.number="form.gridSize">
                   <option :value="3">{{ t('admin.easy', { count: 9 }) }}</option>
                   <option :value="4">{{ t('admin.balanced', { count: 16 }) }}</option>
                   <option :value="5">{{ t('admin.challenging', { count: 25 }) }}</option>
                 </select>
               </label>
-              <label>{{ t('admin.status') }}
-                <select v-model="form.status">
-                  <option value="draft">{{ t('admin.draft') }}</option>
-                  <option value="published">{{ t('admin.published') }}</option>
-                </select>
+              <label class="detail-text-field">{{ t('admin.title') }}
+                <span class="field-control-row">
+                  <input v-if="titleLanguage === 'fr'" v-model="form.title" maxlength="120" required>
+                  <input v-else v-model="form.titleEn" maxlength="120" :placeholder="form.title">
+                  <NTabs v-model="titleLanguage" class="field-language-tabs">
+                    <NTabsList class="field-language-list" :aria-label="t('admin.title')">
+                      <NTabsTrigger value="fr" class="field-language-trigger">FR</NTabsTrigger>
+                      <NTabsTrigger value="en" class="field-language-trigger">EN</NTabsTrigger>
+                    </NTabsList>
+                  </NTabs>
+                </span>
               </label>
+              <label class="detail-text-field puzzle-note-field">{{ t('admin.note') }}
+                <span class="field-control-row field-control-row-note">
+                  <textarea v-if="noteLanguage === 'fr'" v-model="form.note" rows="3" maxlength="500" :placeholder="t('admin.notePlaceholder')" />
+                  <textarea v-else v-model="form.noteEn" rows="3" maxlength="500" :placeholder="form.note || t('admin.notePlaceholder')" />
+                  <NTabs v-model="noteLanguage" class="field-language-tabs">
+                    <NTabsList class="field-language-list" :aria-label="t('admin.note')">
+                      <NTabsTrigger value="fr" class="field-language-trigger">FR</NTabsTrigger>
+                      <NTabsTrigger value="en" class="field-language-trigger">EN</NTabsTrigger>
+                    </NTabsList>
+                  </NTabs>
+                </span>
+              </label>
+              <p class="english-optional">{{ t('admin.englishOptional') }}</p>
+              <p v-if="draftSaveState !== 'idle'" class="draft-autosave" role="status">{{ draftSaveState === 'saving' ? t('admin.autosaving') : t('admin.autosaved') }}</p>
             </div>
           </NTabsContent>
-        </NTabs>
+        </div>
         <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
       </form>
       <template #footer>
         <div class="dialog-actions">
-          <button v-if="editingDate && form.status === 'draft'" type="button" class="admin-delete" :disabled="saving" @click="deletePuzzle">{{ t('admin.deleteDraft') }}</button>
+          <button v-if="hasDraft" type="button" class="admin-delete" :disabled="saving" @click="deletePuzzle">{{ t('admin.deleteDraft') }}</button>
           <button type="button" class="admin-cancel" :disabled="saving" @click="dialogOpen = false">{{ t('admin.cancel') }}</button>
           <button type="submit" form="puzzle-editor-form" class="admin-primary" :disabled="saving || !form.imageSlug">
-            {{ saving ? t('admin.saving') : form.status === 'published' ? t('admin.savePublish') : t('admin.saveDraft') }}
+            {{ saving ? t('admin.saving') : t('admin.publish') }}
           </button>
         </div>
       </template>
     </NDialog>
+    </NTabs>
   </main>
 </template>
 
@@ -151,6 +203,12 @@ const fullscreen = ref(false)
 const dialogOpen = ref(false)
 const editorTab = ref<'illustration' | 'details'>('illustration')
 const editingDate = ref('')
+const sourceDate = ref('')
+const titleLanguage = ref<'fr' | 'en'>('fr')
+const noteLanguage = ref<'fr' | 'en'>('fr')
+const choosingIllustration = ref(false)
+const hasDraft = ref(false)
+const draftSaveState = ref<'idle' | 'saving' | 'saved'>('idle')
 const saving = ref(false)
 const formError = ref('')
 const illustrationSearch = ref('')
@@ -158,10 +216,32 @@ const illustrations = ref<Illustration[]>([])
 const illustrationsOffset = ref(0)
 const illustrationTotal = ref(0)
 const illustrationsLoading = ref(false)
+const illustrationSentinel = ref<HTMLElement>()
+const illustrationSearchInput = ref<HTMLInputElement>()
+const focusedIllustrationSlug = ref('')
+const previewPuzzle = shallowRef<DailyPuzzle>()
+const previewOpen = ref(false)
+const previewAnchor = reactive({ x: 0, y: 0 })
+const previewAnchorStyle = computed(() => ({ left: `${previewAnchor.x}px`, top: `${previewAnchor.y}px` }))
+const panelStage = ref<HTMLElement>()
 const form = reactive<PuzzleForm>(emptyForm())
+let autosaveTimer: ReturnType<typeof setTimeout> | undefined
+let previewCloseTimer: ReturnType<typeof setTimeout> | undefined
+let panelHeightTimer: ReturnType<typeof setTimeout> | undefined
+let illustrationObserver: IntersectionObserver | undefined
+let formReady = false
+let autosaveRunning = false
+let autosaveAgain = false
 const filteredIllustrations = computed(() => {
   const query = illustrationSearch.value.trim().toLocaleLowerCase($getLocale())
   return illustrations.value.filter(image => !query || image.name.toLocaleLowerCase($getLocale()).includes(query) || image.slug.toLowerCase().includes(query))
+})
+const illustrationTabStopSlug = computed(() => {
+  const visible = filteredIllustrations.value
+  return visible.find(image => image.slug === focusedIllustrationSlug.value)?.slug
+    ?? visible.find(image => image.slug === form.imageSlug)?.slug
+    ?? visible[0]?.slug
+    ?? ''
 })
 const calendars: CalendarType[] = [
   { id: 'published', name: t('admin.published'), colors: { eventColor: '#254be8', eventSelectedColor: '#1738bd', lineColor: '#1839bd', textColor: '#fff' } },
@@ -247,17 +327,32 @@ function formatDate(date: Date) {
 }
 
 function openNew(date = todayDate()) {
+  formReady = false
+  previewOpen.value = false
   editingDate.value = ''
+  sourceDate.value = ''
+  hasDraft.value = false
+  draftSaveState.value = 'idle'
   Object.assign(form, emptyForm(date))
   formError.value = ''
   editorTab.value = 'illustration'
+  titleLanguage.value = 'fr'
+  noteLanguage.value = 'fr'
+  choosingIllustration.value = true
+  illustrationSearch.value = ''
   dialogOpen.value = true
+  nextTick(() => { formReady = true })
 }
 
 function openEdit(date: string) {
   const puzzle = allPuzzles.value.find(item => item.date === date)
   if (!puzzle) return openNew(date)
+  formReady = false
+  previewOpen.value = false
   editingDate.value = puzzle.date
+  sourceDate.value = puzzle.status === 'published' ? puzzle.date : (puzzle as DailyPuzzle & { sourceDate?: string }).sourceDate || ''
+  hasDraft.value = puzzle.status === 'draft'
+  draftSaveState.value = hasDraft.value ? 'saved' : 'idle'
   Object.assign(form, {
     date: puzzle.date,
     title: puzzle.title,
@@ -268,11 +363,16 @@ function openEdit(date: string) {
     imageSlug: puzzle.imageSlug,
     imageUrl: puzzle.imageUrl,
     gridSize: puzzle.gridSize,
-    status: puzzle.status,
+    status: 'draft',
   })
   formError.value = ''
   editorTab.value = 'details'
+  titleLanguage.value = 'fr'
+  noteLanguage.value = 'fr'
+  choosingIllustration.value = false
+  illustrationSearch.value = ''
   dialogOpen.value = true
+  nextTick(() => { formReady = true })
 }
 
 async function loadIllustrations(reset = false) {
@@ -295,18 +395,253 @@ function selectIllustration(image: Illustration) {
   form.imageName = image.name
   form.imageSlug = image.slug
   form.imageUrl = image.url
+  choosingIllustration.value = false
   if (!form.title) form.title = image.name
 }
 
-async function savePuzzle() {
+function focusIllustrationSearch() {
+  void nextTick(() => requestAnimationFrame(() => illustrationSearchInput.value?.focus()))
+}
+
+function openIllustrationPicker() {
+  editorTab.value = 'illustration'
+  choosingIllustration.value = true
+  illustrationSearch.value = ''
+  focusedIllustrationSlug.value = form.imageSlug
+  focusIllustrationSearch()
+}
+
+function openIllustrationEditor(puzzle: DailyPuzzle) {
+  openEdit(puzzle.date)
+  openIllustrationPicker()
+  previewOpen.value = false
+}
+
+function focusIllustrationTabStop() {
+  const grid = illustrationSearchInput.value?.parentElement?.querySelector<HTMLElement>('.illustration-results')
+  const first = grid?.querySelector<HTMLButtonElement>('.illustration-option[tabindex="0"]')
+    ?? grid?.querySelector<HTMLButtonElement>('.illustration-option')
+  first?.focus()
+}
+
+function handleIllustrationGridKeydown(event: KeyboardEvent) {
+  const target = event.target
+  if (!(target instanceof HTMLButtonElement) || !target.matches('.illustration-option')) return
+  if (!event.isComposing && !event.altKey && !event.ctrlKey && !event.metaKey && event.key.length === 1 && event.key !== ' ') {
+    const input = illustrationSearchInput.value
+    if (!input) return
+    event.preventDefault()
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? start
+    const nextValue = `${input.value.slice(0, start)}${event.key}${input.value.slice(end)}`
+    const nextCursor = start + event.key.length
+    focusedIllustrationSlug.value = ''
+    illustrationSearch.value = nextValue
+    void nextTick(() => {
+      input.focus()
+      input.setSelectionRange(nextCursor, nextCursor)
+    })
+    return
+  }
+  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
+  const grid = target.closest<HTMLElement>('.illustration-results')
+  if (!grid) return
+  const options = [...grid.querySelectorAll<HTMLButtonElement>('.illustration-option')]
+  const index = options.indexOf(target)
+  if (index < 0) return
+  const columns = Math.max(1, getComputedStyle(grid).gridTemplateColumns.split(' ').length)
+  const rowStart = Math.floor(index / columns) * columns
+  const lastIndex = options.length - 1
+  const rowCount = Math.ceil(options.length / columns)
+  let nextIndex = index
+  if (event.key === 'ArrowLeft') nextIndex = index > 0 ? index - 1 : lastIndex
+  if (event.key === 'ArrowRight') nextIndex = index < lastIndex ? index + 1 : 0
+  if (event.key === 'ArrowUp') {
+    const column = index % columns
+    const row = Math.floor(index / columns)
+    const targetRow = (row - 1 + rowCount) % rowCount
+    nextIndex = Math.min(targetRow * columns + column, lastIndex)
+  }
+  if (event.key === 'ArrowDown') {
+    const column = index % columns
+    const row = Math.floor(index / columns)
+    const targetRow = (row + 1) % rowCount
+    nextIndex = Math.min(targetRow * columns + column, lastIndex)
+  }
+  if (event.key === 'Home') nextIndex = rowStart
+  if (event.key === 'End') nextIndex = Math.min(rowStart + columns - 1, lastIndex)
+  event.preventDefault()
+  if (nextIndex === index) return
+  const nextOption = options[nextIndex]
+  nextOption?.focus({ preventScroll: true })
+  if (!nextOption) return
+
+  const gridBounds = grid.getBoundingClientRect()
+  const optionBounds = nextOption.getBoundingClientRect()
+  const visibleTop = gridBounds.top + grid.clientTop
+  const visibleBottom = visibleTop + grid.clientHeight
+  let nextScrollTop = grid.scrollTop
+  if (optionBounds.top < visibleTop) nextScrollTop -= visibleTop - optionBounds.top
+  else if (optionBounds.bottom > visibleBottom) nextScrollTop += optionBounds.bottom - visibleBottom
+  if (nextScrollTop !== grid.scrollTop) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    grid.scrollTo({
+      top: nextScrollTop,
+      behavior: reduceMotion || event.repeat ? 'auto' : 'smooth',
+    })
+  }
+}
+
+function displayTitle(puzzle: DailyPuzzle) {
+  return $getLocale() === 'en' && puzzle.titleEn ? puzzle.titleEn : puzzle.title
+}
+
+function calendarPuzzleFromTarget(target: EventTarget | null) {
+  if (!(target instanceof Element)) return null
+  const eventElement = target.closest<HTMLElement>('.df-event')
+  if (!eventElement) return null
+  eventElement.removeAttribute('title')
+  const id = eventElement.dataset.eventId
+    || eventElement.closest<HTMLElement>('[data-event-id]')?.dataset.eventId
+  const title = eventElement.querySelector('.df-event-title, .df-month-segment-event-title, .df-year-event-title')?.textContent?.trim()
+  return allPuzzles.value.find(puzzle => puzzle.date === id)
+    || allPuzzles.value.find(puzzle => puzzle.title === title || puzzle.titleEn === title)
+    || null
+}
+
+function showCalendarPreview(target: EventTarget | null, x?: number, y?: number) {
+  const puzzle = calendarPuzzleFromTarget(target)
+  if (!puzzle) return
+  if (previewCloseTimer) clearTimeout(previewCloseTimer)
+  previewPuzzle.value = puzzle
+  if (x !== undefined && y !== undefined) {
+    previewAnchor.x = x
+    previewAnchor.y = y
+  } else if (target instanceof Element) {
+    const bounds = target.closest<HTMLElement>('.df-event')?.getBoundingClientRect()
+    if (bounds) {
+      previewAnchor.x = bounds.left + bounds.width / 2
+      previewAnchor.y = bounds.top
+    }
+  }
+  previewOpen.value = true
+}
+
+function handleCalendarPointerOver(event: PointerEvent) {
+  if (event.pointerType === 'touch') return
+  showCalendarPreview(event.target, event.clientX, event.clientY)
+}
+
+function handleCalendarPointerOut(event: PointerEvent) {
+  if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.df-event, .calendar-event-tooltip')) {
+    keepCalendarPreviewOpen()
+    return
+  }
+  scheduleCalendarPreviewClose()
+}
+
+function handleCalendarFocusIn(event: FocusEvent) {
+  showCalendarPreview(event.target)
+}
+
+function handleCalendarFocusOut(event: FocusEvent) {
+  if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.calendar-event-tooltip')) return
+  scheduleCalendarPreviewClose()
+}
+
+function keepCalendarPreviewOpen() {
+  if (previewCloseTimer) clearTimeout(previewCloseTimer)
+}
+
+function scheduleCalendarPreviewClose() {
+  if (previewCloseTimer) clearTimeout(previewCloseTimer)
+  previewCloseTimer = setTimeout(() => { previewOpen.value = false }, 180)
+}
+
+function handlePreviewFocusOut(event: FocusEvent) {
+  if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.calendar-event-tooltip')) return
+  scheduleCalendarPreviewClose()
+}
+
+watch(editorTab, async () => {
+  const stage = panelStage.value
+  if (!dialogOpen.value || !stage) return
+  if (panelHeightTimer) clearTimeout(panelHeightTimer)
+  const currentHeight = stage.getBoundingClientRect().height
+  stage.style.height = `${currentHeight}px`
+  stage.style.overflow = 'hidden'
+  await nextTick()
+  const nextHeight = stage.scrollHeight
+  requestAnimationFrame(() => { stage.style.height = `${nextHeight}px` })
+  panelHeightTimer = setTimeout(() => {
+    stage.style.height = ''
+    stage.style.overflow = ''
+  }, 280)
+}, { flush: 'pre' })
+
+watch([dialogOpen, editorTab, choosingIllustration, illustrationSearch, illustrationsOffset, illustrationTotal, illustrationsLoading], async () => {
+  illustrationObserver?.disconnect()
+  illustrationObserver = undefined
+  await nextTick()
+  const sentinel = illustrationSentinel.value
+  const root = sentinel?.parentElement
+  if (!import.meta.client || !dialogOpen.value || editorTab.value !== 'illustration' || (!choosingIllustration.value && form.imageUrl) || !sentinel || !root || illustrationsOffset.value >= illustrationTotal.value) return
+  illustrationObserver = new IntersectionObserver((entries) => {
+    if (entries.some(entry => entry.isIntersecting)) void loadIllustrations()
+  }, { root, rootMargin: '0px 0px 180px 0px' })
+  illustrationObserver.observe(sentinel)
+}, { flush: 'post' })
+
+watch(() => ({ ...form }), () => {
+  if (!dialogOpen.value || !formReady || !form.imageSlug || !form.title.trim()) return
+  draftSaveState.value = 'saving'
+  if (autosaveTimer) clearTimeout(autosaveTimer)
+  autosaveTimer = setTimeout(() => { void autosaveDraft() }, 650)
+})
+
+async function autosaveDraft() {
+  if (autosaveRunning) {
+    autosaveAgain = true
+    return
+  }
+  autosaveRunning = true
   saving.value = true
   formError.value = ''
   try {
-    const payload = { ...form }
-    if (editingDate.value) await $fetch(`/api/admin/puzzles/${editingDate.value}`, { method: 'PATCH', body: payload })
+    const payload = { ...form, status: 'draft' as const, sourceDate: sourceDate.value, draftDate: editingDate.value }
+    await $fetch('/api/admin/puzzle-drafts', { method: 'POST', body: payload })
+    editingDate.value = form.date
+    sourceDate.value = payload.sourceDate || ''
+    hasDraft.value = true
+    draftSaveState.value = 'saved'
+    await loadPuzzles()
+  } catch {
+    formError.value = t('admin.autosaveError')
+    draftSaveState.value = 'idle'
+  } finally {
+    autosaveRunning = false
+    saving.value = false
+    if (autosaveAgain) {
+      autosaveAgain = false
+      void autosaveDraft()
+    }
+  }
+}
+
+async function savePuzzle() {
+  if (saving.value || !form.imageSlug) return
+  saving.value = true
+  formError.value = ''
+  try {
+    if (autosaveTimer) clearTimeout(autosaveTimer)
+    const payload = { ...form, status: 'published' as const }
+    if (hasDraft.value && sourceDate.value) await $fetch(`/api/admin/puzzles/${sourceDate.value}`, { method: 'PATCH', body: payload })
+    else if (hasDraft.value) await $fetch('/api/admin/puzzles', { method: 'POST', body: payload })
+    else if (editingDate.value) await $fetch(`/api/admin/puzzles/${editingDate.value}`, { method: 'PATCH', body: payload })
     else await $fetch('/api/admin/puzzles', { method: 'POST', body: payload })
+    if (hasDraft.value) await $fetch(`/api/admin/puzzle-drafts/${encodeURIComponent(editingDate.value)}`, { method: 'DELETE' })
     dialogOpen.value = false
-    notice.value = payload.status === 'published' ? t('admin.savedPublished') : t('admin.savedDraft')
+    notice.value = t('admin.savedPublished')
     await loadPuzzles()
   } catch (cause: any) {
     formError.value = t('admin.saveError')
@@ -316,11 +651,12 @@ async function savePuzzle() {
 }
 
 async function deletePuzzle() {
-  if (!editingDate.value) return
+  if (!editingDate.value || !hasDraft.value) return
+  if (autosaveTimer) clearTimeout(autosaveTimer)
   saving.value = true
   formError.value = ''
   try {
-    await $fetch(`/api/admin/puzzles/${editingDate.value}`, { method: 'DELETE' })
+    await $fetch(`/api/admin/puzzle-drafts/${encodeURIComponent(editingDate.value)}`, { method: 'DELETE' })
     dialogOpen.value = false
     notice.value = t('admin.deletedDraft')
     await loadPuzzles()
@@ -354,5 +690,11 @@ function toggleFullscreen() {
   else document.documentElement.classList.remove('calendar-fullscreen-open')
 }
 
-onBeforeUnmount(() => document.documentElement.classList.remove('calendar-fullscreen-open'))
+onBeforeUnmount(() => {
+  if (autosaveTimer) clearTimeout(autosaveTimer)
+  if (previewCloseTimer) clearTimeout(previewCloseTimer)
+  if (panelHeightTimer) clearTimeout(panelHeightTimer)
+  illustrationObserver?.disconnect()
+  document.documentElement.classList.remove('calendar-fullscreen-open')
+})
 </script>

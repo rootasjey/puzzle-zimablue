@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     metaBaseUrl: 'https://puzzle.zimablue.cc',
   },
   app: {
+    pageTransition: { name: 'page-turn', mode: 'out-in' },
     head: {
       title: 'Puzzle Zimablue',
       titleTemplate: '%s — Puzzle Zimablue',
