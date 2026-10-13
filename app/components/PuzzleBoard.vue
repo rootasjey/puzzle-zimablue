@@ -24,7 +24,7 @@
           'is-dragging': dragging?.piece === piece && dragging.moved,
           'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
         }"
-        :style="[pieceStyle(piece), dragStyle(slot)]"
+        :style="[pieceStyle(piece), dragStyle(piece)]"
         :data-slot="slot"
         type="button"
         :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
@@ -184,7 +184,7 @@ function startDrag(slot: number, event: PointerEvent) {
 
 function movePiece(event: PointerEvent) {
   const drag = dragging.value
-  if (!drag || drag.pointerId !== event.pointerId) return
+  if (!drag || drag.phase !== 'dragging' || drag.pointerId !== event.pointerId) return
   drag.x = event.clientX
   drag.y = event.clientY
   if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 8) return
@@ -209,7 +209,7 @@ function finishDrag(event: PointerEvent) {
       y: rect ? rect.top + rect.height / 2 : event.clientY,
     }
     if (dragSettleTimer) clearTimeout(dragSettleTimer)
-    dragSettleTimer = setTimeout(() => { dragging.value = null; dragSettleTimer = undefined }, 250)
+    dragSettleTimer = setTimeout(() => { dragging.value = null; dragSettleTimer = undefined }, 360)
     ignoreClick.value = true
     if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
     ignoreClickTimer = setTimeout(() => { ignoreClick.value = false }, 0)
@@ -238,9 +238,9 @@ function choosePiece(slot: number) {
   choose(slot)
 }
 
-function dragStyle(slot: number) {
+function dragStyle(piece: number) {
   const drag = dragging.value
-  if (!drag || drag.from !== slot || !drag.moved) return {}
+  if (!drag || drag.piece !== piece || !drag.moved) return {}
   return { opacity: 0 }
 }
 
