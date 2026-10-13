@@ -57,6 +57,18 @@
             </div>
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+            <div v-if="progressEnabled" class="completion-actions">
+              <button class="play-link completion-share" type="button" @click="sharePuzzle">
+                {{ t('game.share') }} <span aria-hidden="true">↗</span>
+              </button>
+              <a class="completion-source-link" :href="illustrationLink" target="_blank" rel="noreferrer">
+                {{ t('game.viewOriginal') }} <span aria-hidden="true">↗</span>
+              </a>
+              <a class="completion-download-link" :href="downloadLink" :download="downloadFilename">
+                {{ t('game.download') }} <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+            <p v-if="shareFeedback" class="completion-share-feedback" role="status">{{ shareFeedback }}</p>
             <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
             <p v-else-if="completionSaved" class="completion-account-note" role="status">{{ t('game.progressSaved') }}</p>
             <NuxtLink v-else-if="!loggedIn && progressEnabled" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
@@ -83,8 +95,12 @@ const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
 const completionSaved = ref(false)
 const completionSaveError = ref(false)
+const shareFeedback = ref('')
 const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: { puzzleDate: props.puzzle.date, moves: String(moves.value) } }))
 const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: { puzzleDate: props.puzzle.date, moves: String(moves.value) } }))
+const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
+const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
+const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
 const { order, selected, moves, complete, started, newBoard, choose, swap } = usePuzzleGame(props.puzzle)
 const imageLoaded = ref(false)
 const imageError = ref(false)
@@ -132,7 +148,9 @@ watch(complete, async (isComplete) => {
     const element = board.value?.$el
     if (element instanceof HTMLElement) {
       const rect = element.getBoundingClientRect()
-      const targetSize = Math.min(window.innerWidth * 0.88, window.innerHeight * 0.68, 640)
+      const targetSize = window.innerWidth <= 600
+        ? Math.min(window.innerWidth * 0.82, window.innerHeight * 0.42, 420)
+        : Math.min(window.innerWidth * 0.88, window.innerHeight * 0.48, 640)
       completionOrigin.value = {
         x: rect.left + rect.width / 2 - window.innerWidth / 2,
         y: rect.top + rect.height / 2 - (window.innerHeight / 2 - 48),
@@ -236,6 +254,33 @@ function choosePiece(slot: number) {
     return
   }
   choose(slot)
+}
+
+async function sharePuzzle() {
+  if (!import.meta.client || !props.progressEnabled) return
+  const url = new URL($localePath({ name: 'play', params: { date: props.puzzle.date } }), window.location.origin).href
+  const shareData = {
+    title: displayedTitle.value,
+    text: t('game.shareMessage', { title: displayedTitle.value }),
+    url,
+  }
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData)
+      return
+    }
+    await navigator.clipboard.writeText(url)
+    shareFeedback.value = t('game.linkCopied')
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return
+    try {
+      await navigator.clipboard.writeText(url)
+      shareFeedback.value = t('game.linkCopied')
+    } catch {
+      shareFeedback.value = t('game.shareError')
+    }
+  }
 }
 
 function dragStyle(piece: number) {

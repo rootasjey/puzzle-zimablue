@@ -156,12 +156,17 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .restart-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-size), minmax(0,1fr)); width: 100%; max-width: 590px; aspect-ratio: 1; margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
-.completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; overflow: auto; padding: 1.25rem; background: var(--paper); }
+.completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }
-.completion-board { display: grid; grid-template-columns: repeat(var(--grid-size), minmax(0,1fr)); width: min(88vw, 68svh, 640px); aspect-ratio: 1; gap: 3px; border: 2px solid var(--ink); background: var(--ink); box-shadow: 7px 7px 0 var(--yellow); transform-origin: center; }
+.completion-board { display: grid; grid-template-columns: repeat(var(--grid-size), minmax(0,1fr)); width: min(88vw, 48svh, 640px); aspect-ratio: 1; gap: 3px; border: 2px solid var(--ink); background: var(--ink); box-shadow: 7px 7px 0 var(--yellow); transform-origin: center; }
 .completion-piece { min-width: 0; min-height: 0; background-color: var(--line); background-image: var(--image-url); background-size: calc(var(--grid-size) * 100%) calc(var(--grid-size) * 100%); }
 .completion-title { color: var(--blue); font-size: clamp(2rem, 5vw, 3rem); font-weight: 850; line-height: 1; text-align: center; }
 .completion-copy { margin: 0; color: var(--muted); font-size: .9rem; font-weight: 650; text-align: center; }
+.completion-actions { display: flex; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: .55rem 1rem; }
+.completion-share { min-height: 2.65rem; margin: 0; padding-inline: .9rem; gap: .65rem; cursor: pointer; }
+.completion-source-link,.completion-download-link { min-height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; color: var(--blue); font-size: .78rem; font-weight: 750; text-align: center; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
+.completion-share-feedback { margin: -.35rem 0 0; color: var(--success-foreground); font-size: .78rem; font-weight: 700; text-align: center; }
+.completion-share:focus-visible,.completion-source-link:focus-visible,.completion-download-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .completion-account-note { max-width: 34ch; margin: -.2rem 0 0; color: var(--success-foreground); font-size: .84rem; font-weight: 700; line-height: 1.5; text-align: center; }
 .completion-account-link { min-height: 2.7rem; margin-top: .1rem; }
 .completion-login-link { color: var(--blue); font-size: .8rem; font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
@@ -195,9 +200,9 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .completion-leave-active .completion-board { transition: transform .16s ease-in; }
 .completion-enter-from .completion-board { transform: translate(var(--origin-x), var(--origin-y)) scale(var(--origin-scale)); }
 .completion-leave-to .completion-board { transform: scale(.96); }
-.completion-enter-active .completion-title,.completion-enter-active .completion-copy,.completion-enter-active .completion-restart,.completion-enter-active .completion-login-link { transition: opacity .22s ease .14s, transform .24s cubic-bezier(.16,1,.3,1) .14s; }
-.completion-leave-active .completion-title,.completion-leave-active .completion-copy,.completion-leave-active .completion-restart,.completion-leave-active .completion-login-link { transition: opacity .1s ease-in; }
-.completion-enter-from .completion-title,.completion-enter-from .completion-copy,.completion-enter-from .completion-restart,.completion-enter-from .completion-login-link,.completion-leave-to .completion-title,.completion-leave-to .completion-copy,.completion-leave-to .completion-restart,.completion-leave-to .completion-login-link { opacity: 0; transform: translateY(.4rem); }
+.completion-enter-active .completion-title,.completion-enter-active .completion-copy,.completion-enter-active .completion-actions,.completion-enter-active .completion-share-feedback,.completion-enter-active .completion-restart,.completion-enter-active .completion-login-link { transition: opacity .22s ease .14s, transform .24s cubic-bezier(.16,1,.3,1) .14s; }
+.completion-leave-active .completion-title,.completion-leave-active .completion-copy,.completion-leave-active .completion-actions,.completion-leave-active .completion-share-feedback,.completion-leave-active .completion-restart,.completion-leave-active .completion-login-link { transition: opacity .1s ease-in; }
+.completion-enter-from .completion-title,.completion-enter-from .completion-copy,.completion-enter-from .completion-actions,.completion-enter-from .completion-share-feedback,.completion-enter-from .completion-restart,.completion-enter-from .completion-login-link,.completion-leave-to .completion-title,.completion-leave-to .completion-copy,.completion-leave-to .completion-actions,.completion-leave-to .completion-share-feedback,.completion-leave-to .completion-restart,.completion-leave-to .completion-login-link { opacity: 0; transform: translateY(.4rem); }
 .puzzle-piece { position: relative; min-width: 0; border: 0; padding: 0; background-color: var(--line); background-image: var(--image-url); background-size: calc(var(--grid-size) * 100%) calc(var(--grid-size) * 100%); cursor: grab; user-select: none; -webkit-user-drag: none; touch-action: none; transition: filter .12s ease, box-shadow .12s ease, transform .1s ease; }
 .puzzle-piece:active { cursor: grabbing; }
 .puzzle-piece:hover { filter: brightness(1.06); }
@@ -359,6 +364,11 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .dialog-art-preview { max-width: 42%; }
   .dialog-art-preview img { width: 40px; height: 38px; }
   .calendar-frame { min-height: 570px; }
+}
+@media (max-width: 600px) {
+  .completion-board { width: min(82vw, 42svh, 420px); }
+  .completion-actions { width: 100%; gap: .25rem .65rem; }
+  .completion-share { flex: 1 0 100%; }
 }
 @media (max-width: 470px) {
   .site-header { gap: .55rem; padding-inline: 1.1rem; }
