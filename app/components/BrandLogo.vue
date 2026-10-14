@@ -4,10 +4,10 @@
       <path d="m7 5 28-.7.5 28.2-28 .8Z" fill="#18224E" />
       <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" fill="#F7F5EE" />
       <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" stroke="#18224E" stroke-width="1.8" />
-      <path class="brand-logo-cell brand-logo-cell--top-left" d="m6.6 6.3 10.5-.2.1 9.5-10.5.2Z" fill="#3986FF" />
-      <path class="brand-logo-cell brand-logo-cell--top-right" d="m18.4 6 10-.2.1 9.5-10 .2Z" fill="#BDB2FF" />
-      <path class="brand-logo-cell brand-logo-cell--bottom-left" d="m6.7 17.1 10.5-.3.1 10.9-10.5.3Z" fill="#FED7E0" />
-      <path class="brand-logo-cell brand-logo-cell--bottom-right" d="m18.4 16.8 10.2-.3.1 10.9-10.2.3Z" fill="#FFF4F4" />
+      <path class="brand-logo-cell brand-logo-cell--top-left" d="m6.6 6.3 10.5-.2.1 9.5-10.5.2Z" fill="#1E5AA8" />
+      <path class="brand-logo-cell brand-logo-cell--top-right" d="m18.4 6 10-.2.1 9.5-10 .2Z" fill="#3986FF" />
+      <path class="brand-logo-cell brand-logo-cell--bottom-left" d="m6.7 17.1 10.5-.3.1 10.9-10.5.3Z" fill="#77B8F7" />
+      <path class="brand-logo-cell brand-logo-cell--bottom-right" d="m18.4 16.8 10.2-.3.1 10.9-10.2.3Z" fill="#C5DFFF" />
       <path d="m6.6 15.8 21.8-.5M17.2 6.1l.2 21.9" stroke="#F7F5EE" stroke-width="1.6" />
     </svg>
     <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
