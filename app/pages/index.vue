@@ -55,5 +55,14 @@ const formatPuzzleDateForLocale = (date: string, options?: Intl.DateTimeFormatOp
 const puzzlePath = (date: string) => $localePath({ name: 'play', params: { date } })
 const puzzleTitle = (puzzle: DailyPuzzle) => $getLocale() === 'en' && puzzle.titleEn ? puzzle.titleEn : puzzle.title
 const formatPuzzleDate = (date: string, options?: Intl.DateTimeFormatOptions) => formatPuzzleDateForLocale(date, options)
-useSeoMeta({ title: () => t('home.seoTitle'), description: () => t('home.description') })
+usePageSeo({
+  title: () => t('home.seoTitle'),
+  description: () => t('home.description'),
+})
+const siteUrl = String(useRuntimeConfig().public.siteUrl).replace(/\/$/, '')
+defineOgImage('Puzzle.takumi', {
+  title: computed(() => featured.value ? puzzleTitle(featured.value) : t('home.seoTitle')),
+  image: computed(() => featured.value?.imageUrl || `${siteUrl}/og-puzzle-zimablue.jpg`),
+  imageAlt: computed(() => t('home.illustrationAlt', { name: featured.value?.imageName ?? 'Zimablue' })),
+}, [{ key: 'og', alt: computed(() => t('home.illustrationAlt', { name: featured.value?.imageName ?? 'Zimablue' })) }])
 </script>

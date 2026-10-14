@@ -77,7 +77,10 @@ const currentLanguage = computed(() => $getLocale())
 const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 'FR')
 const nextLanguageLabel = computed(() => currentLanguage.value === 'fr' ? 'English' : 'Français')
 
-useHead({ htmlAttrs: { 'data-theme': theme } })
+useHead({
+  htmlAttrs: { 'data-theme': theme },
+})
+useSeoMeta({ ogSiteName: 'Puzzle Zimablue' })
 
 function setTheme(value: ThemePreference) {
   themeCookie.value = value

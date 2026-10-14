@@ -1,11 +1,14 @@
 <template>
   <span class="brand-logo" aria-hidden="true">
     <svg class="brand-logo-mark" viewBox="0 0 40 40" fill="none">
-      <rect x="3" y="7" width="30" height="30" rx="10" fill="var(--blue)" stroke="var(--ink)" stroke-width="2" />
-      <path d="M18 8v28M4 21h28" stroke="var(--paper)" stroke-linecap="round" stroke-width="2.5" />
-      <path d="M18 13.5c0-2.1 1.5-3.5 3.4-3.5 1.8 0 3.2 1.4 3.2 3.2 0 .9-.4 1.7-1 2.3H18v-2Z" fill="var(--yellow)" stroke="var(--ink)" stroke-linejoin="round" stroke-width="1.6" />
-      <path d="M9.5 21h2.8c.7.6 1.1 1.4 1.1 2.3 0 1.8-1.4 3.2-3.2 3.2-1.9 0-3.4-1.4-3.4-3.5V21h2.7Z" fill="var(--coral)" stroke="var(--ink)" stroke-linejoin="round" stroke-width="1.6" />
-      <path d="M31 5.5c.6 1.7 1.4 2.5 3.1 3.1-1.7.6-2.5 1.4-3.1 3.1-.6-1.7-1.4-2.5-3.1-3.1 1.7-.6 2.5-1.4 3.1-3.1Z" fill="var(--yellow)" stroke="var(--ink)" stroke-linejoin="round" stroke-width="1.2" />
+      <path d="m7 5 28-.7.5 28.2-28 .8Z" fill="#18224E" />
+      <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" fill="#F7F5EE" />
+      <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" stroke="#18224E" stroke-width="1.8" />
+      <path class="brand-logo-cell brand-logo-cell--top-left" d="m6.6 6.3 10.5-.2.1 9.5-10.5.2Z" fill="#3986FF" />
+      <path class="brand-logo-cell brand-logo-cell--top-right" d="m18.4 6 10-.2.1 9.5-10 .2Z" fill="#BDB2FF" />
+      <path class="brand-logo-cell brand-logo-cell--bottom-left" d="m6.7 17.1 10.5-.3.1 10.9-10.5.3Z" fill="#FED7E0" />
+      <path class="brand-logo-cell brand-logo-cell--bottom-right" d="m18.4 16.8 10.2-.3.1 10.9-10.2.3Z" fill="#FFF4F4" />
+      <path d="m6.6 15.8 21.8-.5M17.2 6.1l.2 21.9" stroke="#F7F5EE" stroke-width="1.6" />
     </svg>
     <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
   </span>
@@ -28,13 +31,25 @@
   height: 2rem;
   flex: none;
   overflow: visible;
-  transition: transform .2s cubic-bezier(.2,.8,.2,1);
 }
+
+.brand-logo-cell {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1);
+}
+
+.brand-logo:hover .brand-logo-cell--top-left,
+:global(.wordmark:focus-visible) .brand-logo-cell--top-left { transform: translate(-2px, -2px) scale(1.4); }
+.brand-logo:hover .brand-logo-cell--top-right,
+:global(.wordmark:focus-visible) .brand-logo-cell--top-right { transform: translate(2px, -2px) scale(1.4); }
+.brand-logo:hover .brand-logo-cell--bottom-left,
+:global(.wordmark:focus-visible) .brand-logo-cell--bottom-left { transform: translate(-2px, 2px) scale(1.4); }
+.brand-logo:hover .brand-logo-cell--bottom-right,
+:global(.wordmark:focus-visible) .brand-logo-cell--bottom-right { transform: translate(2px, 2px) scale(1.4); }
 
 .brand-logo-name { display: inline-flex; }
 .wordmark-blue { color: var(--blue); }
-
-:global(.wordmark:hover) .brand-logo-mark { transform: rotate(-6deg) scale(1.06); }
 
 @media (max-width: 470px) {
   .brand-logo { gap: .36rem; font-size: 1.08rem; }
@@ -42,6 +57,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-logo-mark { transition: none; }
+  .brand-logo-cell { transition: none; }
 }
 </style>

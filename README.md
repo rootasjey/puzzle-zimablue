@@ -35,3 +35,5 @@ npx wrangler dev --local
 ```
 
 Le build Nuxt utilise le preset `cloudflare_module`. Avant tout déploiement, crée la base D1 Cloudflare, renseigne son `database_id` dans `wrangler.jsonc`, puis applique les migrations distantes. Ces étapes ne sont pas exécutées depuis ce prototype.
+
+Les images Open Graph sont générées à la demande. Configure un secret `NUXT_APP_SECRET` stable d’au moins 32 caractères dans le Worker avant de servir les pages (génération avec `npx nuxt-og-image generate-secret`). `wrangler secret put` déclenche un déploiement immédiat ; pour préparer le secret sans changer la version active, utilise `npx wrangler versions secret put NUXT_APP_SECRET --name puzzle-zimablue`, puis fais déployer la version validée par le flux de publication habituel. Sans ce secret, le rendu des images OG échouera en production.

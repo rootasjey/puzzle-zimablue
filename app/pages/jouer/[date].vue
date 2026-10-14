@@ -37,5 +37,13 @@ const puzzle = computed(() => puzzleData.value!)
 const language = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const displayedTitle = computed(() => $getLocale() === 'en' && puzzle.value.titleEn ? puzzle.value.titleEn : puzzle.value.title)
 const displayedNote = computed(() => $getLocale() === 'en' && puzzle.value.noteEn ? puzzle.value.noteEn : puzzle.value.note)
-useSeoMeta({ title: () => displayedTitle.value, description: () => t('play.seoDescription', { name: puzzle.value.imageName }) })
+usePageSeo({
+  title: () => displayedTitle.value,
+  description: () => t('play.seoDescription', { name: puzzle.value.imageName }),
+})
+defineOgImage('Puzzle.takumi', {
+  title: displayedTitle,
+  image: computed(() => puzzle.value.imageUrl),
+  imageAlt: computed(() => t('play.referenceAlt', { name: puzzle.value.imageName })),
+}, [{ key: 'og', alt: computed(() => t('play.referenceAlt', { name: puzzle.value.imageName })) }])
 </script>

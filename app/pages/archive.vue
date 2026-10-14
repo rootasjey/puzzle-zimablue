@@ -34,5 +34,10 @@ const language = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const formatPuzzleDate = (date: string, options?: Intl.DateTimeFormatOptions) => formatSharedPuzzleDate(date, options, language.value)
 const puzzlePath = (date: string) => $localePath({ name: 'play', params: { date } })
 const puzzleTitle = (puzzle: DailyPuzzle) => $getLocale() === 'en' && puzzle.titleEn ? puzzle.titleEn : puzzle.title
-useSeoMeta({ title: () => t('archive.seoTitle'), description: () => t('archive.description') })
+usePageSeo({ title: () => t('archive.seoTitle'), description: () => t('archive.description') })
+defineOgImage('Puzzle.takumi', {
+  title: computed(() => t('archive.seoTitle')),
+  image: `${String(useRuntimeConfig().public.siteUrl).replace(/\/$/, '')}/og-puzzle-zimablue.jpg`,
+  imageAlt: 'Pièces de puzzle colorées sur fond bleu et crème',
+})
 </script>
