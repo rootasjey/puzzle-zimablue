@@ -68,6 +68,7 @@
     "loading": "Preparing the pieces…",
     "imageError": "This illustration could not be loaded.",
     "congratulations": "Well done!",
+    "chooseAnotherPuzzle": "Choose another puzzle",
     "share": "Share the puzzle",
     "shareMessage": "I completed “{title}” on Puzzle Zimablue!",
     "viewOriginal": "View the illustration on Zimablue",
@@ -80,7 +81,6 @@
     "tomorrow": "Well done. Come back tomorrow for a new image.",
     "saveProgress": "Save my progress",
     "alreadyHaveAccount": "I already have an account",
-    "progressSaved": "Result saved to your account.",
     "saveProgressError": "Could not save this result. Try again from your account.",
     "previewNoProgress": "Preview mode: this playthrough will not save any progress."
   },

@@ -68,6 +68,7 @@
     "loading": "Préparation des pièces…",
     "imageError": "Impossible de charger cette illustration.",
     "congratulations": "Bravo !",
+    "chooseAnotherPuzzle": "Choisir un autre puzzle",
     "share": "Partager le puzzle",
     "shareMessage": "J’ai terminé « {title} » sur Puzzle Zimablue !",
     "viewOriginal": "Voir l’illustration sur Zimablue",
@@ -80,7 +81,6 @@
     "tomorrow": "Bien joué. À demain pour une nouvelle image.",
     "saveProgress": "Garder ma progression",
     "alreadyHaveAccount": "J’ai déjà un compte",
-    "progressSaved": "Résultat enregistré dans ton espace.",
     "saveProgressError": "Impossible d’enregistrer ce résultat. Réessaie depuis ton espace.",
     "previewNoProgress": "Mode aperçu : cette partie n’enregistre aucune progression."
   },

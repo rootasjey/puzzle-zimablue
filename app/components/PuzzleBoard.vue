@@ -47,25 +47,8 @@
       <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
       <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
       <div class="board-tool-actions">
-        <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M11 5 6 9H3v6h3l5 4z" />
-            <template v-if="soundEnabled">
-              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-            </template>
-            <template v-else>
-              <path d="m16 9 5 6m0-6-5 6" />
-            </template>
-          </svg>
-        </button>
-        <button class="restart-button" type="button" @click="newBoard">{{ t('game.restart') }}</button>
-      </div>
-    </div>
-    <Teleport to="body">
-      <Transition name="completion">
-        <section v-if="complete && completionOrigin" class="completion-screen" role="region" aria-labelledby="completion-title">
-          <button class="sound-toggle completion-sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+        <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+          <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M11 5 6 9H3v6h3l5 4z" />
               <template v-if="soundEnabled">
@@ -77,6 +60,34 @@
               </template>
             </svg>
           </button>
+          <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
+        </NTooltip>
+        <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+          <button class="restart-icon-button" type="button" :aria-label="t('game.restart')" @click="newBoard">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
+          </button>
+          <template #content>{{ t('game.restart') }}</template>
+        </NTooltip>
+      </div>
+    </div>
+    <Teleport to="body">
+      <Transition name="completion">
+        <section v-if="complete && completionOrigin" class="completion-screen" role="region" aria-labelledby="completion-title">
+          <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+            <button class="sound-toggle completion-sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M11 5 6 9H3v6h3l5 4z" />
+                <template v-if="soundEnabled">
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                  <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                </template>
+                <template v-else>
+                  <path d="m16 9 5 6m0-6-5 6" />
+                </template>
+              </svg>
+            </button>
+            <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
+          </NTooltip>
           <div class="completion-content">
             <div class="completion-board" :style="completionBoardStyle" aria-hidden="true">
               <div v-for="piece in order" :key="piece" class="completion-piece" :style="pieceStyle(piece)" />
@@ -84,23 +95,41 @@
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
             <div v-if="progressEnabled" class="completion-actions">
-              <button class="play-link completion-share" type="button" @click="sharePuzzle">
-                {{ t('game.share') }} <span aria-hidden="true">↗</span>
-              </button>
-              <a class="completion-source-link" :href="illustrationLink" target="_blank" rel="noreferrer">
-                {{ t('game.viewOriginal') }} <span aria-hidden="true">↗</span>
-              </a>
-              <a class="completion-download-link" :href="downloadLink" :download="downloadFilename">
-                {{ t('game.download') }} <span aria-hidden="true">↓</span>
-              </a>
+              <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+                <button class="completion-action-icon" type="button" :aria-label="t('game.share')" @click="sharePuzzle">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.2" /></svg>
+                </button>
+                <template #content>{{ t('game.share') }}</template>
+              </NTooltip>
+              <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+                <a class="completion-action-icon" :href="illustrationLink" target="_blank" rel="noreferrer" :aria-label="t('game.viewOriginal')">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m-11 5L20 4" /><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6" /></svg>
+                </a>
+                <template #content>{{ t('game.viewOriginal') }}</template>
+              </NTooltip>
+              <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+                <a class="completion-action-icon" :href="downloadLink" :download="downloadFilename" :aria-label="t('game.download')">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5" /><path d="M5 17v3h14v-3" /></svg>
+                </a>
+                <template #content>{{ t('game.download') }}</template>
+              </NTooltip>
             </div>
             <p v-if="shareFeedback" class="completion-share-feedback" role="status">{{ shareFeedback }}</p>
+            <div class="completion-navigation-actions">
+              <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+                <button class="restart-icon-button completion-restart" type="button" :aria-label="t('game.restart')" @click="newBoard">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
+                </button>
+                <template #content>{{ t('game.restart') }}</template>
+              </NTooltip>
+              <NuxtLink class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
+                {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
+              </NuxtLink>
+            </div>
             <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
-            <p v-else-if="completionSaved" class="completion-account-note" role="status">{{ t('game.progressSaved') }}</p>
             <NuxtLink v-else-if="!loggedIn && progressEnabled" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
             <NuxtLink v-if="!loggedIn && progressEnabled" class="completion-login-link" :to="signInLink">{{ t('account.alreadyHaveAccount') }}</NuxtLink>
             <p v-else-if="completionSaveError && progressEnabled" class="completion-account-note" role="status">{{ t('game.saveProgressError') }}</p>
-            <button class="restart-button completion-restart" type="button" @click="newBoard">{{ t('game.restart') }}</button>
           </div>
         </section>
       </Transition>
@@ -120,7 +149,6 @@ const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titl
 const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
 const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
-const completionSaved = ref(false)
 const completionSaveError = ref(false)
 const shareFeedback = ref('')
 const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: { puzzleDate: props.puzzle.date, moves: String(moves.value) } }))
@@ -167,7 +195,6 @@ watch(complete, async (isComplete) => {
     if (loggedIn.value && props.progressEnabled) {
       try {
         await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, moves: moves.value } })
-        completionSaved.value = true
       } catch {
         completionSaveError.value = true
       }
@@ -193,7 +220,6 @@ watch(complete, async (isComplete) => {
   }
 
   completionOrigin.value = null
-  completionSaved.value = false
   completionSaveError.value = false
   await nextTick()
   const element = board.value?.$el
