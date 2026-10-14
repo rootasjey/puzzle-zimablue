@@ -1,39 +1,58 @@
 # Puzzle Zimablue
 
-Prototype d’un puzzle commun par jour, construit autour des illustrations publiques de [zimablue.cc](https://zimablue.cc).
+**A small daily puzzle made from illustrations by Zimablue.** Play the same puzzle as everyone else, then revisit earlier days in the archive.
 
-## Démarrer
+[Play Puzzle Zimablue](https://puzzle.zimablue.cc) · [Français](README.fr.md)
+
+![Puzzle Zimablue home page](docs/screenshots/home.png)
+
+*The home page, captured on 15 October 2026.*
+
+## What it does
+
+- One shared puzzle each day, with an archive of previous puzzles.
+- A responsive board that follows the illustration’s aspect ratio.
+- Three difficulty levels: 9, 16, or 25 pieces.
+- Optional accounts for saving progress and viewing statistics across devices.
+- An admin calendar for selecting illustrations, scheduling puzzles, and publishing drafts.
+- French and English interfaces, light and dark themes, and optional sound effects.
+- Illustrations selected from the public [Zimablue](https://zimablue.cc) image catalogue.
+
+## Built with
+
+Nuxt 4, Vue, Una UI, UnoCSS, Cloudflare Workers, and D1. Authentication uses `nuxt-auth-utils`.
+
+## Run locally
+
+You’ll need Node.js and npm.
 
 ```sh
 npm install
 cp .dev.vars.example .dev.vars
-npx wrangler d1 migrations apply puzzle-zimablue --local
-npm run build
-npx wrangler dev --local --port 3001
 ```
 
-Nuxt et Wrangler utilisent le port `3001`. `.dev.vars` est ignoré par Git : remplace les valeurs d’exemple avant de démarrer. Wrangler simule D1 et le binding email en local ; les emails simulés sont consignés localement et ne sont pas envoyés.
+Edit `.dev.vars` and set unique random values for `NUXT_SESSION_PASSWORD` and `NUXT_ADMIN_BOOTSTRAP_KEY` (at least 32 characters each). Set `NUXT_INITIAL_ADMIN_EMAIL` to the address allowed to create the first admin account. Keep real values in `.dev.vars`; it is ignored by Git.
 
-Le compte administrateur se crée une seule fois depuis `/admin/initialiser`. La clé de bootstrap et l’email autorisé proviennent de `.dev.vars`. Ensuite, utilise `/admin/connexion`. Il n’y a pas d’inscription publique ; le schéma prévoit déjà les rôles `admin` et `user` pour une éventuelle ouverture ultérieure.
+Initialize the local D1 database and start Nuxt:
 
-## Programmer les puzzles
+```sh
+npx wrangler d1 migrations apply puzzle-zimablue --local
+npm run dev
+```
 
-Dans `/admin/calendrier`, les puzzles sont stockés dans D1. Les dates se déplacent par glisser-déposer ; ouvre une date vide pour en préparer un. La sélection des illustrations reste manuelle et provient de l’API publique de Zimablue. Les puzzles peuvent être enregistrés en brouillon ou publiés avec 9, 16 ou 25 pièces. Les utilisateurs voient le puzzle publié du jour et peuvent rejouer les archives.
+Open [http://localhost:3001](http://localhost:3001). The first admin account can be initialized at `/admin/initialiser` with the bootstrap key.
 
-## Compte et récupération du mot de passe
+Wrangler’s local environment simulates D1 and the email binding. Password-recovery emails are logged locally and are not sent.
 
-Génère des valeurs aléatoires longues pour `NUXT_SESSION_PASSWORD` (au moins 32 caractères) et `NUXT_ADMIN_BOOTSTRAP_KEY` (au moins 32 caractères), et renseigne l’adresse du propriétaire dans `NUXT_INITIAL_ADMIN_EMAIL`. `NUXT_PUBLIC_SITE_URL` sert à construire les liens de récupération.
-
-Les jetons de récupération sont à usage unique, expirent après 30 minutes et seule leur empreinte est stockée dans D1. La réponse de la demande reste identique pour les adresses inconnues afin de ne pas révéler les comptes existants. Le binding Cloudflare Email Service est simulé par Wrangler en local ; les emails simulés ne sont pas envoyés. En production, vérifie que `no-reply@zimablue.cc` est autorisé comme expéditeur dans Cloudflare.
-
-## Build Cloudflare
+## Build and type-check
 
 ```sh
 npm run typecheck
 npm run build
-npx wrangler dev --local
 ```
 
-Le build Nuxt utilise le preset `cloudflare_module`. Avant tout déploiement, crée la base D1 Cloudflare, renseigne son `database_id` dans `wrangler.jsonc`, puis applique les migrations distantes. Ces étapes ne sont pas exécutées depuis ce prototype.
+The production build uses Nuxt’s `cloudflare-module` preset. Production resources and credentials are managed in Cloudflare and must not be copied into local configuration or committed.
 
-Les images Open Graph sont générées à la demande. Configure un secret `NUXT_APP_SECRET` stable d’au moins 32 caractères dans le Worker avant de servir les pages (génération avec `npx nuxt-og-image generate-secret`). `wrangler secret put` déclenche un déploiement immédiat ; pour préparer le secret sans changer la version active, utilise `npx wrangler versions secret put NUXT_APP_SECRET --name puzzle-zimablue`, puis fais déployer la version validée par le flux de publication habituel. Sans ce secret, le rendu des images OG échouera en production.
+## Illustrations
+
+The app loads the selected image from Zimablue’s public image catalogue. The image catalogue and its artwork are maintained at [zimablue.cc](https://zimablue.cc).
