@@ -9,7 +9,7 @@
       tag="div"
       class="puzzle-board"
       ref="board"
-      :style="{ '--grid-size': puzzle.gridSize, '--image-url': `url('${puzzle.imageUrl}')` }"
+      :style="boardStyle"
       role="group"
       :aria-label="t('game.gridLabel', { size: puzzle.gridSize, title: displayedTitle })"
       @pointermove="movePiece"
@@ -43,7 +43,7 @@
         </div>
       </Transition>
     </Teleport>
-    <div class="board-tools">
+    <div class="board-tools" :style="boardStyle">
       <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
       <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
       <div class="board-tool-actions">
@@ -159,6 +159,8 @@ const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzl
 const { order, selected, moves, complete, started, newBoard, swap } = usePuzzleGame(props.puzzle)
 const imageLoaded = ref(false)
 const imageError = ref(false)
+const imageDimensions = ref({ width: 1, height: 1 })
+const viewportSize = ref({ width: 0, height: 0 })
 const board = ref<ComponentPublicInstance | null>(null)
 const completionHeading = ref<HTMLHeadingElement | null>(null)
 const completionOrigin = ref<{ x: number; y: number; scale: number } | null>(null)
@@ -178,13 +180,36 @@ const dragGhostStyle = computed(() => {
   }
 })
 
-const completionBoardStyle = computed(() => completionOrigin.value ? {
+const imageAspectRatio = computed(() => imageDimensions.value.width / imageDimensions.value.height)
+const boardMaxWidth = computed(() => {
+  const maxHeight = viewportSize.value.width <= 600 ? viewportSize.value.height * .58 : 590
+  return Math.min(590, maxHeight * imageAspectRatio.value)
+})
+const completionBoardWidth = computed(() => {
+  const { width, height } = viewportSize.value
+  if (!width || !height) return 420
+  const mobile = width <= 600
+  const maxWidth = Math.min(mobile ? width * .82 : width * .88, 640)
+  const maxHeight = height * (mobile ? .42 : .48)
+  return Math.min(maxWidth, maxHeight * imageAspectRatio.value)
+})
+const boardStyle = computed(() => ({
   '--grid-size': props.puzzle.gridSize,
   '--image-url': `url('${props.puzzle.imageUrl}')`,
+  '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
+  '--board-max-width': `${boardMaxWidth.value}px`,
+}))
+const completionBoardStyle = computed(() => completionOrigin.value ? {
+  ...boardStyle.value,
+  width: `${completionBoardWidth.value}px`,
   '--origin-x': `${completionOrigin.value.x}px`,
   '--origin-y': `${completionOrigin.value.y}px`,
   '--origin-scale': completionOrigin.value.scale,
 } : {})
+
+function updateViewportSize() {
+  viewportSize.value = { width: window.innerWidth, height: window.innerHeight }
+}
 
 watch(complete, async (isComplete) => {
   if (!import.meta.client) return
@@ -203,9 +228,7 @@ watch(complete, async (isComplete) => {
     const element = board.value?.$el
     if (element instanceof HTMLElement) {
       const rect = element.getBoundingClientRect()
-      const targetSize = window.innerWidth <= 600
-        ? Math.min(window.innerWidth * 0.82, window.innerHeight * 0.42, 420)
-        : Math.min(window.innerWidth * 0.88, window.innerHeight * 0.48, 640)
+      const targetSize = completionBoardWidth.value
       completionOrigin.value = {
         x: rect.left + rect.width / 2 - window.innerWidth / 2,
         y: rect.top + rect.height / 2 - (window.innerHeight / 2 - 48),
@@ -374,10 +397,13 @@ function pieceStyle(piece: number) {
 }
 
 onMounted(async () => {
+  updateViewportSize()
+  window.addEventListener('resize', updateViewportSize)
   const image = new Image()
   image.src = props.puzzle.imageUrl
   try {
     await image.decode()
+    imageDimensions.value = { width: image.naturalWidth, height: image.naturalHeight }
     imageLoaded.value = true
     if (!started.value) newBoard()
   } catch {
@@ -386,6 +412,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (import.meta.client) window.removeEventListener('resize', updateViewportSize)
   if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
   if (dragSettleTimer) clearTimeout(dragSettleTimer)
   if (import.meta.client) document.querySelector('.site-shell')?.removeAttribute('inert')
