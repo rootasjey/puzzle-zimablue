@@ -2,7 +2,7 @@
   <div class="site-shell">
     <header class="site-header page-wrap">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
-        <span>zima</span><span class="wordmark-blue">blue</span>
+        <BrandLogo />
       </NuxtLink>
       <nav :aria-label="t('app.navigation')">
         <NuxtLink class="nav-link" :to="$localePath({ name: 'index' })">{{ t('app.home') }}</NuxtLink>

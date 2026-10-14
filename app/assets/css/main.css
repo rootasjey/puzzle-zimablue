@@ -80,8 +80,7 @@ button { font: inherit; }
 .page-turn-enter-to { clip-path: inset(0); opacity: 1; transform: translateX(0); }
 .page-turn-leave-to { opacity: 0; transform: translateX(-.5rem); }
 .site-header { display: flex; align-items: center; justify-content: space-between; height: 82px; border-bottom: 2px solid var(--ink); }
-.wordmark { text-decoration: none; font: 900 1.32rem/1 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: -.08em; color: var(--ink); }
-.wordmark-blue { color: var(--blue); }
+.wordmark { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); }
 .site-header nav { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); }
 .theme-menu { position: relative; }
 .theme-toggle { display: grid; width: 2.35rem; height: 2.35rem; place-items: center; border: 2px solid var(--ink); background: var(--white); box-shadow: 2px 2px 0 var(--ink); color: var(--ink); font-size: 1.2rem; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease; }
@@ -387,7 +386,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
 }
 @media (max-width: 470px) {
   .site-header { gap: .55rem; padding-inline: 1.1rem; }
-  .wordmark { flex: none; font-size: 1.08rem; }
+  .wordmark { flex: none; }
   .nav-link { font-size: .7rem; }
   .site-header nav { flex: 1; justify-content: flex-end; gap: .5rem; min-width: 0; }
   .site-header nav > .nav-link:first-child { display: none; }
