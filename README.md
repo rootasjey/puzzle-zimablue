@@ -56,3 +56,7 @@ The production build uses Nuxt’s `cloudflare-module` preset. Production resour
 ## Illustrations
 
 The app loads the selected image from Zimablue’s public image catalogue. The image catalogue and its artwork are maintained at [zimablue.cc](https://zimablue.cc).
+
+## License
+
+The project’s source code is available under the [MIT License](LICENSE). Zimablue illustrations, the Zimablue name and logo, and screenshots in this repository are excluded from that license and remain all rights reserved by their respective owners.
