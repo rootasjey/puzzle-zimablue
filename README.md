@@ -4,7 +4,7 @@
 
 [Play Puzzle Zimablue](https://puzzle.zimablue.cc) · [Français](README.fr.md)
 
-![Puzzle Zimablue home page](docs/screenshots/home.png)
+![Puzzle Zimablue home page in English](docs/screenshots/home-en.png)
 
 *The home page, captured on 15 October 2026.*
 

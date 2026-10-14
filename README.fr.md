@@ -4,7 +4,7 @@
 
 [Jouer à Puzzle Zimablue](https://puzzle.zimablue.cc) · [English](README.md)
 
-![Page d’accueil de Puzzle Zimablue](docs/screenshots/home.png)
+![Page d’accueil de Puzzle Zimablue en français](docs/screenshots/home-fr.png)
 
 *La page d’accueil, capturée le 15 octobre 2026.*
 
