@@ -79,6 +79,7 @@ const nextLanguageLabel = computed(() => currentLanguage.value === 'fr' ? 'Engli
 
 useHead({
   htmlAttrs: { 'data-theme': theme },
+  meta: [{ name: 'msvalidate.01', content: '6D24C120FDA31CA11DDE69DCCFF499A7' }],
 })
 useSeoMeta({ ogSiteName: 'Puzzle Zimablue' })
 
