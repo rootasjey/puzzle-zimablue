@@ -1,10 +1,12 @@
 <template>
   <main class="page-wrap home-page">
     <section v-if="featured" class="daily-feature">
-      <div class="feature-art">
-        <img :src="featured.imageUrl" :alt="t('home.illustrationAlt', { name: featured.imageName })" fetchpriority="high">
-        <span class="art-index">{{ formatPuzzleDate(featured.date, { day: 'numeric', month: 'numeric' }) }}</span>
-      </div>
+      <NuxtLink class="feature-art-link" :to="puzzlePath(featured.date)" :aria-label="t('home.playToday')">
+        <div class="feature-art">
+          <img :src="featured.imageUrl" :alt="t('home.illustrationAlt', { name: featured.imageName })" fetchpriority="high">
+          <span class="art-index">{{ formatPuzzleDate(featured.date, { day: 'numeric', month: 'numeric' }) }}</span>
+        </div>
+      </NuxtLink>
       <div class="feature-copy">
         <p class="section-kicker">{{ t('home.kicker') }}</p>
         <h1>{{ t('home.titleFirst') }}<br>{{ t('home.titleJoin') }} <em>{{ t('home.titleColor') }}</em></h1>
