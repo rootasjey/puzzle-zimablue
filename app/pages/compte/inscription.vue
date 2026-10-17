@@ -28,7 +28,7 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const dateLocale = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const puzzleDate = computed(() => typeof route.query.puzzleDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(route.query.puzzleDate) ? route.query.puzzleDate : '')
-const puzzleMoves = computed(() => typeof route.query.moves === 'string' && /^\d{1,6}$/.test(route.query.moves) ? Number(route.query.moves) : null)
+const puzzleAttempt = computed(() => typeof route.query.attempt === 'string' && route.query.attempt.length <= 5_005 ? route.query.attempt : '')
 const email = ref('')
 const password = ref('')
 const error = ref('')
@@ -40,7 +40,7 @@ async function register() {
   try {
     await $fetch('/api/auth/register', {
       method: 'POST',
-      body: { email: email.value, password: password.value, locale: $getLocale(), ...(puzzleDate.value && puzzleMoves.value !== null ? { puzzleDate: puzzleDate.value, moves: puzzleMoves.value } : {}) },
+      body: { email: email.value, password: password.value, locale: $getLocale(), ...(puzzleDate.value && puzzleAttempt.value ? { puzzleDate: puzzleDate.value, attempt: puzzleAttempt.value } : {}) },
     })
     sent.value = true
   } catch (cause: any) {

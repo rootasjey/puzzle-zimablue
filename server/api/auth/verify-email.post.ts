@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
   const result = await database.batch([
     database.prepare('UPDATE users SET email_verified_at = COALESCE(email_verified_at, ?), updated_at = ? WHERE id = ? AND disabled_at IS NULL')
       .bind(now, now, account.user_id),
-    database.prepare(`INSERT OR IGNORE INTO puzzle_completions (user_id, puzzle_date, moves, completed_at)
-      SELECT user_id, pending_puzzle_date, pending_moves, ? FROM email_verification_tokens
+    database.prepare(`INSERT OR IGNORE INTO puzzle_completions (user_id, puzzle_date, moves, completed_at, score_verified)
+      SELECT user_id, pending_puzzle_date, pending_moves, ?, pending_score_verified FROM email_verification_tokens
       WHERE token_hash = ? AND user_id = ? AND pending_puzzle_date IS NOT NULL AND pending_moves IS NOT NULL AND used_at IS NULL AND expires_at > ?`)
       .bind(now, tokenHash, account.user_id, now),
     database.prepare('UPDATE email_verification_tokens SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?')

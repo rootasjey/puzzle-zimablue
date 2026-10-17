@@ -6,8 +6,8 @@ interface CompletionRow { puzzle_date: string; moves: number; completed_at: stri
 export default defineEventHandler(async (event) => {
   const user = await requireSignedInUser(event)
   const database = getDatabase(event)
-  const activeUser = await database.prepare('SELECT id FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
-    .bind(user.id).first<{ id: string }>()
+  const activeUser = await database.prepare('SELECT id, public_name FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
+    .bind(user.id).first<{ id: string; public_name: string | null }>()
   if (!activeUser) {
     await clearUserSession(event)
     throw createError({ statusCode: 403, statusMessage: 'Session invalide.' })
@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
   }
   const lowestMoves = completions.length ? Math.min(...completions.map(row => row.moves)) : null
   return {
+    publicName: activeUser.public_name ?? '',
     completedCount: completions.length,
     currentStreak: streak,
     bestMoves: lowestMoves,

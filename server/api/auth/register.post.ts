@@ -1,11 +1,12 @@
 import { getDatabase, getWorkerBindings } from '../../utils/cloudflare'
 import { consumeRateLimit, createOpaqueToken, normalizeEmail, sha256Hex } from '../../utils/auth'
+import { verifyPuzzleAttempt } from '#shared/utils/puzzle-attempt'
 
 export default defineEventHandler(async (event) => {
   if (!useRuntimeConfig(event).public.registrationEnabled) {
     throw createError({ statusCode: 404, statusMessage: 'Inscription indisponible.' })
   }
-  const body = await readBody<{ email?: unknown; password?: unknown; puzzleDate?: unknown; moves?: unknown; locale?: unknown }>(event)
+  const body = await readBody<{ email?: unknown; password?: unknown; puzzleDate?: unknown; attempt?: unknown; moves?: unknown; locale?: unknown }>(event)
   if (typeof body?.email !== 'string' || body.email.length > 254 || typeof body.password !== 'string' || body.password.length < 12 || body.password.length > 128) {
     throw createError({ statusCode: 400, statusMessage: 'Adresse ou mot de passe invalide.' })
   }
@@ -20,19 +21,24 @@ export default defineEventHandler(async (event) => {
 
   let puzzleDate: string | null = null
   let moves: number | null = null
-  if (body.puzzleDate !== undefined || body.moves !== undefined) {
-    if (typeof body.puzzleDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(body.puzzleDate) || !Number.isInteger(body.moves) || Number(body.moves) < 0 || Number(body.moves) > 100_000) {
+  let scoreVerified = 0
+  if (body.puzzleDate !== undefined || body.attempt !== undefined || body.moves !== undefined) {
+    if (typeof body.puzzleDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(body.puzzleDate)) {
       throw createError({ statusCode: 400, statusMessage: 'Résultat de puzzle invalide.' })
     }
     puzzleDate = body.puzzleDate
-    moves = Number(body.moves)
   }
 
   const database = getDatabase(event)
   await database.prepare('DELETE FROM email_verification_tokens WHERE used_at IS NOT NULL OR expires_at <= ?').bind(new Date().toISOString()).run()
   if (puzzleDate) {
-    const puzzle = await database.prepare("SELECT date FROM puzzles WHERE date = ? AND status = 'published'").bind(puzzleDate).first()
+    const puzzle = await database.prepare("SELECT grid_size FROM puzzles WHERE date = ? AND status = 'published'")
+      .bind(puzzleDate)
+      .first<{ grid_size: number }>()
     if (!puzzle) throw createError({ statusCode: 400, statusMessage: 'Puzzle introuvable.' })
+    moves = verifyPuzzleAttempt(puzzleDate, puzzle.grid_size, body.attempt)
+    if (moves === null) throw createError({ statusCode: 400, statusMessage: 'Résultat de puzzle invalide.' })
+    scoreVerified = 1
   }
   const existing = await database.prepare('SELECT email_verified_at FROM users WHERE email = ?').bind(email).first<{ email_verified_at: string | null }>()
   if (existing) {
@@ -49,8 +55,8 @@ export default defineEventHandler(async (event) => {
   const result = await database.batch([
     database.prepare("INSERT INTO users (id, email, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, 'user', ?, ?)")
       .bind(userId, email, passwordHash, nowIso, nowIso),
-    database.prepare('INSERT INTO email_verification_tokens (id, user_id, token_hash, expires_at, pending_puzzle_date, pending_moves, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .bind(crypto.randomUUID(), userId, await sha256Hex(verificationToken), expiresAt, puzzleDate, moves, nowIso),
+    database.prepare('INSERT INTO email_verification_tokens (id, user_id, token_hash, expires_at, pending_puzzle_date, pending_moves, pending_score_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(crypto.randomUUID(), userId, await sha256Hex(verificationToken), expiresAt, puzzleDate, moves, scoreVerified, nowIso),
   ])
   if (result[0]?.meta.changes !== 1 || result[1]?.meta.changes !== 1) {
     throw createError({ statusCode: 409, statusMessage: 'Impossible de créer le compte.' })

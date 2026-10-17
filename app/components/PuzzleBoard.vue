@@ -125,6 +125,8 @@
               <NuxtLink class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
                 {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
               </NuxtLink>
+              <span v-if="completionSavePending" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
+              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard' })">{{ t('leaderboard.link') }}</NuxtLink>
             </div>
             <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
             <NuxtLink v-else-if="!loggedIn && progressEnabled" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
@@ -140,6 +142,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import type { DailyPuzzle } from '#shared/types/puzzle'
+import { encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
 const props = withDefaults(defineProps<{ puzzle: DailyPuzzle; progressEnabled?: boolean }>(), { progressEnabled: true })
@@ -150,13 +153,15 @@ const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
 const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
 const completionSaveError = ref(false)
+const completionSavePending = ref(false)
 const shareFeedback = ref('')
-const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: { puzzleDate: props.puzzle.date, moves: String(moves.value) } }))
-const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: { puzzleDate: props.puzzle.date, moves: String(moves.value) } }))
+const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } }))
+const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } }))
 const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
 const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
 const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
-const { order, selected, moves, complete, started, newBoard, swap } = usePuzzleGame(props.puzzle)
+const { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, swap } = usePuzzleGame(props.puzzle)
+const attemptToken = computed(() => encodePuzzleAttempt(attemptGeneration.value, moveHistory.value))
 const imageLoaded = ref(false)
 const imageError = ref(false)
 const imageDimensions = ref({ width: 1, height: 1 })
@@ -218,10 +223,13 @@ watch(complete, async (isComplete) => {
   if (isComplete) {
     playSound('complete')
     if (loggedIn.value && props.progressEnabled) {
+      completionSavePending.value = true
       try {
-        await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, moves: moves.value } })
+        await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } })
       } catch {
         completionSaveError.value = true
+      } finally {
+        completionSavePending.value = false
       }
     }
     await nextTick()

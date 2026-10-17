@@ -1,28 +1,24 @@
 import type { DailyPuzzle } from '#shared/types/puzzle'
+import { createPuzzleOrder, type PuzzleMove } from '#shared/utils/puzzle-attempt'
 
 export function usePuzzleGame(puzzle: DailyPuzzle) {
   const order = ref<number[]>([])
   const selected = ref<number | null>(null)
   const moves = ref(0)
+  const moveHistory = ref<PuzzleMove[]>([])
+  const attemptGeneration = ref(0)
   const started = ref(false)
   let boardGeneration = 0
 
   const complete = computed(() => order.value.length > 0 && order.value.every((piece, slot) => piece === slot))
 
   function newBoard() {
-    const pieces = Array.from({ length: puzzle.gridSize ** 2 }, (_, index) => index)
-    let seed = [...puzzle.date].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 7)
-    seed = (seed + Math.imul(boardGeneration++, 0x9e3779b9)) >>> 0
-    for (let i = pieces.length - 1; i > 0; i--) {
-      seed = (seed * 1664525 + 1013904223) >>> 0
-      const j = seed % (i + 1)
-      ;[pieces[i], pieces[j]] = [pieces[j]!, pieces[i]!]
-    }
-    if (pieces.every((piece, index) => piece === index)) [pieces[0], pieces[1]] = [pieces[1]!, pieces[0]!]
-    if (order.value.length && pieces.every((piece, index) => piece === order.value[index])) [pieces[0], pieces[1]] = [pieces[1]!, pieces[0]!]
-    order.value = pieces
+    const generation = boardGeneration++
+    attemptGeneration.value = generation
+    order.value = createPuzzleOrder(puzzle.date, puzzle.gridSize, generation)
     selected.value = null
     moves.value = 0
+    moveHistory.value = []
     started.value = true
   }
 
@@ -45,9 +41,10 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
     const next = [...order.value]
     ;[next[first], next[second]] = [next[second]!, next[first]!]
     order.value = next
+    moveHistory.value.push([first, second])
     moves.value++
     selected.value = null
   }
 
-  return { order, selected, moves, complete, started, newBoard, choose, swap }
+  return { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, choose, swap }
 }

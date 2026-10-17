@@ -1,9 +1,15 @@
 {
+  "pages": {
+    "leaderboard": {
+      "title": "Classement du jour"
+    }
+  },
   "app": {
     "homeLabel": "Puzzle Zimablue, accueil",
     "navigation": "Navigation principale",
     "home": "Le puzzle du jour",
     "archive": "Archives",
+    "leaderboard": "Classement",
     "account": "Mon espace",
     "signIn": "Connexion",
     "admin": "Admin",
@@ -44,6 +50,21 @@
     "description": "Les images restent là. Choisis un jour et rejoue-le à ton rythme.",
     "replay": "{count} pièces · rejouer"
   },
+  "leaderboard": {
+    "seoTitle": "Classement du jour",
+    "back": "← Accueil",
+    "kicker": "Le puzzle du jour",
+    "title": "Les meilleurs coups.",
+    "description": "Le classement du puzzle du jour, selon le nombre d’échanges. Les égalités partagent le même rang.",
+    "link": "Voir le classement du jour",
+    "rank": "Rang",
+    "player": "Joueur",
+    "score": "Coups",
+    "empty": "Pas encore de score ici. Termine le puzzle et choisis un nom public dans ton espace pour apparaître au classement.",
+    "noPuzzle": "Le puzzle du jour n’est pas encore publié.",
+    "profileNote": "Choisis un nom public dans ton espace pour apparaître ici. Il ne sera visible qu’avec tes scores du jour.",
+    "manageProfile": "Gérer mon nom public"
+  },
   "play": {
     "back": "← Revenir aux jours précédents",
     "viewIllustration": "Voir l’illustration",
@@ -81,6 +102,7 @@
     "tomorrow": "Bien joué. À demain pour une nouvelle image.",
     "saveProgress": "Garder ma progression",
     "alreadyHaveAccount": "J’ai déjà un compte",
+    "savingScore": "Vérification du score…",
     "saveProgressError": "Impossible d’enregistrer ce résultat. Réessaie depuis ton espace.",
     "previewNoProgress": "Mode aperçu : cette partie n’enregistre aucune progression."
   },
@@ -216,6 +238,13 @@
     "puzzlesCompleted": "puzzles terminés",
     "dayStreak": "jours de suite",
     "bestMoves": "meilleur nombre de coups",
+    "publicNameTitle": "Nom public",
+    "publicNameHelp": "Choisis le nom qui apparaîtra dans le classement du jour. Laisse le champ vide pour ne pas y participer.",
+    "publicNameLabel": "Nom affiché",
+    "savePublicName": "Enregistrer le nom",
+    "savingPublicName": "Enregistrement…",
+    "publicNameSaved": "Nom public mis à jour.",
+    "publicNameError": "Le nom public n’a pas pu être enregistré.",
     "history": "Puzzles terminés",
     "empty": "Tes puzzles terminés apparaîtront ici."
   }

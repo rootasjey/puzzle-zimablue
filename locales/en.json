@@ -1,9 +1,15 @@
 {
+  "pages": {
+    "leaderboard": {
+      "title": "Daily leaderboard"
+    }
+  },
   "app": {
     "homeLabel": "Puzzle Zimablue home",
     "navigation": "Main navigation",
     "home": "Today’s puzzle",
     "archive": "Archive",
+    "leaderboard": "Leaderboard",
     "account": "My account",
     "signIn": "Sign in",
     "admin": "Admin",
@@ -44,6 +50,21 @@
     "description": "The images are still here. Pick a day and play again at your own pace.",
     "replay": "{count} pieces · play again"
   },
+  "leaderboard": {
+    "seoTitle": "Daily leaderboard",
+    "back": "← Home",
+    "kicker": "Today’s puzzle",
+    "title": "Fewer moves, higher place.",
+    "description": "Today’s puzzle rankings, sorted by swaps. Players with the same score share a place.",
+    "link": "See today’s leaderboard",
+    "rank": "Place",
+    "player": "Player",
+    "score": "Moves",
+    "empty": "No scores yet. Complete the puzzle and choose a public name in your account to appear here.",
+    "noPuzzle": "Today’s puzzle has not been published yet.",
+    "profileNote": "Choose a public name in your account to appear here. It is only shown alongside your daily scores.",
+    "manageProfile": "Manage my public name"
+  },
   "play": {
     "back": "← Back to previous days",
     "viewIllustration": "View illustration",
@@ -81,6 +102,7 @@
     "tomorrow": "Well done. Come back tomorrow for a new image.",
     "saveProgress": "Save my progress",
     "alreadyHaveAccount": "I already have an account",
+    "savingScore": "Checking your score…",
     "saveProgressError": "Could not save this result. Try again from your account.",
     "previewNoProgress": "Preview mode: this playthrough will not save any progress."
   },
@@ -216,6 +238,13 @@
     "puzzlesCompleted": "puzzles completed",
     "dayStreak": "day streak",
     "bestMoves": "best move count",
+    "publicNameTitle": "Public name",
+    "publicNameHelp": "Choose the name shown on the daily leaderboard. Leave it blank to stay off the list.",
+    "publicNameLabel": "Display name",
+    "savePublicName": "Save name",
+    "savingPublicName": "Saving…",
+    "publicNameSaved": "Public name updated.",
+    "publicNameError": "Could not save your public name.",
     "history": "Completed puzzles",
     "empty": "Your completed puzzles will appear here."
   }

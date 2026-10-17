@@ -17,6 +17,16 @@
         <article class="account-stat"><strong>{{ stats.currentStreak }}</strong><span>{{ t('account.dayStreak') }}</span></article>
         <article class="account-stat"><strong>{{ stats.bestMoves ?? '—' }}</strong><span>{{ t('account.bestMoves') }}</span></article>
       </div>
+      <section v-if="stats" class="account-public-profile" aria-labelledby="public-name-title">
+        <h2 id="public-name-title">{{ t('account.publicNameTitle') }}</h2>
+        <p>{{ t('account.publicNameHelp') }}</p>
+        <form class="account-public-form" @submit.prevent="savePublicName">
+          <label>{{ t('account.publicNameLabel') }}<input v-model="publicName" type="text" maxlength="24" autocomplete="nickname"></label>
+          <p v-if="profileError" class="form-error" role="alert">{{ profileError }}</p>
+          <p v-if="profileSaved" class="auth-confirmation" role="status">{{ profileSaved }}</p>
+          <button class="admin-primary" type="submit" :disabled="profileBusy">{{ profileBusy ? t('account.savingPublicName') : t('account.savePublicName') }}</button>
+        </form>
+      </section>
       <section class="account-history">
         <h2>{{ t('account.history') }}</h2>
         <p v-if="stats?.completions.length === 0" class="auth-intro">{{ t('account.empty') }}</p>
@@ -45,7 +55,7 @@
 
 <script setup lang="ts">
 import { formatPuzzleDate } from '#shared/types/puzzle'
-interface AccountStats { completedCount: number; currentStreak: number; bestMoves: number | null; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
+interface AccountStats { publicName: string; completedCount: number; currentStreak: number; bestMoves: number | null; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
 definePageMeta({ name: 'account' })
 const { $defineI18nRoute } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account' } })
@@ -56,6 +66,26 @@ const t = (key: string, params?: Record<string, string | number>): string => Str
 const dateLocale = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const { data: stats, error } = await useFetch<AccountStats>('/api/account/stats', { immediate: loggedIn.value })
 const busy = ref(false)
+const profileBusy = ref(false)
+const publicName = ref('')
+const profileError = ref('')
+const profileSaved = ref('')
+watch(() => stats.value?.publicName, value => { publicName.value = value ?? '' }, { immediate: true })
+async function savePublicName() {
+  profileBusy.value = true
+  profileError.value = ''
+  profileSaved.value = ''
+  try {
+    const result = await $fetch<{ publicName: string }>('/api/account/profile', { method: 'POST', body: { publicName: publicName.value } })
+    publicName.value = result.publicName
+    if (stats.value) stats.value.publicName = result.publicName
+    profileSaved.value = t('account.publicNameSaved')
+  } catch (cause: any) {
+    profileError.value = cause?.data?.statusMessage || t('account.publicNameError')
+  } finally {
+    profileBusy.value = false
+  }
+}
 async function logout() {
   busy.value = true
   await $fetch('/api/auth/logout', { method: 'POST' })

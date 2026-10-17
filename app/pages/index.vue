@@ -13,6 +13,7 @@
         <p class="feature-description">{{ t('home.description') }}</p>
         <div class="today-line">{{ formatPuzzleDate(featured.date) }} <span class="line-divider">·</span> {{ t('home.pieces', { count: featured.gridSize ** 2 }) }}</div>
         <NuxtLink class="play-link" :to="puzzlePath(featured.date)">{{ t('home.playToday') }} <span aria-hidden="true">↗</span></NuxtLink>
+        <NuxtLink class="leaderboard-home-link" :to="$localePath({ name: 'leaderboard' })">{{ t('leaderboard.link') }}</NuxtLink>
       </div>
     </section>
     <p v-else class="empty-state">{{ t('home.empty') }}</p>
