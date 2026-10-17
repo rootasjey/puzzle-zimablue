@@ -2,6 +2,12 @@
   "pages": {
     "leaderboard": {
       "title": "Classement du jour"
+    },
+    "about": {
+      "title": "À propos"
+    },
+    "admin-metrics": {
+      "title": "Métriques admin"
     }
   },
   "app": {
@@ -10,6 +16,7 @@
     "home": "Le puzzle du jour",
     "archive": "Archives",
     "leaderboard": "Classement",
+    "about": "À propos",
     "account": "Mon espace",
     "signIn": "Connexion",
     "admin": "Admin",
@@ -65,6 +72,26 @@
     "profileNote": "Choisis un nom public dans ton espace pour apparaître ici. Il ne sera visible qu’avec tes scores du jour.",
     "manageProfile": "Gérer mon nom public"
   },
+  "about": {
+    "seoTitle": "À propos de Puzzle Zimablue",
+    "description": "L’histoire de Puzzle Zimablue, un jeu quotidien imaginé par un développeur français autour des illustrations de Zimablue.",
+    "back": "← Accueil",
+    "kicker": "L’histoire du jeu",
+    "title": "D’abord un cadeau. Puis un jeu.",
+    "intro": "Je suis un développeur français qui aime créer des choses.",
+    "originTitle": "Une idée recyclée",
+    "origin": "Au départ, Puzzle Zimablue était un cadeau d’anniversaire pour une bonne amie. Elle n’a pas vraiment accroché ; j’ai donc recyclé l’idée en ce petit jeu quotidien, autour des illustrations publiées sur zimablue.cc.",
+    "thanks": "Merci de jouer ! J’espère que tu prendras plaisir à revenir pour le puzzle du jour.",
+    "feedbackTitle": "Une remarque ?",
+    "feedback": "Tu peux ouvrir une issue sur GitHub ou m’envoyer un courriel.",
+    "openIssue": "Ouvrir une issue GitHub",
+    "email": "Écrire à puzzle@zimablue.cc",
+    "rightsTitle": "Code et illustrations",
+    "codeLicense": "Le code source est publié sous licence MIT.",
+    "readLicense": "Lire la licence",
+    "artRights": "Les illustrations et le logo Zimablue restent tous droits réservés et ne sont pas couverts par la licence du code.",
+    "socialsTitle": "Me retrouver ailleurs"
+  },
   "play": {
     "back": "← Revenir aux jours précédents",
     "viewIllustration": "Voir l’illustration",
@@ -115,6 +142,27 @@
     "back": "← Retour au jeu",
     "kicker": "Atelier des puzzles",
     "calendarTitle": "Calendrier éditorial",
+    "metricsLink": "Métriques",
+    "metricsTitle": "Activité du jeu",
+    "metricsSeoTitle": "Métriques du jeu",
+    "metricsDescription": "Activité enregistrée au cours des {count} derniers jours.",
+    "metricsSummary": "Résumé de l’activité sur la période",
+    "metricsActivePlayers": "Joueurs actifs",
+    "metricsCompleted": "Puzzles terminés",
+    "metricsAverage": "Coups moyens vérifiés",
+    "metricsDailyTitle": "Complétions par jour",
+    "metricsCompletions": "Parties terminées",
+    "metricsChartAlt": "Complétions enregistrées sur {days} jours : {count} au total.",
+    "metricsBarTitle": "{date} : {count} parties terminées",
+    "metricsDailyScores": "Détail quotidien",
+    "metricsVerifiedOnly": "Scores vérifiés uniquement",
+    "metricsDataNote": "Les joueurs sont comptés à partir des parties enregistrées par des comptes vérifiés. Les visites et les parties sans compte ne sont pas suivies. La moyenne porte uniquement sur les scores vérifiés.",
+    "metricsDate": "Date",
+    "metricsCompletedShort": "Parties",
+    "metricsPlayersShort": "Joueurs",
+    "metricsAverageShort": "Moy. / meilleur",
+    "metricsEmpty": "Aucune partie enregistrée pendant cette période.",
+    "metricsError": "Les métriques n’ont pas pu être chargées.",
     "fullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "newPuzzle": "＋ Nouveau puzzle",

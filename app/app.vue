@@ -45,6 +45,7 @@
     </header>
     <NuxtPage :page-key="route => route.fullPath" />
     <footer class="site-footer page-wrap">
+      <NuxtLink class="site-footer-about" :to="$localePath({ name: 'about' })">{{ t('app.about') }}</NuxtLink>
       <NuxtLink class="site-footer-leaderboard" :to="$localePath({ name: 'leaderboard' })">{{ t('app.leaderboard') }}</NuxtLink>
       <span>{{ t('app.footerLine') }} <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
       <span>{{ t('app.footerTagline') }}</span>

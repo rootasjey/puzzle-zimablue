@@ -34,6 +34,8 @@ export default defineNuxtConfig({
       { loc: '/en', alternatives: [{ hreflang: 'fr-FR', href: 'https://puzzle.zimablue.cc/' }, { hreflang: 'en-US', href: 'https://puzzle.zimablue.cc/en' }, { hreflang: 'x-default', href: 'https://puzzle.zimablue.cc/' }] },
       { loc: '/archive', alternatives: [{ hreflang: 'fr-FR', href: 'https://puzzle.zimablue.cc/archive' }, { hreflang: 'en-US', href: 'https://puzzle.zimablue.cc/en/archive' }, { hreflang: 'x-default', href: 'https://puzzle.zimablue.cc/archive' }] },
       { loc: '/en/archive', alternatives: [{ hreflang: 'fr-FR', href: 'https://puzzle.zimablue.cc/archive' }, { hreflang: 'en-US', href: 'https://puzzle.zimablue.cc/en/archive' }, { hreflang: 'x-default', href: 'https://puzzle.zimablue.cc/archive' }] },
+      { loc: '/a-propos', alternatives: [{ hreflang: 'fr-FR', href: 'https://puzzle.zimablue.cc/a-propos' }, { hreflang: 'en-US', href: 'https://puzzle.zimablue.cc/en/about' }, { hreflang: 'x-default', href: 'https://puzzle.zimablue.cc/a-propos' }] },
+      { loc: '/en/about', alternatives: [{ hreflang: 'fr-FR', href: 'https://puzzle.zimablue.cc/a-propos' }, { hreflang: 'en-US', href: 'https://puzzle.zimablue.cc/en/about' }, { hreflang: 'x-default', href: 'https://puzzle.zimablue.cc/a-propos' }] },
     ],
   },
   ogImage: {

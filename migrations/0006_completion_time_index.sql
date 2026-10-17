@@ -1,0 +1,1 @@
+CREATE INDEX puzzle_completions_completed_at_idx ON puzzle_completions(completed_at);

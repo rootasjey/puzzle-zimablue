@@ -6,6 +6,7 @@
         <h1>{{ t('admin.calendarTitle') }}</h1>
       </div>
       <div class="admin-actions">
+        <NuxtLink class="admin-secondary admin-metrics-link" :to="$localePath({ name: 'admin-metrics' })">{{ t('admin.metricsLink') }}</NuxtLink>
         <button class="admin-secondary" @click="toggleFullscreen">{{ fullscreen ? t('admin.exitFullscreen') : t('admin.fullscreen') }}</button>
         <button class="admin-primary admin-add" @click="openNew()">{{ t('admin.newPuzzle') }}</button>
       </div>
