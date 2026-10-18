@@ -77,21 +77,27 @@
     <Teleport to="body">
       <Transition name="completion">
         <section v-if="complete && completionOrigin" class="completion-screen" role="region" aria-labelledby="completion-title">
-          <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-            <button class="sound-toggle completion-sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M11 5 6 9H3v6h3l5 4z" />
-                <template v-if="soundEnabled">
-                  <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-                  <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-                </template>
-                <template v-else>
-                  <path d="m16 9 5 6m0-6-5 6" />
-                </template>
-              </svg>
-            </button>
-            <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
-          </NTooltip>
+          <div class="completion-top-actions">
+            <NuxtLink class="completion-home-link" :to="$localePath({ name: 'index' })">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7" /><path d="M5.5 9v12h13V9M9.5 21v-7h5v7" /></svg>
+              <span>{{ t('game.home') }}</span>
+            </NuxtLink>
+            <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+              <button class="sound-toggle completion-sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5 6 9H3v6h3l5 4z" />
+                  <template v-if="soundEnabled">
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+                  </template>
+                  <template v-else>
+                    <path d="m16 9 5 6m0-6-5 6" />
+                  </template>
+                </svg>
+              </button>
+              <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
+            </NTooltip>
+          </div>
           <div class="completion-content">
             <div class="completion-board" :style="completionBoardStyle" aria-hidden="true">
               <div v-for="piece in order" :key="piece" class="completion-piece" :style="pieceStyle(piece)" />
