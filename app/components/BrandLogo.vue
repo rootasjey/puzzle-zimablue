@@ -1,14 +1,17 @@
 <template>
   <span class="brand-logo" aria-hidden="true">
     <svg class="brand-logo-mark" viewBox="0 0 40 40" fill="none">
-      <path d="m7 5 28-.7.5 28.2-28 .8Z" fill="#18224E" />
-      <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" fill="#F7F5EE" />
-      <path d="m3.5 3.5 28-.7.5 28.1-27.8.8Z" stroke="#18224E" stroke-width="1.8" />
-      <path class="brand-logo-cell brand-logo-cell--top-left" d="m6.6 6.3 10.5-.2.1 9.5-10.5.2Z" fill="#1E5AA8" />
-      <path class="brand-logo-cell brand-logo-cell--top-right" d="m18.4 6 10-.2.1 9.5-10 .2Z" fill="#3986FF" />
-      <path class="brand-logo-cell brand-logo-cell--bottom-left" d="m6.7 17.1 10.5-.3.1 10.9-10.5.3Z" fill="#77B8F7" />
-      <path class="brand-logo-cell brand-logo-cell--bottom-right" d="m18.4 16.8 10.2-.3.1 10.9-10.2.3Z" fill="#C5DFFF" />
-      <path d="m6.6 15.8 21.8-.5M17.2 6.1l.2 21.9" stroke="#F7F5EE" stroke-width="1.6" />
+      <rect x="10" y="7" width="21" height="27" rx="3.5" transform="rotate(13 20.5 20.5)" fill="#18224E" />
+      <g class="brand-logo-card brand-logo-card--right">
+        <rect x="14" y="4" width="21" height="27" rx="3.5" transform="rotate(13 24.5 17.5)" fill="#FFDC4B" stroke="#18224E" stroke-width="1.6" />
+      </g>
+      <g class="brand-logo-card brand-logo-card--left">
+        <rect x="3" y="6" width="21" height="27" rx="3.5" transform="rotate(-14 13.5 19.5)" fill="#65D0F4" stroke="#18224E" stroke-width="1.6" />
+      </g>
+      <g class="brand-logo-card brand-logo-card--front">
+        <rect x="8" y="8" width="21" height="27" rx="3.5" fill="#3986FF" stroke="#18224E" stroke-width="1.8" />
+        <path d="M11 11.5h7" stroke="#F7F5EE" stroke-width="2" stroke-linecap="round" />
+      </g>
     </svg>
     <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
   </span>
@@ -33,20 +36,37 @@
   overflow: visible;
 }
 
-.brand-logo-cell {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 180ms cubic-bezier(.2,.8,.2,1);
-}
+@media (prefers-reduced-motion: no-preference) {
+  .brand-logo-card {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 190ms cubic-bezier(.2,.8,.2,1);
+  }
 
-.brand-logo:hover .brand-logo-cell--top-left,
-:global(.wordmark:focus-visible) .brand-logo-cell--top-left { transform: translate(-2px, -2px) scale(1.4); }
-.brand-logo:hover .brand-logo-cell--top-right,
-:global(.wordmark:focus-visible) .brand-logo-cell--top-right { transform: translate(2px, -2px) scale(1.4); }
-.brand-logo:hover .brand-logo-cell--bottom-left,
-:global(.wordmark:focus-visible) .brand-logo-cell--bottom-left { transform: translate(-2px, 2px) scale(1.4); }
-.brand-logo:hover .brand-logo-cell--bottom-right,
-:global(.wordmark:focus-visible) .brand-logo-cell--bottom-right { transform: translate(2px, 2px) scale(1.4); }
+  .wordmark-blue {
+    transition: color 190ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .brand-logo:hover .brand-logo-card--left,
+  :global(.wordmark:focus-visible) .brand-logo-card--left {
+    transform: translate(-2px, -1px) rotate(-2deg);
+  }
+
+  .brand-logo:hover .brand-logo-card--right,
+  :global(.wordmark:focus-visible) .brand-logo-card--right {
+    transform: translate(2px, -1px) rotate(2deg);
+  }
+
+  .brand-logo:hover .brand-logo-card--front,
+  :global(.wordmark:focus-visible) .brand-logo-card--front {
+    transform: translateY(-1px);
+  }
+
+  .brand-logo:hover .wordmark-blue,
+  :global(.wordmark:focus-visible) .wordmark-blue {
+    color: #65D0F4;
+  }
+}
 
 .brand-logo-name { display: inline-flex; }
 .wordmark-blue { color: var(--blue); }
@@ -56,7 +76,4 @@
   .brand-logo-mark { width: 1.8rem; height: 1.8rem; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .brand-logo-cell { transition: none; }
-}
 </style>
