@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.5] - 2026-10-18
+
+### Changed
+
+- Increased the spacing above account navigation and moved its component-specific styles into its Vue component.
+
 ## [0.6.4] - 2026-10-18
 
 ### Changed

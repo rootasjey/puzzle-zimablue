@@ -46,13 +46,7 @@
         </div>
       </nav>
     </header>
-    <header v-if="showAccountNavigation" class="account-section-header">
-      <NuxtLink :to="$localePath({ name: 'index' })" class="auth-back">{{ t('auth.back') }}</NuxtLink>
-      <nav class="account-section-nav" :aria-label="t('account.sectionNavigation')">
-        <NuxtLink :to="$localePath({ name: 'account' })" :aria-current="isAccountRoute('account') ? 'page' : undefined">{{ t('account.progressTab') }}</NuxtLink>
-        <NuxtLink :to="$localePath({ name: 'account-settings' })" :aria-current="isAccountRoute('account-settings') ? 'page' : undefined">{{ t('settings.title') }}</NuxtLink>
-      </nav>
-    </header>
+    <AccountSectionNavigation v-if="showAccountNavigation" />
     <NuxtPage :page-key="route => route.fullPath" />
     <footer class="site-footer page-wrap">
       <NuxtLink class="site-footer-about" :to="$localePath({ name: 'about' })">{{ t('app.about') }}</NuxtLink>
@@ -139,7 +133,4 @@ function switchLanguage() {
   $switchLocale(currentLanguage.value === 'fr' ? 'en' : 'fr')
 }
 
-function isAccountRoute(name: 'account' | 'account-settings') {
-  return route.path === $localePath({ name })
-}
 </script>
