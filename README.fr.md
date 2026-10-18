@@ -22,6 +22,10 @@
 
 Nuxt 4, Vue, Una UI, UnoCSS, Cloudflare Workers et D1. L’authentification utilise `nuxt-auth-utils`.
 
+## Versionnage
+
+L’application suit [Semantic Versioning](https://semver.org/) et sa version actuelle apparaît dans le pied de page. Chaque commit qui modifie le comportement, le contenu ou l’apparence de l’application met à jour la version dans `package.json` et `package-lock.json`, puis ajoute une entrée datée dans [`CHANGELOG.md`](CHANGELOG.md). On incrémente la version patch pour les corrections et finitions, et la version mineure pour les nouvelles fonctionnalités tant que l’application est en `0.x`. La documentation seule et la maintenance interne ne font pas évoluer la version. Chaque commit versionné reçoit un tag Git local correspondant (`vX.Y.Z`) ; les tags identifient le code source sans déclencher de déploiement ni de publication.
+
 ## Lancer le projet en local
 
 Node.js et npm sont nécessaires.

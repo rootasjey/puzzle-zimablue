@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-10-18
+
+### Changed
+
+- Simplified the completion screen actions and reduced visual button density.
+
 ## [0.1.0] - 2026-10-18
 
 ### Added
