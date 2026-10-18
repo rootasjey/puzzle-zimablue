@@ -24,7 +24,7 @@ Nuxt 4, Vue, Una UI, UnoCSS, Cloudflare Workers, and D1. Authentication uses `nu
 
 ## Versioning
 
-The app follows [Semantic Versioning](https://semver.org/), and its current version appears in the site footer. Each commit that changes shipped app behavior, content, or presentation updates the version in `package.json` and `package-lock.json` and adds a dated entry to [`CHANGELOG.md`](CHANGELOG.md). Use a patch bump for fixes and polish, and a minor bump for new capabilities while the app is pre-1.0. Documentation-only and internal maintenance changes do not bump the app version. Create a matching local Git tag (`vX.Y.Z`) for each versioned app commit; tags identify source versions and do not deploy or publish the app.
+The app follows [Semantic Versioning](https://semver.org/), and its current version appears in the site footer. Each commit that changes shipped app behavior, content, or presentation updates the version in `package.json` and `package-lock.json` and adds a dated entry to [`CHANGELOG.md`](CHANGELOG.md). Use a patch bump for fixes and polish. Before `1.0.0`, use a minor bump for new capabilities and breaking changes; `1.0.0` marks a deliberate commitment to a stable core experience. After `1.0.0`, reserve a major bump for backward-incompatible changes to core gameplay, accounts or saved progress, or public URLs/APIs. Large but compatible features use a minor bump. Documentation-only and internal maintenance changes do not bump the app version. Create a matching local Git tag (`vX.Y.Z`) for each versioned app commit; tags identify source versions and do not deploy or publish the app.
 
 ## Run locally
 
