@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-10-19
+
+### Added
+
+- Custom Tronche avatar palettes, including import from a playground URL, with account-level persistence.
+
 ## [0.6.5] - 2026-10-18
 
 ### Changed

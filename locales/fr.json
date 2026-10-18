@@ -381,6 +381,23 @@
     "soundVolume": "Volume des effets",
     "avatarTitle": "Avatar",
     "avatarHelp": "Choisis un style d’avatar généré par Tronche.",
+    "avatarPaletteTitle": "Palettes de couleurs",
+    "avatarPalettes": {
+      "blue": "Bleu électrique",
+      "pop": "Pop",
+      "lavender": "Lavande",
+      "earth": "Terre",
+      "sunshine": "Soleil",
+      "candy": "Bonbon"
+    },
+    "avatarImportTitle": "Personnaliser avec Tronche",
+    "avatarImportHelp": "Colle une URL du playground Tronche pour importer son style et sa palette. Le nom de l’URL n’est pas conservé.",
+    "avatarOpenPlayground": "Ouvrir le playground",
+    "avatarUrlLabel": "URL du playground ou d’un avatar Tronche",
+    "avatarUrlPlaceholder": "https://tronche.cc/playground?variant=beam…",
+    "avatarImportButton": "Importer",
+    "avatarImported": "Configuration importée. Enregistre les paramètres pour l’appliquer à ton compte.",
+    "avatarImportError": "Cette URL Tronche est invalide ou contient une configuration non prise en charge.",
     "avatarVariants": {
       "marble": "Marbre",
       "bauhaus": "Bauhaus",

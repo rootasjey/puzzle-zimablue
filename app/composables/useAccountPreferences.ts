@@ -1,4 +1,4 @@
-import { DEFAULT_ACCOUNT_PREFERENCES, type AccountPreferences, type TroncheAvatarVariant } from '#shared/types/account-preferences'
+import { DEFAULT_ACCOUNT_PREFERENCES, normalizeTroncheAvatarColors, type AccountPreferences, type TroncheAvatarVariant } from '#shared/types/account-preferences'
 
 const LOCAL_STORAGE_KEY = 'puzzle-zimablue:guest-preferences'
 
@@ -40,6 +40,7 @@ export function useAccountPreferences() {
               ? Math.max(0, Math.min(100, parsed.soundVolume))
               : 100,
             avatarVariant: isAvatarVariant(parsed.avatarVariant) ? parsed.avatarVariant : 'marble',
+            avatarColors: normalizeTroncheAvatarColors(parsed.avatarColors) ?? [],
           }
         }
         else if (savedSound !== null) preferences.value.soundEnabled = savedSound === 'true'
@@ -87,10 +88,11 @@ export function useAccountPreferences() {
     return true
   }
 
-  function avatarUrl(variant = preferences.value.avatarVariant, size = 96) {
+  function avatarUrl(variant = preferences.value.avatarVariant, size = 96, colors = preferences.value.avatarColors) {
     const seed = preferences.value.avatarSeed
     if (!seed) return ''
     const query = new URLSearchParams({ variant, size: String(size), square: 'true' })
+    if (colors.length) query.set('colors', colors.join(','))
     return `https://tronche.cc/api/avatar/${encodeURIComponent(seed)}?${query.toString()}`
   }
 

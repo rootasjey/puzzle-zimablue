@@ -9,6 +9,7 @@ export interface AccountPreferences {
   soundVolume: number
   avatarVariant: TroncheAvatarVariant
   avatarSeed: string
+  avatarColors: string[]
 }
 
 export const DEFAULT_ACCOUNT_PREFERENCES: AccountPreferences = {
@@ -18,4 +19,18 @@ export const DEFAULT_ACCOUNT_PREFERENCES: AccountPreferences = {
   soundVolume: 100,
   avatarVariant: 'marble',
   avatarSeed: '',
+  avatarColors: [],
+}
+
+export function normalizeTroncheAvatarColors(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null
+  if (value.length === 0) return []
+  if (value.length < 2 || value.length > 8) return null
+
+  const colors = value.map((color) => {
+    if (typeof color !== 'string' || !/^#?[\da-f]{6}$/i.test(color.trim())) return null
+    return `#${color.trim().replace(/^#/, '').toUpperCase()}`
+  })
+
+  return colors.every((color): color is string => color !== null) ? colors : null
 }

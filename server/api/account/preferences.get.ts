@@ -1,5 +1,5 @@
 import type { AccountPreferences, TroncheAvatarVariant } from '../../../shared/types/account-preferences'
-import { TRONCHE_AVATAR_VARIANTS } from '../../../shared/types/account-preferences'
+import { normalizeTroncheAvatarColors, TRONCHE_AVATAR_VARIANTS } from '../../../shared/types/account-preferences'
 import { createOpaqueToken, requireSignedInUser } from '../../utils/auth'
 import { getDatabase } from '../../utils/cloudflare'
 
@@ -10,6 +10,7 @@ interface PreferencesRow {
   sound_volume: number
   avatar_variant: string
   avatar_seed: string
+  avatar_colors: string
   disabled_at: string | null
   email_verified_at: string | null
 }
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
   const sessionUser = await requireSignedInUser(event)
   const database = getDatabase(event)
   let row = await database.prepare(`SELECT show_reference_image, reduce_motion, sound_enabled, sound_volume,
-    avatar_variant, avatar_seed, disabled_at, email_verified_at FROM users WHERE id = ?`)
+    avatar_variant, avatar_seed, avatar_colors, disabled_at, email_verified_at FROM users WHERE id = ?`)
     .bind(sessionUser.id)
     .first<PreferencesRow>()
 
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
       .bind(seed, new Date().toISOString(), sessionUser.id)
       .run()
     row = await database.prepare(`SELECT show_reference_image, reduce_motion, sound_enabled, sound_volume,
-      avatar_variant, avatar_seed, disabled_at, email_verified_at FROM users WHERE id = ?`)
+      avatar_variant, avatar_seed, avatar_colors, disabled_at, email_verified_at FROM users WHERE id = ?`)
       .bind(sessionUser.id)
       .first<PreferencesRow>()
     if (!row?.avatar_seed) throw createError({ statusCode: 500, statusMessage: 'Impossible de préparer le profil.' })
@@ -49,5 +50,6 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
     soundVolume: Math.max(0, Math.min(100, row.sound_volume)),
     avatarVariant,
     avatarSeed: row.avatar_seed,
+    avatarColors: normalizeTroncheAvatarColors(row.avatar_colors.split(',').filter(Boolean)) ?? [],
   }
 })
