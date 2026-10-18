@@ -22,6 +22,10 @@
 
 Nuxt 4, Vue, Una UI, UnoCSS, Cloudflare Workers, and D1. Authentication uses `nuxt-auth-utils`.
 
+## Versioning
+
+The app follows [Semantic Versioning](https://semver.org/). The current version is recorded in `package.json`; notable changes go in [`CHANGELOG.md`](CHANGELOG.md). For a release, update the changelog, bump the package version, and create a matching Git tag in the form `vX.Y.Z`.
+
 ## Run locally
 
 You’ll need Node.js and npm.
