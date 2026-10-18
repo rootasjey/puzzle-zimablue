@@ -309,6 +309,7 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .completion-account-link:focus-visible,.completion-login-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .account-nav { padding: .35rem .45rem; border-bottom: 2px solid var(--yellow); }
 .account-page { display: grid; flex: 1; place-items: start center; padding: clamp(2.5rem, 7vw, 5rem) clamp(1.2rem, 4vw, 3rem); }
+.account-section-header { position: sticky; z-index: 20; top: 0; width: min(calc(100% - 2.4rem), 850px); margin: 0 auto; padding-top: .35rem; background: var(--paper); }
 .account-content { width: min(100%, 850px); }
 .account-welcome { width: min(100%, 500px); }
 .account-heading { display: flex; align-items: start; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.4rem; }

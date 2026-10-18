@@ -46,6 +46,13 @@
         </div>
       </nav>
     </header>
+    <header v-if="showAccountNavigation" class="account-section-header">
+      <NuxtLink :to="$localePath({ name: 'index' })" class="auth-back">{{ t('auth.back') }}</NuxtLink>
+      <nav class="account-section-nav" :aria-label="t('account.sectionNavigation')">
+        <NuxtLink :to="$localePath({ name: 'account' })" :aria-current="isAccountRoute('account') ? 'page' : undefined">{{ t('account.progressTab') }}</NuxtLink>
+        <NuxtLink :to="$localePath({ name: 'account-settings' })" :aria-current="isAccountRoute('account-settings') ? 'page' : undefined">{{ t('settings.title') }}</NuxtLink>
+      </nav>
+    </header>
     <NuxtPage :page-key="route => route.fullPath" />
     <footer class="site-footer page-wrap">
       <NuxtLink class="site-footer-about" :to="$localePath({ name: 'about' })">{{ t('app.about') }}</NuxtLink>
@@ -61,9 +68,10 @@
 type ThemePreference = 'system' | 'light' | 'dark'
 
 const { loggedIn, user } = useUserSession()
+const route = useRoute()
 const preferences = useAccountPreferences()
 const { public: { appVersion } } = useRuntimeConfig()
-const { $getLocale, $switchLocale, $t } = useI18n()
+const { $getLocale, $localePath, $switchLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const themeCookie = useCookie<ThemePreference>('puzzle-theme', {
   default: () => 'system',
@@ -80,6 +88,10 @@ const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'light', label: 'theme.light' },
   { value: 'dark', label: 'theme.dark' },
 ]
+const showAccountNavigation = computed(() => loggedIn.value && (
+  route.path === $localePath({ name: 'account' })
+  || route.path === $localePath({ name: 'account-settings' })
+))
 const themeLabels = computed(() => Object.fromEntries(themeOptions.map(option => [option.value, t(option.label)])) as Record<ThemePreference, string>)
 const currentLanguage = computed(() => $getLocale())
 const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 'FR')
@@ -125,5 +137,9 @@ onBeforeUnmount(() => {
 
 function switchLanguage() {
   $switchLocale(currentLanguage.value === 'fr' ? 'en' : 'fr')
+}
+
+function isAccountRoute(name: 'account' | 'account-settings') {
+  return route.path === $localePath({ name })
 }
 </script>

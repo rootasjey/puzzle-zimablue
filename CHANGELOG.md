@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.3] - 2026-10-18
+
+### Changed
+
+- Kept account navigation mounted across the progress and settings pages and visible while scrolling.
+
 ## [0.6.2] - 2026-10-18
 
 ### Changed
