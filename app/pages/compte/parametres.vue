@@ -197,3 +197,47 @@ async function savePublicProfile() {
   }
 }
 </script>
+
+<style>
+.settings-section { margin-top: 1.7rem; padding-top: 1.3rem; border-top: 1px solid var(--line-divider); }
+.settings-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.settings-fieldset:disabled { opacity: .6; }
+.settings-section h2 { margin: 0; font-size: 1.15rem; font-weight: 850; }
+.settings-section > p { max-width: 58ch; margin: .45rem 0 1rem; color: var(--muted); font-size: .86rem; line-height: 1.6; }
+.settings-profile-section { margin-top: 2.2rem; }
+.settings-profile-section > h2 { font-size: 1.3rem; }
+.settings-profile-subsection { margin-top: 1.7rem; }
+.settings-profile-subsection + .settings-profile-subsection { padding-top: 1.4rem; border-top: 1px solid var(--line-divider); }
+.settings-profile-subsection h3 { margin: 0; font-size: 1rem; font-weight: 800; }
+.settings-profile-subsection > p { max-width: 58ch; margin: .4rem 0 .9rem; color: var(--muted); font-size: .84rem; line-height: 1.6; }
+.settings-toggle { display: flex; align-items: flex-start; gap: .7rem; margin: 1rem 0; cursor: pointer; }
+.settings-toggle input { width: 1.15rem; height: 1.15rem; flex: none; margin: .1rem 0 0; accent-color: var(--blue); }
+.settings-toggle span { display: grid; gap: .2rem; }
+.settings-toggle strong { font-size: .9rem; }
+.settings-toggle small { color: var(--muted); font-size: .77rem; line-height: 1.5; }
+.settings-volume { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .3rem 1rem; margin-top: 1rem; }
+.settings-volume label { font-size: .88rem; font-weight: 750; }
+.settings-volume output { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.settings-volume input { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
+.settings-avatars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+.settings-avatar-option { display: grid; min-width: 0; min-height: 7.5rem; justify-items: center; align-content: center; gap: .5rem; padding: .7rem; border: 2px solid var(--line); background: var(--white); color: var(--ink); font: inherit; font-size: .78rem; font-weight: 750; cursor: pointer; }
+.settings-avatar-option[aria-pressed="true"] { border-color: var(--blue); box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--blue); }
+.settings-avatar-option img { display: block; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; }
+.settings-save { margin-top: 1.5rem; }
+@media (max-width: 520px) {
+  .settings-avatars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.account-public-toggle { display: flex; max-width: 600px; align-items: start; gap: .7rem; color: var(--ink); font-size: .86rem; font-weight: 750; line-height: 1.45; cursor: pointer; }
+.account-public-toggle input { width: 1.15rem; height: 1.15rem; flex: none; margin: .08rem 0 0; accent-color: var(--blue); }
+.account-public-toggle input:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.account-public-hint { margin: .65rem 0 0 !important; color: var(--yellow-foreground) !important; font-size: .8rem !important; }
+.account-public-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; margin-top: .9rem; }
+.account-public-actions .admin-primary { min-height: 2.8rem; }
+.account-public-actions .soft-link { font-size: .82rem; font-weight: 750; }
+.account-public-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: .75rem; max-width: 600px; }
+.account-public-form label { display: grid; gap: .4rem; color: var(--ink); font-size: .82rem; font-weight: 750; }
+.account-public-form input { width: 100%; min-height: 2.8rem; padding: .65rem .75rem; border: 2px solid var(--ink); border-radius: 0; background: var(--white); color: var(--ink); font: inherit; font-size: .9rem; }
+.account-public-form input:focus { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.account-public-form .form-error, .account-public-form .auth-confirmation { grid-column: 1 / -1; }
+@media (max-width: 600px) {
+  .account-public-form { grid-template-columns: 1fr; } }
+</style>

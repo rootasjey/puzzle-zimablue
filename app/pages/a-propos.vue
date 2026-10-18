@@ -65,3 +65,32 @@ const socialLinks = [
 ]
 usePageSeo({ title: () => t('about.seoTitle'), description: () => t('about.description') })
 </script>
+
+<style>
+.about-page { flex: 1; padding-top: clamp(2rem, 5vw, 3.7rem); padding-bottom: 5rem; }
+.about-intro { max-width: 760px; margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
+.about-intro .section-kicker { margin-bottom: .45rem; }
+.about-intro h1 { max-width: 13ch; font-size: clamp(2.7rem, 6vw, 4.5rem); font-weight: 850; line-height: 1.03; }
+.about-lede { max-width: 47ch; margin: 1.1rem 0 0; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.65; }
+.about-content { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(230px, .65fr); align-items: start; gap: clamp(2rem, 7vw, 6rem); }
+.about-story { max-width: 660px; }
+.about-section + .about-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line-divider); }
+.about-section h2, .about-socials h2 { margin: 0 0 .65rem; font-size: clamp(1.15rem, 2vw, 1.4rem); font-weight: 850; letter-spacing: -.04em; }
+.about-section p { max-width: 65ch; margin: .55rem 0 0; color: var(--muted); font-size: .92rem; line-height: 1.75; }
+.about-section a { color: var(--blue); font-weight: 750; text-underline-offset: .2rem; }
+.about-thanks { margin-top: 1.15rem !important; padding: .85rem 1rem; border-left: 4px solid var(--yellow); background: color-mix(in srgb, var(--yellow) 22%, var(--white)); color: var(--ink) !important; font-weight: 750; }
+.about-contact-links { display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; margin-top: .9rem; font-size: .84rem; }
+.about-socials { padding-left: clamp(1.2rem, 3vw, 2.2rem); border-left: 2px solid var(--ink); }
+.about-socials ul { display: grid; margin: 0; padding: 0; list-style: none; }
+.about-socials li { border-bottom: 1px solid var(--line); }
+.about-socials li:first-child { border-top: 1px solid var(--line); }
+.about-socials a { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .2rem .7rem; min-height: 3.4rem; padding: .55rem .1rem; color: var(--ink); text-decoration: none; }
+.about-socials a > span:first-child { color: var(--muted); font-size: .72rem; font-weight: 700; }
+.about-socials a strong { grid-column: 1; font-size: .84rem; font-weight: 800; overflow-wrap: anywhere; }
+.about-social-arrow { grid-column: 2; grid-row: 1 / span 2; color: var(--blue); font-weight: 800; }
+.about-socials a:hover strong { color: var(--blue); }
+.about-socials a:focus-visible, .about-contact-links a:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .about-content { grid-template-columns: 1fr; gap: 2.5rem; }
+  .about-socials { padding: 1.4rem 0 0; border-top: 2px solid var(--ink); border-left: 0; } }
+</style>

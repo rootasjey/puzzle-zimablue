@@ -67,3 +67,43 @@ function handlePreviewShortcut(event: KeyboardEvent) {
 onMounted(() => window.addEventListener('keydown', handlePreviewShortcut))
 onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcut))
 </script>
+
+<style>
+.source-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+.play-page { flex: 1; padding-top: clamp(2rem, 5vw, 3.7rem); padding-bottom: 5rem; }
+.play-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.7rem; }
+.play-heading h1 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 850; }
+.play-note { margin: .55rem 0 0; color: var(--muted); }
+.source-link { margin-bottom: .35rem; color: var(--blue); font-size: .82rem; font-weight: 800; text-decoration: none; }
+.play-layout { display: grid; grid-template-columns: minmax(0,1fr) 230px; align-items: start; gap: clamp(1rem, 4vw, 2.5rem); }
+.play-layout.is-reference-hidden { grid-template-columns: minmax(0, 1fr); }
+.play-layout.is-reference-hidden .game-panel { width: min(100%, 850px); justify-self: center; }
+.game-panel { min-width: 0; }
+.board-tools { display: flex; width: min(100%, var(--board-max-width, 590px)); min-height: 2.5rem; align-items: center; justify-content: space-between; gap: .8rem; margin: .55rem auto 0; }
+.board-session-summary { display: grid; min-width: 0; gap: .12rem; }
+.session-save-status { max-width: 34ch; margin: 0; color: var(--muted); font-size: .66rem; line-height: 1.25; }
+.session-save-status.is-conflict, .session-save-status.is-error { color: var(--coral); }
+.board-tool-actions { display: flex; align-items: center; gap: .6rem; }
+.reference-toggle svg { width: 1.05rem; height: 1.05rem; }
+.sound-toggle { display: grid; width: 2.15rem; height: 2.15rem; flex: none; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--muted); cursor: pointer; transition: transform .15s ease, border-color .15s ease, background-color .15s ease, color .15s ease; }
+.sound-toggle[aria-pressed="true"] { border-color: var(--blue); background: var(--paper); color: var(--blue); }
+.sound-toggle:hover { transform: translateY(-1px); color: var(--ink); }
+.sound-toggle:active { transform: translateY(1px); }
+.sound-toggle:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.sound-toggle svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.move-count, .success-note { margin: 0; color: var(--muted); font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.move-limit-note { margin: 0; color: var(--coral); font-size: .75rem; font-weight: 700; }
+.success-note { color: var(--success); }
+.restart-icon-button { display: grid; width: 2.3rem; height: 2.3rem; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--blue); cursor: pointer; transition: transform .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease; }
+.restart-icon-button:hover { transform: translateY(-1px); border-color: var(--blue); color: var(--coral); }
+.restart-icon-button:active { transform: translate(1px, 1px); box-shadow: none; }
+.restart-icon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.restart-icon-button svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+@media (max-width: 760px) {
+  .play-layout { grid-template-columns: 1fr; }
+  .play-heading { align-items: start; } }
+@media (max-width: 470px) {
+  .play-page { padding-inline: 1.1rem; }
+  .play-heading { display: block; }
+  .source-link { display: inline-block; margin-top: .9rem; } }
+</style>

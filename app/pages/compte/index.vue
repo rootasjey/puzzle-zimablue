@@ -92,3 +92,31 @@ async function logout() {
   await navigateTo(useNuxtApp().$localePath({ name: 'account-sign-in' }))
 }
 </script>
+
+<style>
+.account-avatar { width: 4.5rem; height: 4.5rem; margin-bottom: .5rem; border: 2px solid var(--ink); border-radius: 50%; object-fit: cover; }
+.account-heading { display: flex; align-items: start; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.4rem; }
+.account-heading h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 850; }
+.account-heading .auth-intro { margin-bottom: 0; }
+.account-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 2rem 0 2.6rem; border: 2px solid var(--ink); background: var(--white); box-shadow: var(--shadow); }
+.account-stat { display: grid; min-height: 110px; align-content: center; justify-items: center; gap: .35rem; padding: .7rem; text-align: center; }
+.account-stat + .account-stat { border-left: 2px solid var(--ink); }
+.account-stat strong { color: var(--blue); font-size: clamp(1.6rem, 4vw, 2.3rem); font-weight: 900; line-height: 1; }
+.account-stat span { max-width: 16ch; color: var(--muted); font-size: .76rem; font-weight: 700; line-height: 1.35; }
+.account-cumulative-stats { margin: 0 0 2.4rem; }
+.account-cumulative-stats h2 { margin: 0 0 .45rem; font-size: 1.25rem; font-weight: 850; }
+.account-cumulative-stats > p { margin: 0 0 .8rem; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+.account-history h2 { margin: 0 0 .8rem; font-size: 1.4rem; font-weight: 850; }
+.account-public-profile { margin: 0 0 2.4rem; padding: 1.2rem 0; border-block: 1px solid var(--line-divider); }
+.account-public-profile h2 { margin: 0; font-size: 1.2rem; font-weight: 850; }
+.account-public-profile > p { max-width: 58ch; margin: .45rem 0 1rem; color: var(--muted); font-size: .86rem; line-height: 1.6; }
+.account-public-sharing { margin-top: -1.4rem; }
+.account-completions { margin: 0; padding: 0; border-top: 2px solid var(--ink); list-style: none; }
+.account-completions li { border-bottom: 1px solid var(--line-divider); }
+.account-completions a { display: flex; min-height: 3.25rem; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .15rem; color: var(--ink); font-size: .86rem; text-decoration: none; }
+.account-completions a:hover { color: var(--blue); }
+.account-completions strong { color: var(--blue); font-size: .8rem; }
+.account-cumulative-stats .metrics-table-wrap { overflow-x: auto; }
+@media (max-width: 600px) {
+  .account-heading { align-items: flex-start; flex-direction: column; } }
+</style>

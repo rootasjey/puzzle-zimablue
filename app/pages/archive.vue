@@ -48,3 +48,27 @@ defineOgImage('Puzzle.takumi', {
   imageAlt: 'Pièces de puzzle colorées sur fond bleu et crème',
 })
 </script>
+
+<style>
+.archive-intro h1 { font-size: clamp(2.6rem, 5.3vw, 4.35rem); line-height: 1.04; font-weight: 850; }
+.archive-intro h1 em { color: var(--blue); font-style: normal; }
+.archive-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.archive-page { flex: 1; padding-top: clamp(2rem, 5vw, 3.7rem); padding-bottom: 5rem; }
+.archive-intro { margin-bottom: 2.5rem; }
+.archive-intro h1 { font-size: clamp(2.6rem, 5vw, 4.25rem); }
+.archive-intro > p:last-child { max-width: 42ch; margin: 1rem 0 0; color: var(--muted); line-height: 1.65; }
+.archive-list { grid-template-columns: 1fr; max-width: 740px; }
+.archive-history-item { display: grid; gap: .45rem; }
+.archive-list .archive-card { grid-template-columns: 112px minmax(0,1fr) auto; min-height: 132px; }
+.archive-list .archive-card img { width: 112px; height: 112px; }
+.archive-history-board-link { display: inline-flex; width: fit-content; align-items: center; gap: .4rem; padding: .2rem .35rem; color: var(--blue); font-size: .77rem; font-weight: 750; text-decoration: none; }
+.archive-history-board-link span:last-child { font-size: .95rem; }
+.archive-history-board-link svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.archive-history-board-link:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.archive-history-board-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+@media (max-width: 470px) {
+  .archive-page { padding-inline: 1.1rem; }
+  .archive-list .archive-card { grid-template-columns: 80px minmax(0,1fr) auto; min-height: 98px; }
+  .archive-list .archive-card img { width: 80px; height: 80px; }
+  .archive-history-board-link { padding-left: .15rem; font-size: .73rem; } }
+</style>

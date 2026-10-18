@@ -72,3 +72,18 @@ usePageSeo({
   description: () => t('publicProfile.description'),
 })
 </script>
+
+<style>
+.public-player-summary { display: flex; max-width: 760px; align-items: baseline; gap: .7rem; margin: 0 0 2.5rem; padding: 1rem 0; border-block: 2px solid var(--ink); }
+.public-player-summary strong { color: var(--blue); font-size: 2.2rem; font-weight: 900; line-height: 1; }
+.public-player-summary span { color: var(--muted); font-size: .86rem; font-weight: 700; }
+.public-player-page { flex: 1; padding-top: clamp(2rem, 5vw, 3.7rem); padding-bottom: 5rem; }
+.public-player-stats { max-width: 760px; }
+.public-player-stats h2 { margin: 0 0 .9rem; font-size: 1.3rem; font-weight: 850; }
+.public-player-stats .metrics-table-wrap { overflow-x: auto; }
+.public-player-table { min-width: 530px; }
+.public-player-table thead th:first-child { width: 28%; }
+.public-player-table thead th:nth-child(2), .public-player-table thead th:nth-child(3) { width: 15%; }
+.public-player-table thead th:nth-child(4), .public-player-table thead th:nth-child(5) { width: 21%; }
+.public-player-note { max-width: 760px; margin: 1.1rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+</style>

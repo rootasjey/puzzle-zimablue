@@ -95,3 +95,40 @@ defineOgImage('Puzzle.takumi', {
   imageAlt: 'Puzzle Zimablue leaderboard',
 })
 </script>
+
+<style>
+.leaderboard-metrics-note { max-width: 760px; margin: .6rem 0 2rem; color: var(--muted); font-size: .74rem; line-height: 1.5; }
+
+.leaderboard-page { flex: 1; padding-top: clamp(2rem, 5vw, 3.7rem); padding-bottom: 5rem; }
+.leaderboard-intro { max-width: 650px; margin-bottom: 2.5rem; }
+.leaderboard-intro .section-kicker { margin-bottom: .45rem; }
+.leaderboard-intro h1 { font-size: clamp(2.6rem, 5vw, 4.25rem); font-weight: 850; line-height: 1.04; }
+.leaderboard-intro > p:not(.section-kicker):not(.leaderboard-date) { max-width: 48ch; margin: 1rem 0 0; color: var(--muted); line-height: 1.65; }
+.leaderboard-date { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; margin: 1rem 0 0; color: var(--muted); font-size: .83rem; font-weight: 700; }
+.leaderboard-metrics { display: grid; max-width: 760px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem 1.2rem; margin-bottom: .6rem; }
+.leaderboard-metrics article { display: grid; align-content: start; gap: .3rem; padding-top: .65rem; border-top: 2px solid var(--ink); }
+.leaderboard-metrics article strong { color: var(--blue); font-size: clamp(1.2rem, 2.5vw, 1.75rem); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.leaderboard-metrics article strong span { color: var(--muted); font-size: .8em; }
+.leaderboard-metrics article > span { color: var(--muted); font-size: .7rem; font-weight: 700; line-height: 1.3; }
+.leaderboard-table { max-width: 760px; border-top: 2px solid var(--ink); }
+.leaderboard-columns, .leaderboard-entries li { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto; align-items: center; gap: 1rem; }
+.leaderboard-columns { min-height: 2.9rem; color: var(--muted); font-size: .74rem; font-weight: 750; }
+.leaderboard-columns span:last-child { text-align: right; }
+.leaderboard-entries { margin: 0; padding: 0; border-bottom: 2px solid var(--ink); list-style: none; }
+.leaderboard-entries li { min-height: 4.1rem; border-top: 1px solid var(--line-divider); font-size: .92rem; }
+.leaderboard-entries li.is-leader { margin-inline: -.6rem; padding-inline: .6rem; border-inline: 2px solid var(--ink); background: var(--yellow); color: var(--yellow-foreground); }
+.leaderboard-rank { color: var(--blue); font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.leaderboard-name { overflow-wrap: anywhere; font-weight: 750; }
+.leaderboard-profile-link { color: inherit; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
+.leaderboard-profile-link:hover { color: var(--blue); }
+.leaderboard-entries li.is-leader .leaderboard-profile-link:hover { color: var(--yellow-foreground); }
+.leaderboard-score { color: var(--blue); font-size: .84rem; font-weight: 850; text-align: right; white-space: nowrap; }
+.leaderboard-entries li.is-leader .leaderboard-score, .leaderboard-entries li.is-leader .leaderboard-rank { color: var(--yellow-foreground); }
+.leaderboard-profile-note { display: flex; max-width: 760px; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 2rem; padding: .35rem 0 .35rem 1rem; border-left: 4px solid var(--yellow); }
+.leaderboard-profile-note p { max-width: 50ch; margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.6; }
+.leaderboard-profile-note .soft-link { color: var(--blue); font-size: .82rem; white-space: nowrap; }
+@media (max-width: 600px) {
+  .leaderboard-profile-note { align-items: flex-start; flex-direction: column; }
+  .leaderboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem 1rem; }
+  .leaderboard-metrics article strong { font-size: 1.35rem; } }
+</style>

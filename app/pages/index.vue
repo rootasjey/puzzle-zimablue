@@ -69,3 +69,47 @@ defineOgImage('Puzzle.takumi', {
   imageAlt: computed(() => t('home.illustrationAlt', { name: featured.value?.imageName ?? 'Zimablue' })),
 }, [{ key: 'og', alt: computed(() => t('home.illustrationAlt', { name: featured.value?.imageName ?? 'Zimablue' })) }])
 </script>
+
+<style>
+.home-page { flex: 1; padding-top: clamp(2rem, 5vw, 4rem); padding-bottom: 4rem; }
+.daily-feature { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(280px, .96fr); align-items: center; gap: clamp(2rem, 7vw, 6rem); }
+.feature-art-link { display: block; min-width: 0; color: inherit; text-decoration: none; }
+.feature-art-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 5px; }
+.feature-art { position: relative; min-width: 0; aspect-ratio: 1.18; overflow: hidden; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-.6deg); transition: transform .2s ease; }
+.feature-art:hover { transform: rotate(0); }
+.feature-art-link:active .feature-art { transform: translate(2px, 2px) rotate(0); box-shadow: 1px 1px 0 var(--ink); }
+.feature-art::after { position: absolute; inset: auto 0 0; height: 25%; content: ''; background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 26%, transparent)); pointer-events: none; }
+.feature-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.art-index { position: absolute; z-index: 1; right: .8rem; bottom: .8rem; padding: .45rem .65rem; border: 2px solid var(--ink); background: var(--yellow); color: var(--yellow-foreground); font-size: .74rem; font-weight: 800; letter-spacing: .06em; }
+.feature-copy { padding-block: 1rem; }
+.feature-copy h1 { font-size: clamp(2.6rem, 5.3vw, 4.35rem); line-height: 1.04; font-weight: 850; }
+.feature-copy h1 em { color: var(--blue); font-style: normal; }
+.feature-description { max-width: 36ch; margin: 1.3rem 0 1.4rem; color: var(--muted); font-size: 1rem; line-height: 1.7; }
+.today-line { display: flex; align-items: center; gap: .55rem; color: var(--muted); font-size: .83rem; font-weight: 600; }
+.line-divider { color: var(--line-divider); }
+.play-link { display: inline-flex; align-items: center; justify-content: center; gap: 1.5rem; min-height: 3.1rem; margin-top: 1.65rem; padding: 0 1.2rem; border: 2px solid var(--ink); background: var(--blue); color: var(--blue-foreground); box-shadow: var(--shadow); font-size: .87rem; font-weight: 800; text-decoration: none; transition: transform .16s ease, box-shadow .16s ease; }
+.play-link:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.leaderboard-home-link { display: block; width: fit-content; margin-top: .9rem; color: var(--blue); font-size: .84rem; font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
+.play-link:focus-visible, .leaderboard-home-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+.archive-preview { margin-top: clamp(4rem, 9vw, 7rem); }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.35rem; }
+.section-heading .section-kicker { margin-bottom: .35rem; }
+.section-heading h2 { font-size: clamp(1.45rem, 3vw, 2rem); font-weight: 850; }
+.archive-all { color: var(--blue); font-weight: 700; }
+.archive-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.prototype-note { margin: 1.5rem 0 0; color: var(--muted); font-size: .75rem; }
+.play-link:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+@media (max-width: 760px) {
+  .daily-feature { grid-template-columns: 1fr; gap: 1.4rem; }
+  .feature-art { aspect-ratio: 1.22; max-height: 440px; }
+  .feature-copy { padding: 0; }
+  .feature-copy h1 { font-size: clamp(2.7rem, 11vw, 4rem); }
+  .feature-description { margin-block: .9rem 1rem; }
+  .archive-preview { margin-top: 3.7rem; }
+  .archive-grid { grid-template-columns: 1fr; } }
+@media (max-width: 470px) {
+  .home-page { padding-inline: 1.1rem; }
+  .feature-art { aspect-ratio: 1.05; }
+  .section-heading { align-items: start; }
+  .archive-all { margin-top: 1rem; font-size: .75rem; white-space: nowrap; } }
+</style>
