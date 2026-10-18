@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.5.2] - 2026-10-18
+
+### Changed
+
+- Simplified the avatar helper text in French and English.
+
 ## [0.5.1] - 2026-10-18
 
 ### Changed
