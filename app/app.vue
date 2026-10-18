@@ -49,6 +49,7 @@
       <NuxtLink class="site-footer-leaderboard" :to="$localePath({ name: 'leaderboard' })">{{ t('app.leaderboard') }}</NuxtLink>
       <span>{{ t('app.footerLine') }} <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
       <span>{{ t('app.footerTagline') }}</span>
+      <span class="site-footer-version">v{{ appVersion }}</span>
     </footer>
   </div>
 </template>
@@ -57,6 +58,7 @@
 type ThemePreference = 'system' | 'light' | 'dark'
 
 const { loggedIn, user } = useUserSession()
+const { public: { appVersion } } = useRuntimeConfig()
 const { $getLocale, $switchLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const themeCookie = useCookie<ThemePreference>('puzzle-theme', {

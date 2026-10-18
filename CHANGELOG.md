@@ -10,3 +10,4 @@ Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic 
 - Admin dashboard for completion and verified-score metrics.
 - Animated loading screen using the project logo.
 - Takumi renderer dependency for Nuxt OG image generation.
+- Display the current app version in the site footer.

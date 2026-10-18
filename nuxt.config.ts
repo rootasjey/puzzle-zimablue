@@ -1,3 +1,7 @@
+import { readFileSync } from 'node:fs'
+
+const { version: appVersion } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-12',
   devtools: { enabled: true },
@@ -76,6 +80,7 @@ export default defineNuxtConfig({
     public: {
       registrationEnabled: true,
       siteUrl: 'https://puzzle.zimablue.cc',
+      appVersion,
     },
   },
 })
