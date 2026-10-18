@@ -3,12 +3,15 @@
     <section v-if="loggedIn" class="account-content">
       <NuxtLink :to="$localePath({ name: 'index' })" class="auth-back">{{ t('auth.back') }}</NuxtLink>
       <p class="section-kicker">{{ t('account.kicker') }}</p>
+      <nav class="account-section-nav" :aria-label="t('account.sectionNavigation')">
+        <NuxtLink :to="$localePath({ name: 'account' })" aria-current="page">{{ t('account.progressTab') }}</NuxtLink>
+        <NuxtLink :to="$localePath({ name: 'account-settings' })">{{ t('settings.title') }}</NuxtLink>
+      </nav>
       <div class="account-heading">
         <div>
           <img v-if="preferences.avatarUrl()" class="account-avatar" :src="preferences.avatarUrl( preferences.preferences.value.avatarVariant, 128)" alt="">
           <h1>{{ t('account.title') }}</h1>
           <p class="auth-intro">{{ user?.email }}</p>
-          <NuxtLink class="account-settings-link" :to="$localePath({ name: 'account-settings' })">{{ t('settings.open') }}</NuxtLink>
         </div>
         <button class="admin-secondary" type="button" :disabled="busy" @click="logout">{{ t('account.signOut') }}</button>
       </div>
@@ -46,45 +49,6 @@
         </div>
         <p v-else class="metrics-empty">{{ t('publicProfile.noScores') }}</p>
       </section>
-      <section v-if="stats" class="account-public-profile" aria-labelledby="public-name-title">
-        <h2 id="public-name-title">{{ t('account.publicNameTitle') }}</h2>
-        <p>{{ t('account.publicNameHelp') }}</p>
-        <form class="account-public-form" @submit.prevent="savePublicName">
-          <label>{{ t('account.publicNameLabel') }}<input v-model="publicName" type="text" maxlength="24" autocomplete="nickname"></label>
-          <p v-if="profileError" class="form-error" role="alert">{{ profileError }}</p>
-          <p v-if="profileSaved" class="auth-confirmation" role="status">{{ profileSaved }}</p>
-          <button class="admin-primary" type="submit" :disabled="profileBusy">{{ profileBusy ? t('account.savingPublicName') : t('account.savePublicName') }}</button>
-        </form>
-      </section>
-      <section v-if="stats" class="account-public-profile account-public-sharing" aria-labelledby="public-profile-title">
-        <h2 id="public-profile-title">{{ t('account.publicProfileTitle') }}</h2>
-        <p>{{ t('account.publicProfileHelp') }}</p>
-        <label class="account-public-toggle">
-          <input v-model="publicProfileDraft" type="checkbox" :disabled="publicProfileBusy">
-          <span>{{ t('account.publicProfileToggle') }}</span>
-        </label>
-        <p v-if="publicProfileDraft && !stats.publicName" class="account-public-hint">{{ t('account.publicProfileNeedsName') }}</p>
-        <p v-if="publicProfileError" class="form-error" role="alert">{{ publicProfileError }}</p>
-        <p v-if="publicProfileSaved" class="auth-confirmation" role="status">{{ publicProfileSaved }}</p>
-        <div class="account-public-actions">
-          <button
-            class="admin-primary"
-            type="button"
-            :disabled="publicProfileBusy || publicProfileDraft === isPublicProfile || (publicProfileDraft && !stats.publicName)"
-            @click="savePublicProfile"
-          >
-            {{ publicProfileBusy ? t('account.savingPublicProfile') : t(publicProfileActionLabel) }}
-          </button>
-          <NuxtLink
-            v-if="isPublicProfile && stats.publicProfileToken"
-            class="soft-link"
-            :to="$localePath({ name: 'public-player-profile', params: { token: stats.publicProfileToken } })"
-            target="_blank"
-          >
-            {{ t('account.viewPublicProfile') }} <span aria-hidden="true">↗</span>
-          </NuxtLink>
-        </div>
-      </section>
       <section class="account-history">
         <h2>{{ t('account.history') }}</h2>
         <p v-if="stats?.completions.length === 0" class="auth-intro">{{ t('account.empty') }}</p>
@@ -113,7 +77,7 @@
 
 <script setup lang="ts">
 import { formatPuzzleDate } from '#shared/types/puzzle'
-interface AccountStats { publicName: string; publicProfileToken: string | null; completedCount: number; currentStreak: number; bestMoves: number | null; verifiedStats: { completedCount: number; difficulties: { gridRows: number; gridColumns: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[] }; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
+interface AccountStats { completedCount: number; currentStreak: number; bestMoves: number | null; verifiedStats: { completedCount: number; difficulties: { gridRows: number; gridColumns: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[] }; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
 definePageMeta({ name: 'account' })
 const { $defineI18nRoute } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account' } })
@@ -127,55 +91,6 @@ const dateLocale = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const formatNumber = (value: number) => new Intl.NumberFormat(dateLocale.value, { maximumFractionDigits: 1 }).format(value)
 const { data: stats, error } = await useFetch<AccountStats>('/api/account/stats', { immediate: loggedIn.value })
 const busy = ref(false)
-const profileBusy = ref(false)
-const publicName = ref('')
-const profileError = ref('')
-const profileSaved = ref('')
-const publicProfileDraft = ref(false)
-const publicProfileBusy = ref(false)
-const publicProfileError = ref('')
-const publicProfileSaved = ref('')
-const isPublicProfile = computed(() => Boolean(stats.value?.publicProfileToken))
-const publicProfileActionLabel = computed(() => publicProfileDraft.value === isPublicProfile.value
-  ? isPublicProfile.value ? 'account.publicProfileOn' : 'account.publicProfileOff'
-  : publicProfileDraft.value ? 'account.makeProfilePublic' : 'account.makeProfilePrivate')
-watch(() => stats.value?.publicName, value => { publicName.value = value ?? '' }, { immediate: true })
-watch(isPublicProfile, value => { publicProfileDraft.value = value }, { immediate: true })
-async function savePublicName() {
-  profileBusy.value = true
-  profileError.value = ''
-  profileSaved.value = ''
-  try {
-    const result = await $fetch<{ publicName: string }>('/api/account/profile', { method: 'POST', body: { publicName: publicName.value } })
-    publicName.value = result.publicName
-    if (stats.value) stats.value.publicName = result.publicName
-    profileSaved.value = t('account.publicNameSaved')
-  } catch (cause: any) {
-    profileError.value = cause?.statusCode === 409 ? t('account.publicNameDisableProfileFirst') : cause?.data?.statusMessage || t('account.publicNameError')
-  } finally {
-    profileBusy.value = false
-  }
-}
-async function savePublicProfile() {
-  publicProfileBusy.value = true
-  publicProfileError.value = ''
-  publicProfileSaved.value = ''
-  try {
-    const result = await $fetch<{ enabled: boolean; token: string | null }>('/api/account/public-profile', {
-      method: 'POST',
-      body: { enabled: publicProfileDraft.value },
-    })
-    if (stats.value) stats.value.publicProfileToken = result.token
-    publicProfileDraft.value = result.enabled
-    publicProfileSaved.value = t(result.enabled ? 'account.publicProfileEnabledNotice' : 'account.publicProfileDisabledNotice')
-  } catch (cause: any) {
-    publicProfileError.value = cause?.statusCode === 409
-      ? t('account.publicProfileNeedsName')
-      : cause?.data?.statusMessage || t('account.publicProfileError')
-  } finally {
-    publicProfileBusy.value = false
-  }
-}
 async function logout() {
   busy.value = true
   await $fetch('/api/auth/logout', { method: 'POST' })

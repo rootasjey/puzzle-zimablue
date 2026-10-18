@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-10-18
+
+### Changed
+
+- Added shared account navigation and moved public-name and historical-profile controls into a dedicated profile section in Settings.
+
 ## [0.5.2] - 2026-10-18
 
 ### Changed
