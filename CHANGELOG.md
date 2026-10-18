@@ -2,6 +2,15 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-10-18
+
+### Added
+
+- Account preferences for the reference image, reduced motion, sound, and effect volume, with a local fallback for guests.
+- A keyboard shortcut (`A`) to toggle the reference image while playing, outside text fields.
+- Optional Tronche avatars for signed-in accounts.
+- Zimablue illustration descriptions saved with puzzles and shown on the completion screen.
+
 ## [0.4.0] - 2026-10-18
 
 ### Added

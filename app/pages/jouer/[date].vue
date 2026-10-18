@@ -11,9 +11,10 @@
       </div>
       <a class="source-link" :href="`https://zimablue.cc/illustrations/${puzzle.imageSlug}`" target="_blank" rel="noreferrer">{{ t('play.viewIllustration') }} <span aria-hidden="true">↗</span></a>
     </header>
-    <div class="play-layout">
+    <p class="sr-only" role="status" aria-live="polite">{{ previewAnnouncement }}</p>
+    <div class="play-layout" :class="{ 'is-reference-hidden': !showReferenceImage }">
       <PuzzleBoard :puzzle="puzzle" />
-      <aside class="reference-panel">
+      <aside v-if="showReferenceImage" class="reference-panel">
         <span class="reference-label">{{ t('play.reference') }}</span>
         <img :src="puzzle.imageUrl" :alt="t('play.referenceAlt', { name: puzzle.imageName })">
       </aside>
@@ -37,6 +38,9 @@ const puzzle = computed(() => puzzleData.value!)
 const language = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const displayedTitle = computed(() => $getLocale() === 'en' && puzzle.value.titleEn ? puzzle.value.titleEn : puzzle.value.title)
 const displayedNote = computed(() => $getLocale() === 'en' && puzzle.value.noteEn ? puzzle.value.noteEn : puzzle.value.note)
+const preferences = useAccountPreferences()
+const showReferenceImage = computed(() => preferences.preferences.value.showReferenceImage)
+const previewAnnouncement = ref('')
 usePageSeo({
   title: () => displayedTitle.value,
   description: () => t('play.seoDescription', { name: puzzle.value.imageName }),
@@ -46,4 +50,20 @@ defineOgImage('Puzzle.takumi', {
   image: computed(() => puzzle.value.imageUrl),
   imageAlt: computed(() => t('play.referenceAlt', { name: puzzle.value.imageName })),
 }, [{ key: 'og', alt: computed(() => t('play.referenceAlt', { name: puzzle.value.imageName })) }])
+
+function isTextEntryTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && (target.isContentEditable || Boolean(target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]')))
+}
+
+function handlePreviewShortcut(event: KeyboardEvent) {
+  if (event.key.toLowerCase() !== 'a' || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
+    || event.defaultPrevented || isTextEntryTarget(event.target)) return
+  event.preventDefault()
+  const nextValue = !showReferenceImage.value
+  previewAnnouncement.value = t(nextValue ? 'play.showReference' : 'play.hideReference')
+  void preferences.save({ showReferenceImage: nextValue })
+}
+
+onMounted(() => window.addEventListener('keydown', handlePreviewShortcut))
+onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcut))
 </script>

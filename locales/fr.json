@@ -135,6 +135,8 @@
     "viewIllustration": "Voir l’illustration",
     "reference": "L’image à retrouver",
     "referenceAlt": "Aperçu de {name}",
+    "hideReference": "Masquer l’aperçu de l’image",
+    "showReference": "Afficher l’aperçu de l’image",
     "seoDescription": "Reconstitue l’illustration {name}.",
     "referenceHelp": "Observe les couleurs, puis échange les pièces en deux touches.",
     "notFound": "Ce puzzle n’est pas encore dans l’archive."
@@ -152,6 +154,7 @@
     "restart": "Recommencer",
     "enableSounds": "Activer les sons",
     "muteSounds": "Couper les sons",
+    "artDescription": "À propos de cette illustration",
     "loading": "Préparation des pièces…",
     "imageError": "Impossible de charger cette illustration.",
     "congratulations": "Bravo !",
@@ -358,5 +361,36 @@
     "publicProfileDisabledNotice": "Ton profil et tes anciens scores sont maintenant privés. Le classement du jour reste lié au nom public ci-dessus.",
     "history": "Puzzles terminés",
     "empty": "Tes puzzles terminés apparaîtront ici."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Choisis les réglages de jeu et l’apparence de ton espace.",
+    "open": "Ouvrir les paramètres",
+    "back": "← Retour à mon espace",
+    "signInRequired": "Connecte-toi pour gérer les réglages liés à ton compte.",
+    "loading": "Chargement de tes paramètres…",
+    "gameTitle": "Préférences de jeu",
+    "showReference": "Afficher l’aperçu de l’image",
+    "referenceHelp": "Tu peux aussi appuyer sur A pendant un puzzle, hors d’un champ de saisie.",
+    "reduceMotion": "Réduire les animations",
+    "reduceMotionHelp": "Les animations des pages et des pièces seront raccourcies.",
+    "soundEnabled": "Activer les sons",
+    "soundHelp": "Les sons accompagnent les déplacements et la résolution du puzzle.",
+    "soundVolume": "Volume des effets",
+    "avatarTitle": "Avatar",
+    "avatarHelp": "Choisis un style d’avatar généré par Tronche. Ton adresse email n’est pas transmise.",
+    "avatarVariants": {
+      "marble": "Marbre",
+      "bauhaus": "Bauhaus",
+      "beam": "Rayon",
+      "pixel": "Pixel",
+      "ring": "Anneau",
+      "sunset": "Coucher de soleil"
+    },
+    "save": "Enregistrer les paramètres",
+    "saving": "Enregistrement…",
+    "saved": "Paramètres enregistrés.",
+    "saveError": "Les paramètres n’ont pas pu être enregistrés. Réessaie.",
+    "artDescription": "À propos de cette illustration"
   }
 }

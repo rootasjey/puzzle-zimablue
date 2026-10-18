@@ -5,8 +5,10 @@
       <p class="section-kicker">{{ t('account.kicker') }}</p>
       <div class="account-heading">
         <div>
+          <img v-if="preferences.avatarUrl()" class="account-avatar" :src="preferences.avatarUrl( preferences.preferences.value.avatarVariant, 128)" alt="">
           <h1>{{ t('account.title') }}</h1>
           <p class="auth-intro">{{ user?.email }}</p>
+          <NuxtLink class="account-settings-link" :to="$localePath({ name: 'account-settings' })">{{ t('settings.open') }}</NuxtLink>
         </div>
         <button class="admin-secondary" type="button" :disabled="busy" @click="logout">{{ t('account.signOut') }}</button>
       </div>
@@ -117,6 +119,7 @@ const { $defineI18nRoute } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account' } })
 const route = useRoute()
 const { loggedIn, user, fetch } = useUserSession()
+const preferences = useAccountPreferences()
 const { $localePath } = useNuxtApp()
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')

@@ -182,7 +182,7 @@ const t = (key: string, params?: Record<string, string | number>): string => Str
 const { $defineI18nRoute, $localePath } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/admin/calendar' } })
 
-interface Illustration { name: string; slug: string; url: string }
+interface Illustration { name: string; slug: string; url: string; description: string }
 interface PuzzleForm {
   date: string
   title: string
@@ -192,6 +192,7 @@ interface PuzzleForm {
   imageName: string
   imageSlug: string
   imageUrl: string
+  imageDescription: string
   gridSize: number
   status: 'draft' | 'published'
 }
@@ -256,7 +257,7 @@ onMounted(async () => {
 })
 
 function emptyForm(date = todayDate()): PuzzleForm {
-  return { date, title: '', note: '', titleEn: '', noteEn: '', imageName: '', imageSlug: '', imageUrl: '', gridSize: 3, status: 'draft' }
+  return { date, title: '', note: '', titleEn: '', noteEn: '', imageName: '', imageSlug: '', imageUrl: '', imageDescription: '', gridSize: 3, status: 'draft' }
 }
 
 function todayDate() {
@@ -364,6 +365,7 @@ function openEdit(date: string) {
     imageName: puzzle.imageName,
     imageSlug: puzzle.imageSlug,
     imageUrl: puzzle.imageUrl,
+    imageDescription: puzzle.imageDescription ?? '',
     gridSize: puzzle.gridSize,
     status: 'draft',
   })
@@ -397,6 +399,7 @@ function selectIllustration(image: Illustration) {
   form.imageName = image.name
   form.imageSlug = image.slug
   form.imageUrl = image.url
+  form.imageDescription = image.description
   choosingIllustration.value = false
   if (!form.title) form.title = image.name
 }

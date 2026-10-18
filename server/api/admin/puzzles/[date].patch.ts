@@ -10,9 +10,9 @@ export default defineEventHandler(async (event) => {
   const puzzle = validatePuzzleInput(await readBody(event))
   try {
     const result = await getDatabase(event).prepare(`UPDATE puzzles SET
-      date = ?, title = ?, note = ?, title_en = ?, note_en = ?, image_name = ?, image_slug = ?, image_url = ?, grid_size = ?, grid_rows = ?, grid_columns = ?, status = ?, updated_at = ?
+      date = ?, title = ?, note = ?, title_en = ?, note_en = ?, image_name = ?, image_slug = ?, image_url = ?, image_description = ?, grid_size = ?, grid_rows = ?, grid_columns = ?, status = ?, updated_at = ?
       WHERE date = ?`)
-      .bind(puzzle.date, puzzle.title, puzzle.note, puzzle.titleEn, puzzle.noteEn, puzzle.imageName, puzzle.imageSlug, puzzle.imageUrl, puzzle.gridSize, puzzle.gridRows, puzzle.gridColumns, puzzle.status, new Date().toISOString(), originalDate)
+      .bind(puzzle.date, puzzle.title, puzzle.note, puzzle.titleEn, puzzle.noteEn, puzzle.imageName, puzzle.imageSlug, puzzle.imageUrl, puzzle.imageDescription, puzzle.gridSize, puzzle.gridRows, puzzle.gridColumns, puzzle.status, new Date().toISOString(), originalDate)
       .run()
     if (result.meta.changes !== 1) throw createError({ statusCode: 404, statusMessage: 'Puzzle introuvable.' })
   } catch (error) {

@@ -1,32 +1,14 @@
 type PuzzleSound = 'move' | 'misplaced' | 'placed' | 'complete'
 
-const STORAGE_KEY = 'puzzle-zimablue:sounds-enabled'
-
 export function usePuzzleSounds() {
-  const enabled = useState<boolean>('puzzle-sounds-enabled', () => true)
+  const accountPreferences = useAccountPreferences()
+  const enabled = computed(() => accountPreferences.preferences.value.soundEnabled)
   let context: AudioContext | null = null
 
-  onMounted(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved !== null) enabled.value = saved === 'true'
-    } catch {
-      // Sound remains enabled for this visit when storage is unavailable.
-    }
-  })
-
-  watch(enabled, (isEnabled) => {
-    if (!import.meta.client) return
-    try {
-      localStorage.setItem(STORAGE_KEY, String(isEnabled))
-    } catch {
-      // The in-memory preference still works when storage is unavailable.
-    }
-  })
-
-  function toggle() {
-    enabled.value = !enabled.value
-    if (enabled.value) void getContext()?.resume()
+  async function toggle() {
+    const nextEnabled = !enabled.value
+    const saved = await accountPreferences.save({ soundEnabled: nextEnabled })
+    if (saved && nextEnabled) void getContext()?.resume()
   }
 
   function play(sound: PuzzleSound) {
@@ -36,16 +18,17 @@ export function usePuzzleSounds() {
     if (audio.state === 'suspended') void audio.resume()
 
     const now = audio.currentTime
+    const volume = accountPreferences.preferences.value.soundVolume / 100
     if (sound === 'move') {
-      tone(audio, 285, now, 0.055, 0.035, 'triangle')
+      tone(audio, 285, now, 0.055, 0.035 * volume, 'triangle')
     } else if (sound === 'misplaced') {
-      tone(audio, 190, now, 0.13, 0.045, 'triangle', 125)
+      tone(audio, 190, now, 0.13, 0.045 * volume, 'triangle', 125)
     } else if (sound === 'placed') {
-      tone(audio, 620, now, 0.1, 0.04)
-      tone(audio, 840, now + 0.075, 0.13, 0.04)
+      tone(audio, 620, now, 0.1, 0.04 * volume)
+      tone(audio, 840, now + 0.075, 0.13, 0.04 * volume)
     } else {
       ;[523, 659, 784, 1046].forEach((frequency, index) => {
-        tone(audio, frequency, now + index * 0.105, 0.2, 0.042)
+        tone(audio, frequency, now + index * 0.105, 0.2, 0.042 * volume)
       })
     }
   }

@@ -53,6 +53,16 @@
       </div>
       <div class="board-tool-actions">
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+          <button class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
+              <circle v-if="showReferenceImage" cx="12" cy="12" r="2.5" />
+              <path v-else d="m4 4 16 16" />
+            </svg>
+          </button>
+          <template #content>{{ t(showReferenceImage ? 'play.hideReference' : 'play.showReference') }}</template>
+        </NTooltip>
+        <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
           <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M11 5 6 9H3v6h3l5 4z" />
@@ -106,6 +116,10 @@
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <div class="completion-result">
               <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+              <div v-if="puzzle.imageDescription" class="completion-art-description">
+                <strong>{{ t('game.artDescription') }}</strong>
+                <p>{{ puzzle.imageDescription }}</p>
+              </div>
               <span v-if="completionSavePending && progressEnabled" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
               <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard-puzzle', params: { date: puzzle.date } })">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3" /></svg>
@@ -166,12 +180,18 @@ import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-a
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
 const props = withDefaults(defineProps<{ puzzle: DailyPuzzle; progressEnabled?: boolean }>(), { progressEnabled: true })
+const accountPreferences = useAccountPreferences()
+const showReferenceImage = computed(() => accountPreferences.preferences.value.showReferenceImage)
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
 const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
+
+function toggleReferenceImage() {
+  void accountPreferences.save({ showReferenceImage: !showReferenceImage.value })
+}
 const completionSaveError = ref(false)
 const completionSavePending = ref(false)
 const shareFeedback = ref('')

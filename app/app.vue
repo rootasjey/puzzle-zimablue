@@ -7,7 +7,10 @@
       <nav :aria-label="t('app.navigation')">
         <NuxtLink class="nav-link" :to="$localePath({ name: 'index' })">{{ t('app.home') }}</NuxtLink>
         <NuxtLink class="nav-link" :to="$localePath({ name: 'archive' })">{{ t('app.archive') }}</NuxtLink>
-        <NuxtLink v-if="loggedIn && user" class="nav-link" :to="$localePath({ name: 'account' })">{{ t('app.account') }}</NuxtLink>
+        <NuxtLink v-if="loggedIn && user" class="nav-link account-nav" :to="$localePath({ name: 'account' })">
+          <img v-if="preferences.avatarUrl()" class="account-nav-avatar" :src="preferences.avatarUrl()" alt="">
+          {{ t('app.account') }}
+        </NuxtLink>
         <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
         <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-calendar' })">{{ t('app.admin') }}</NuxtLink>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
@@ -58,6 +61,7 @@
 type ThemePreference = 'system' | 'light' | 'dark'
 
 const { loggedIn, user } = useUserSession()
+const preferences = useAccountPreferences()
 const { public: { appVersion } } = useRuntimeConfig()
 const { $getLocale, $switchLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
@@ -82,7 +86,7 @@ const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 
 const nextLanguageLabel = computed(() => currentLanguage.value === 'fr' ? 'English' : 'Français')
 
 useHead({
-  htmlAttrs: { 'data-theme': theme },
+  htmlAttrs: { 'data-theme': theme, 'data-reduced-motion': computed(() => preferences.preferences.value.reduceMotion ? 'true' : 'false') },
   meta: [{ name: 'msvalidate.01', content: '6D24C120FDA31CA11DDE69DCCFF499A7' }],
 })
 useSeoMeta({ ogSiteName: 'Puzzle Zimablue' })
@@ -104,8 +108,14 @@ function closeThemeMenu(event: PointerEvent | KeyboardEvent) {
 }
 
 onMounted(() => {
+  void (loggedIn.value ? preferences.loadAccount() : preferences.loadGuest())
   document.addEventListener('pointerdown', closeThemeMenu)
   document.addEventListener('keydown', closeThemeMenu)
+})
+
+watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
+  if (isLoggedIn === wasLoggedIn) return
+  void (isLoggedIn ? preferences.loadAccount() : preferences.loadGuest())
 })
 
 onBeforeUnmount(() => {

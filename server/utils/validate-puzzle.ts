@@ -10,6 +10,7 @@ export interface PuzzleInput {
   imageName?: unknown
   imageSlug?: unknown
   imageUrl?: unknown
+  imageDescription?: unknown
   gridSize?: unknown
   status?: unknown
 }
@@ -18,10 +19,12 @@ export function validatePuzzleInput(body: PuzzleInput) {
   const imageUrl = safeImageUrl(body.imageUrl)
   const titleEn = body.titleEn ?? ''
   const noteEn = body.noteEn ?? ''
+  const imageDescription = body.imageDescription ?? ''
   if (!isIsoDate(body.date) || typeof body.title !== 'string' || !body.title.trim() || body.title.length > 120
     || typeof body.note !== 'string' || body.note.length > 500
     || typeof titleEn !== 'string' || titleEn.length > 120
     || typeof noteEn !== 'string' || noteEn.length > 500
+    || typeof imageDescription !== 'string' || imageDescription.length > 2000
     || typeof body.imageName !== 'string' || !body.imageName.trim() || body.imageName.length > 160
     || typeof body.imageSlug !== 'string' || !/^[\w-]{1,180}$/.test(body.imageSlug)
     || typeof body.gridSize !== 'number' || !Number.isInteger(body.gridSize) || body.gridSize < 3 || body.gridSize > 5
@@ -37,6 +40,7 @@ export function validatePuzzleInput(body: PuzzleInput) {
     imageName: body.imageName.trim(),
     imageSlug: body.imageSlug,
     imageUrl,
+    imageDescription: imageDescription.trim(),
     gridSize: body.gridSize,
     gridRows: body.gridSize,
     gridColumns: body.gridSize,

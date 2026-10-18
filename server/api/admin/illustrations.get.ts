@@ -9,6 +9,7 @@ interface ZimablueImage {
   name: string
   slug: string
   pathname: string
+  description?: string
   variants: string | ZimablueVariant[]
 }
 
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(100, Math.max(1, Number(query.limit) || 48))
   const offset = Math.max(0, Number(query.offset) || 0)
   const response = await $fetch<ZimablueResponse>('https://zimablue.cc/api/images', {
-    query: { limit, offset, fields: 'name,slug,pathname,variants' },
+    query: { limit, offset, fields: 'name,slug,pathname,description,variants' },
   })
   const images = Array.isArray(response.data) ? response.data : []
   return {
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
       const pathname = pickVariantPath(image)
       const url = publicImageUrl(pathname)
       if (!url || !image.name || !image.slug) return []
-      return [{ name: image.name, slug: image.slug, url }]
+      return [{ name: image.name, slug: image.slug, url, description: typeof image.description === 'string' ? image.description.slice(0, 2000) : '' }]
     }),
     total: response.pagination?.total ?? images.length,
   }

@@ -10,6 +10,7 @@ export interface DailyPuzzle {
   imageName: string
   imageSlug: string
   imageUrl: string
+  imageDescription: string
   gridSize: number
   gridRows: number
   gridColumns: number
@@ -29,6 +30,7 @@ export interface WeeklyPuzzle {
   imageName: string
   imageSlug: string
   imageUrl: string
+  imageDescription: string
   imageUrlLandscape: string | null
   imageUrlPortrait: string | null
   imageUrlSquare: string | null

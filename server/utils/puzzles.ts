@@ -12,6 +12,7 @@ interface PuzzleRow {
   image_name: string
   image_slug: string
   image_url: string
+  image_description: string
   grid_size: number
   grid_rows: number
   grid_columns: number
@@ -29,6 +30,7 @@ export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
     imageName: row.image_name,
     imageSlug: row.image_slug,
     imageUrl: row.image_url,
+    imageDescription: row.image_description ?? '',
     gridSize: row.grid_size,
     gridRows: row.grid_rows,
     gridColumns: row.grid_columns,
@@ -39,7 +41,7 @@ export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
 
 export async function getPuzzleByDate(event: H3Event, date: string): Promise<DailyPuzzle | null> {
   const row = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, image_description, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
     .bind(date, 'published', getParisDate())
     .first<PuzzleRow>()
   return row ? mapPuzzle(row) : null
@@ -47,7 +49,7 @@ export async function getPuzzleByDate(event: H3Event, date: string): Promise<Dai
 
 export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, image_description, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
     .bind('published', getParisDate())
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
@@ -55,7 +57,7 @@ export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]
 
 export async function getAdminPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles ORDER BY date')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, image_description, grid_size, grid_rows, grid_columns, status FROM puzzles ORDER BY date')
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
 }
