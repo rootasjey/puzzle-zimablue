@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.2] - 2026-10-18
+
+### Changed
+
+- Removed the card frame from account settings and aligned the opening navigation on both account pages.
+
 ## [0.6.1] - 2026-10-18
 
 ### Changed

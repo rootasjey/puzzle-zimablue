@@ -272,7 +272,6 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .account-section-nav a:hover { color: var(--ink); }
 .account-section-nav a[aria-current="page"] { border-color: var(--blue); color: var(--ink); }
 .account-section-nav a:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
-.settings-sheet { max-width: 820px; }
 .settings-section { margin-top: 1.7rem; padding-top: 1.3rem; border-top: 1px solid var(--line-divider); }
 .settings-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .settings-fieldset:disabled { opacity: .6; }
@@ -314,6 +313,7 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .account-welcome { width: min(100%, 500px); }
 .account-heading { display: flex; align-items: start; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.4rem; }
 .account-heading h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 850; }
+.account-content > h1 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); font-weight: 850; }
 .account-heading .auth-intro { margin-bottom: 0; }
 .account-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 2rem 0 2.6rem; border: 2px solid var(--ink); background: var(--white); box-shadow: var(--shadow); }
 .account-stat { display: grid; min-height: 110px; align-content: center; justify-items: center; gap: .35rem; padding: .7rem; text-align: center; }
@@ -382,7 +382,6 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .admin-nav { padding: .45rem .65rem; border: 2px solid var(--ink); background: var(--yellow); color: var(--yellow-foreground); box-shadow: 2px 2px 0 var(--ink); }
 .auth-page { display: grid; flex: 1; place-items: center; padding: 3rem 1.2rem 5rem; }
 .auth-sheet { width: min(100%, 440px); padding: clamp(1.4rem, 5vw, 2.2rem); border: 2px solid var(--ink); background: var(--white); box-shadow: 6px 6px 0 var(--ink); }
-.auth-sheet.settings-sheet { width: min(100%, 850px); }
 .auth-back { display: inline-block; margin-bottom: 2rem; color: var(--blue); font-size: .84rem; font-weight: 750; text-decoration: none; }
 .auth-sheet h1,.admin-topline h1 { margin: 0; font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 850; letter-spacing: -.065em; line-height: 1.05; }
 .auth-intro { margin: .8rem 0 1.5rem; color: var(--muted); font-size: .92rem; line-height: 1.65; }

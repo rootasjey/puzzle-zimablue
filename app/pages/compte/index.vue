@@ -2,7 +2,6 @@
   <main class="account-page">
     <section v-if="loggedIn" class="account-content">
       <NuxtLink :to="$localePath({ name: 'index' })" class="auth-back">{{ t('auth.back') }}</NuxtLink>
-      <p class="section-kicker">{{ t('account.kicker') }}</p>
       <nav class="account-section-nav" :aria-label="t('account.sectionNavigation')">
         <NuxtLink :to="$localePath({ name: 'account' })" aria-current="page">{{ t('account.progressTab') }}</NuxtLink>
         <NuxtLink :to="$localePath({ name: 'account-settings' })">{{ t('settings.title') }}</NuxtLink>
