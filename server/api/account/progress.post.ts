@@ -1,6 +1,6 @@
 import { getDatabase } from '../../utils/cloudflare'
 import { requireSignedInUser } from '../../utils/auth'
-import { verifyPuzzleAttempt } from '#shared/utils/puzzle-attempt'
+import { createDailyPuzzleId, verifyPuzzleAttempt } from '#shared/utils/puzzle-attempt'
 
 export default defineEventHandler(async (event) => {
   const user = await requireSignedInUser(event)
@@ -15,11 +15,11 @@ export default defineEventHandler(async (event) => {
     await clearUserSession(event)
     throw createError({ statusCode: 403, statusMessage: 'Session invalide.' })
   }
-  const puzzle = await database.prepare("SELECT date, grid_size FROM puzzles WHERE date = ? AND status = 'published'")
+  const puzzle = await database.prepare("SELECT date, grid_rows, grid_columns FROM puzzles WHERE date = ? AND status = 'published'")
     .bind(body.puzzleDate)
-    .first<{ date: string; grid_size: number }>()
+    .first<{ date: string; grid_rows: number; grid_columns: number }>()
   if (!puzzle) throw createError({ statusCode: 404, statusMessage: 'Puzzle introuvable.' })
-  const moves = verifyPuzzleAttempt(body.puzzleDate, puzzle.grid_size, body.attempt)
+  const moves = verifyPuzzleAttempt({ puzzleId: createDailyPuzzleId(puzzle.date), gridRows: puzzle.grid_rows, gridColumns: puzzle.grid_columns }, body.attempt)
   if (moves === null) throw createError({ statusCode: 400, statusMessage: 'Résultat de puzzle invalide.' })
 
   const completedAt = new Date().toISOString()

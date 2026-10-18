@@ -11,7 +11,7 @@
         <p class="section-kicker">{{ t('home.kicker') }}</p>
         <h1>{{ t('home.titleFirst') }}<br>{{ t('home.titleJoin') }} <em>{{ t('home.titleColor') }}</em></h1>
         <p class="feature-description">{{ t('home.description') }}</p>
-        <div class="today-line">{{ formatPuzzleDate(featured.date) }} <span class="line-divider">·</span> {{ t('home.pieces', { count: featured.gridSize ** 2 }) }}</div>
+        <div class="today-line">{{ formatPuzzleDate(featured.date) }} <span class="line-divider">·</span> {{ t('home.pieces', { count: featured.pieceCount }) }}</div>
         <NuxtLink class="play-link" :to="puzzlePath(featured.date)">{{ t('home.playToday') }} <span aria-hidden="true">↗</span></NuxtLink>
         <NuxtLink class="leaderboard-home-link" :to="$localePath({ name: 'leaderboard' })">{{ t('leaderboard.link') }}</NuxtLink>
       </div>

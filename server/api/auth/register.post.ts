@@ -1,6 +1,6 @@
 import { getDatabase, getWorkerBindings } from '../../utils/cloudflare'
 import { consumeRateLimit, createOpaqueToken, normalizeEmail, sha256Hex } from '../../utils/auth'
-import { verifyPuzzleAttempt } from '#shared/utils/puzzle-attempt'
+import { createDailyPuzzleId, verifyPuzzleAttempt } from '#shared/utils/puzzle-attempt'
 
 export default defineEventHandler(async (event) => {
   if (!useRuntimeConfig(event).public.registrationEnabled) {
@@ -32,11 +32,11 @@ export default defineEventHandler(async (event) => {
   const database = getDatabase(event)
   await database.prepare('DELETE FROM email_verification_tokens WHERE used_at IS NOT NULL OR expires_at <= ?').bind(new Date().toISOString()).run()
   if (puzzleDate) {
-    const puzzle = await database.prepare("SELECT grid_size FROM puzzles WHERE date = ? AND status = 'published'")
+    const puzzle = await database.prepare("SELECT grid_rows, grid_columns FROM puzzles WHERE date = ? AND status = 'published'")
       .bind(puzzleDate)
-      .first<{ grid_size: number }>()
+      .first<{ grid_rows: number; grid_columns: number }>()
     if (!puzzle) throw createError({ statusCode: 400, statusMessage: 'Puzzle introuvable.' })
-    moves = verifyPuzzleAttempt(puzzleDate, puzzle.grid_size, body.attempt)
+    moves = verifyPuzzleAttempt({ puzzleId: createDailyPuzzleId(puzzleDate), gridRows: puzzle.grid_rows, gridColumns: puzzle.grid_columns }, body.attempt)
     if (moves === null) throw createError({ statusCode: 400, statusMessage: 'Résultat de puzzle invalide.' })
     scoreVerified = 1
   }

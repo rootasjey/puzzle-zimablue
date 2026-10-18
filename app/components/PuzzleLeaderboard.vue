@@ -8,7 +8,7 @@
       <p v-if="data?.puzzle" class="leaderboard-date">
         {{ formatPuzzleDate(data.puzzle.date, { dateStyle: 'full' }) }}
         <span aria-hidden="true">·</span>
-        {{ t('home.pieces', { count: data.puzzle.gridSize ** 2 }) }}
+        {{ t('home.pieces', { count: data.puzzle.pieceCount }) }}
       </p>
     </header>
 

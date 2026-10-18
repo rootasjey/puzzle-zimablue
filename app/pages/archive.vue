@@ -13,7 +13,7 @@
           <div class="archive-card-copy">
             <span>{{ formatPuzzleDate(puzzle.date, { day: 'numeric', month: 'long', year: 'numeric' }) }}</span>
             <strong>{{ puzzleTitle(puzzle) }}</strong>
-            <small>{{ t('archive.replay', { count: puzzle.gridSize ** 2 }) }}</small>
+            <small>{{ t('archive.replay', { count: puzzle.pieceCount }) }}</small>
           </div>
           <span class="card-open" aria-hidden="true">↗</span>
         </NuxtLink>

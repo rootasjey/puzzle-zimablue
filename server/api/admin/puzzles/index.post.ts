@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
   const now = new Date().toISOString()
   try {
     await getDatabase(event).prepare(`INSERT INTO puzzles
-      (date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status, created_by, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(puzzle.date, puzzle.title, puzzle.note, puzzle.titleEn, puzzle.noteEn, puzzle.imageName, puzzle.imageSlug, puzzle.imageUrl, puzzle.gridSize, puzzle.status, admin.id, now, now)
+      (date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status, created_by, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(puzzle.date, puzzle.title, puzzle.note, puzzle.titleEn, puzzle.noteEn, puzzle.imageName, puzzle.imageSlug, puzzle.imageUrl, puzzle.gridSize, puzzle.gridRows, puzzle.gridColumns, puzzle.status, admin.id, now, now)
       .run()
   } catch {
     throw createError({ statusCode: 409, statusMessage: 'Un puzzle existe déjà à cette date.' })

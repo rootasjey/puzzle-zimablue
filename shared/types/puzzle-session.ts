@@ -5,9 +5,10 @@ export interface PuzzleSessionSnapshot {
 }
 
 export interface LocalPuzzleSession {
-  version: 1
-  date: string
-  gridSize: number
+  version: 2
+  puzzleId: string
+  gridRows: number
+  gridColumns: number
   attempt: string
   savedAt: number
 }

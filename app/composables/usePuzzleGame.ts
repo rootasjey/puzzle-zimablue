@@ -1,5 +1,5 @@
 import type { DailyPuzzle } from '#shared/types/puzzle'
-import { createPuzzleOrder, type PuzzleMove } from '#shared/utils/puzzle-attempt'
+import { createPuzzleOrder, MAX_ATTEMPT_MOVES, type PuzzleMove } from '#shared/utils/puzzle-attempt'
 
 export function usePuzzleGame(puzzle: DailyPuzzle) {
   const order = ref<number[]>([])
@@ -11,11 +11,12 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
   let boardGeneration = 0
 
   const complete = computed(() => order.value.length > 0 && order.value.every((piece, slot) => piece === slot))
+  const moveLimitReached = computed(() => moveHistory.value.length >= MAX_ATTEMPT_MOVES)
 
   function newBoard() {
     const generation = boardGeneration++
     attemptGeneration.value = generation
-    order.value = createPuzzleOrder(puzzle.date, puzzle.gridSize, generation)
+    order.value = createPuzzleOrder(puzzle.puzzleId, puzzle.gridRows, puzzle.gridColumns, generation)
     selected.value = null
     moves.value = 0
     moveHistory.value = []
@@ -23,7 +24,7 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
   }
 
   function restoreBoard(generation: number, restoreMoves: readonly PuzzleMove[]) {
-    const restoredOrder = createPuzzleOrder(puzzle.date, puzzle.gridSize, generation)
+    const restoredOrder = createPuzzleOrder(puzzle.puzzleId, puzzle.gridRows, puzzle.gridColumns, generation)
     for (const [first, second] of restoreMoves) {
       ;[restoredOrder[first], restoredOrder[second]] = [restoredOrder[second]!, restoredOrder[first]!]
     }
@@ -37,7 +38,7 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
   }
 
   function choose(slot: number) {
-    if (complete.value) return
+    if (complete.value || moveLimitReached.value) return
     if (selected.value === null) {
       selected.value = slot
       return
@@ -51,7 +52,7 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
   }
 
   function swap(first: number, second: number) {
-    if (complete.value || first === second || first < 0 || second < 0 || first >= order.value.length || second >= order.value.length) return
+    if (complete.value || moveLimitReached.value || first === second || first < 0 || second < 0 || first >= order.value.length || second >= order.value.length) return
     const next = [...order.value]
     ;[next[first], next[second]] = [next[second]!, next[first]!]
     order.value = next
@@ -60,5 +61,5 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
     selected.value = null
   }
 
-  return { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, restoreBoard, choose, swap }
+  return { order, selected, moves, moveHistory, attemptGeneration, complete, moveLimitReached, started, newBoard, restoreBoard, choose, swap }
 }

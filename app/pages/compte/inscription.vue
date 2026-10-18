@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { formatPuzzleDate } from '#shared/types/puzzle'
+import { MAX_ATTEMPT_LENGTH } from '#shared/utils/puzzle-attempt'
 definePageMeta({ name: 'account-sign-up', layout: false })
 const { $defineI18nRoute } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account/sign-up' } })
@@ -28,7 +29,7 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const dateLocale = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const puzzleDate = computed(() => typeof route.query.puzzleDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(route.query.puzzleDate) ? route.query.puzzleDate : '')
-const puzzleAttempt = computed(() => typeof route.query.attempt === 'string' && route.query.attempt.length <= 5_005 ? route.query.attempt : '')
+const puzzleAttempt = computed(() => typeof route.query.attempt === 'string' && route.query.attempt.length <= MAX_ATTEMPT_LENGTH ? route.query.attempt : '')
 const email = ref('')
 const password = ref('')
 const error = ref('')

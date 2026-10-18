@@ -29,7 +29,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="difficulty in data.stats.difficulties" :key="difficulty.gridSize">
+              <tr v-for="difficulty in data.stats.difficulties" :key="`${difficulty.gridRows}x${difficulty.gridColumns}`">
                 <th scope="row">{{ t('home.pieces', { count: difficulty.pieceCount }) }}</th>
                 <td>{{ difficulty.completions }}</td>
                 <td>{{ formatNumber(difficulty.averageMoves) }}</td>
@@ -51,7 +51,7 @@ interface PublicPlayerPayload {
   profile: { publicName: string }
   stats: {
     completedCount: number
-    difficulties: { gridSize: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[]
+    difficulties: { gridRows: number; gridColumns: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[]
   }
 }
 

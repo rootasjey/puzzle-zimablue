@@ -1,6 +1,7 @@
 export type PuzzleStatus = 'draft' | 'published'
 
 export interface DailyPuzzle {
+  puzzleId: string
   date: string
   title: string
   note: string
@@ -10,6 +11,30 @@ export interface DailyPuzzle {
   imageSlug: string
   imageUrl: string
   gridSize: number
+  gridRows: number
+  gridColumns: number
+  pieceCount: number
+  status: PuzzleStatus
+}
+
+/** Data contract for a future weekly Master puzzle; image variants can be supplied independently. */
+export interface WeeklyPuzzle {
+  puzzleId: string
+  weekKey: string
+  weekStart: string
+  title: string
+  note: string
+  titleEn: string
+  noteEn: string
+  imageName: string
+  imageSlug: string
+  imageUrl: string
+  imageUrlLandscape: string | null
+  imageUrlPortrait: string | null
+  imageUrlSquare: string | null
+  gridRows: number
+  gridColumns: number
+  pieceCount: number
   status: PuzzleStatus
 }
 

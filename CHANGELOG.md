@@ -2,6 +2,19 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-10-18
+
+### Added
+
+- Versioned puzzle attempts bound to stable daily or weekly puzzle IDs and rectangular grid dimensions, with support for up to 1,024 pieces.
+- Weekly Master puzzle data storage for localized content, layout, and optional landscape, portrait, and square image variants.
+- Automated tests for attempt encoding, replay verification, puzzle identity, and layout limits.
+
+### Changed
+
+- Account and device saves now use attempt format v2. Existing v1 saved sessions are invalidated by the D1 migration.
+- Puzzle boards, score summaries, and player statistics now use row and column dimensions.
+
 ## [0.3.2] - 2026-10-18
 
 ### Changed

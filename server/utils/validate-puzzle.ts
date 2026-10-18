@@ -38,6 +38,8 @@ export function validatePuzzleInput(body: PuzzleInput) {
     imageSlug: body.imageSlug,
     imageUrl,
     gridSize: body.gridSize,
+    gridRows: body.gridSize,
+    gridColumns: body.gridSize,
     status: body.status as PuzzleStatus,
   }
 }

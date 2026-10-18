@@ -12,7 +12,7 @@
       ref="board"
       :style="boardStyle"
       role="group"
-      :aria-label="t('game.gridLabel', { size: puzzle.gridSize, title: displayedTitle })"
+      :aria-label="t('game.gridLabel', { rows: puzzle.gridRows, columns: puzzle.gridColumns, title: displayedTitle })"
       @pointermove="movePiece"
     >
       <button
@@ -40,7 +40,7 @@
     <Teleport to="body">
       <Transition name="ghost-lift" appear>
         <div v-if="dragging?.moved" class="puzzle-drag-ghost" :class="{ settling: dragging.phase === 'settling', touch: dragging.pointerType === 'touch' }" :style="dragGhostStyle" aria-hidden="true">
-          <div class="puzzle-drag-ghost-image" :style="[pieceStyle(dragging.piece), { '--image-url': `url('${puzzle.imageUrl}')`, '--grid-size': puzzle.gridSize } ]" />
+          <div class="puzzle-drag-ghost-image" :style="[pieceStyle(dragging.piece), { '--image-url': `url('${puzzle.imageUrl}')`, '--grid-rows': puzzle.gridRows, '--grid-columns': puzzle.gridColumns } ]" />
         </div>
       </Transition>
     </Teleport>
@@ -48,6 +48,7 @@
       <div class="board-session-summary">
         <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
         <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
+        <p v-if="moveLimitReached" class="move-limit-note" role="status">{{ t('game.moveLimitReached') }}</p>
         <p v-if="progressEnabled" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
       </div>
       <div class="board-tool-actions">
@@ -179,8 +180,9 @@ const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: 
 const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
 const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
 const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
-const { order, selected, moves, moveHistory, attemptGeneration, complete, newBoard, restoreBoard, swap } = usePuzzleGame(props.puzzle)
-const attemptToken = computed(() => encodePuzzleAttempt(attemptGeneration.value, moveHistory.value))
+const { order, selected, moves, moveHistory, attemptGeneration, complete, moveLimitReached, newBoard, restoreBoard, swap } = usePuzzleGame(props.puzzle)
+const attemptLayout = computed(() => ({ puzzleId: props.puzzle.puzzleId, gridRows: props.puzzle.gridRows, gridColumns: props.puzzle.gridColumns }))
+const attemptToken = computed(() => encodePuzzleAttempt(attemptLayout.value, attemptGeneration.value, moveHistory.value))
 type SessionStatus = 'loading' | 'saving' | 'saved' | 'deviceSaved' | 'updated' | 'conflict' | 'error'
 const sessionStatus = ref<SessionStatus>('loading')
 const sessionStatusKey = computed(() => ({
@@ -214,7 +216,7 @@ let lastAppliedAttempt = ''
 let latestLocalSaveAt = 0
 let sessionRetryDelay = 2000
 
-const localSessionKey = `puzzle-zimablue:session:${props.puzzle.date}:${props.puzzle.gridSize}`
+const localSessionKey = `puzzle-zimablue:session:${props.puzzle.puzzleId}`
 
 const dragGhostStyle = computed(() => {
   if (!dragging.value) return {}
@@ -241,7 +243,8 @@ const completionBoardWidth = computed(() => {
   return Math.min(maxWidth, maxHeight * imageAspectRatio.value)
 })
 const boardStyle = computed(() => ({
-  '--grid-size': props.puzzle.gridSize,
+  '--grid-rows': props.puzzle.gridRows,
+  '--grid-columns': props.puzzle.gridColumns,
   '--image-url': `url('${props.puzzle.imageUrl}')`,
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
@@ -263,9 +266,9 @@ function readLocalSession(): LocalPuzzleSession | null {
     const value = window.localStorage.getItem(localSessionKey)
     if (!value) return null
     const parsed = JSON.parse(value) as Partial<LocalPuzzleSession>
-    if (parsed.version !== 1 || parsed.date !== props.puzzle.date || parsed.gridSize !== props.puzzle.gridSize
+    if (parsed.version !== 2 || parsed.puzzleId !== props.puzzle.puzzleId || parsed.gridRows !== props.puzzle.gridRows || parsed.gridColumns !== props.puzzle.gridColumns
       || typeof parsed.savedAt !== 'number' || typeof parsed.attempt !== 'string'
-      || !decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, parsed.attempt)) return null
+      || !decodePuzzleAttempt(attemptLayout.value, parsed.attempt)) return null
     return parsed as LocalPuzzleSession
   } catch {
     return null
@@ -276,9 +279,10 @@ function writeLocalSession(attempt = attemptToken.value) {
   const savedAt = Date.now()
   latestLocalSaveAt = savedAt
   const snapshot: LocalPuzzleSession = {
-    version: 1,
-    date: props.puzzle.date,
-    gridSize: props.puzzle.gridSize,
+    version: 2,
+    puzzleId: props.puzzle.puzzleId,
+    gridRows: props.puzzle.gridRows,
+    gridColumns: props.puzzle.gridColumns,
     attempt,
     savedAt,
   }
@@ -290,7 +294,7 @@ function writeLocalSession(attempt = attemptToken.value) {
 }
 
 function applyAttempt(attempt: string): boolean {
-  const decoded = decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, attempt)
+  const decoded = decodePuzzleAttempt(attemptLayout.value, attempt)
   if (!decoded) return false
   dragging.value = null
   if (dragSettleTimer) clearTimeout(dragSettleTimer)
@@ -345,7 +349,7 @@ async function saveSession() {
   try {
     const result = await $fetch<{ saved: boolean; session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
       method: 'PUT',
-      body: { puzzleDate: props.puzzle.date, attempt, expectedRevision: sessionRevision },
+      body: { puzzleId: props.puzzle.puzzleId, attempt, expectedRevision: sessionRevision },
     })
     if (!result.saved && result.session) {
       acceptRemoteSession(result.session, 'conflict')
@@ -373,7 +377,7 @@ async function pollSession() {
   if (!sessionReady || !loggedIn.value || sessionSaveInFlight || document.visibilityState !== 'visible') return
   try {
     const result = await $fetch<{ session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
-      query: { puzzleDate: props.puzzle.date },
+      query: { puzzleId: props.puzzle.puzzleId },
     })
     if (result.session && result.session.revision > sessionRevision) {
       const localChanged = attemptToken.value !== lastServerAttempt
@@ -412,7 +416,7 @@ async function initializeSession(isLoggedIn = loggedIn.value) {
   if (isLoggedIn) {
     try {
       const result = await $fetch<{ session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
-        query: { puzzleDate: props.puzzle.date },
+        query: { puzzleId: props.puzzle.puzzleId },
       })
       if (result.session) {
         sessionRevision = result.session.revision
@@ -457,9 +461,9 @@ function handleGuestStorage(event: StorageEvent) {
   if (loggedIn.value || event.key !== localSessionKey || !event.newValue) return
   try {
     const local = JSON.parse(event.newValue) as Partial<LocalPuzzleSession>
-    if (local.version !== 1 || local.date !== props.puzzle.date || local.gridSize !== props.puzzle.gridSize
+    if (local.version !== 2 || local.puzzleId !== props.puzzle.puzzleId || local.gridRows !== props.puzzle.gridRows || local.gridColumns !== props.puzzle.gridColumns
       || typeof local.savedAt !== 'number' || local.savedAt <= latestLocalSaveAt || typeof local.attempt !== 'string'
-      || !decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, local.attempt)) return
+      || !decodePuzzleAttempt(attemptLayout.value, local.attempt)) return
     latestLocalSaveAt = local.savedAt
     if (applyAttempt(local.attempt)) sessionStatus.value = 'updated'
   } catch {
@@ -666,11 +670,12 @@ function dragStyle(piece: number) {
 }
 
 function pieceStyle(piece: number) {
-  const column = piece % props.puzzle.gridSize
-  const row = Math.floor(piece / props.puzzle.gridSize)
-  const last = (props.puzzle.gridSize - 1) * 100
+  const column = piece % props.puzzle.gridColumns
+  const row = Math.floor(piece / props.puzzle.gridColumns)
+  const lastColumn = (props.puzzle.gridColumns - 1) * 100
+  const lastRow = (props.puzzle.gridRows - 1) * 100
   return {
-    backgroundPosition: `${last ? column / (props.puzzle.gridSize - 1) * 100 : 0}% ${last ? row / (props.puzzle.gridSize - 1) * 100 : 0}%`,
+    backgroundPosition: `${lastColumn ? column / (props.puzzle.gridColumns - 1) * 100 : 0}% ${lastRow ? row / (props.puzzle.gridRows - 1) * 100 : 0}%`,
   }
 }
 

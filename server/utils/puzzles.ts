@@ -1,5 +1,6 @@
 import type { H3Event } from 'h3'
 import type { DailyPuzzle, PuzzleStatus } from '../../shared/types/puzzle'
+import { createDailyPuzzleId } from '../../shared/utils/puzzle-attempt'
 import { getDatabase } from './cloudflare'
 
 interface PuzzleRow {
@@ -12,11 +13,14 @@ interface PuzzleRow {
   image_slug: string
   image_url: string
   grid_size: number
+  grid_rows: number
+  grid_columns: number
   status: PuzzleStatus
 }
 
 export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
   return {
+    puzzleId: createDailyPuzzleId(row.date),
     date: row.date,
     title: row.title,
     note: row.note,
@@ -26,13 +30,16 @@ export function mapPuzzle(row: PuzzleRow): DailyPuzzle {
     imageSlug: row.image_slug,
     imageUrl: row.image_url,
     gridSize: row.grid_size,
+    gridRows: row.grid_rows,
+    gridColumns: row.grid_columns,
+    pieceCount: row.grid_rows * row.grid_columns,
     status: row.status,
   }
 }
 
 export async function getPuzzleByDate(event: H3Event, date: string): Promise<DailyPuzzle | null> {
   const row = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE date = ? AND status = ? AND date <= ?')
     .bind(date, 'published', getParisDate())
     .first<PuzzleRow>()
   return row ? mapPuzzle(row) : null
@@ -40,7 +47,7 @@ export async function getPuzzleByDate(event: H3Event, date: string): Promise<Dai
 
 export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles WHERE status = ? AND date <= ? ORDER BY date DESC')
     .bind('published', getParisDate())
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
@@ -48,7 +55,7 @@ export async function getPublishedPuzzles(event: H3Event): Promise<DailyPuzzle[]
 
 export async function getAdminPuzzles(event: H3Event): Promise<DailyPuzzle[]> {
   const result = await getDatabase(event)
-    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, status FROM puzzles ORDER BY date')
+    .prepare('SELECT date, title, note, title_en, note_en, image_name, image_slug, image_url, grid_size, grid_rows, grid_columns, status FROM puzzles ORDER BY date')
     .all<PuzzleRow>()
   return (result.results ?? []).map(mapPuzzle)
 }

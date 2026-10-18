@@ -1,6 +1,6 @@
 {
   "name": "puzzle-zimablue",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "nuxt build",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck",
+    "test": "node --test tests/*.test.mjs",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

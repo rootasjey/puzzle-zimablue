@@ -32,7 +32,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="difficulty in stats.verifiedStats.difficulties" :key="difficulty.gridSize">
+              <tr v-for="difficulty in stats.verifiedStats.difficulties" :key="`${difficulty.gridRows}x${difficulty.gridColumns}`">
                 <th scope="row">{{ t('home.pieces', { count: difficulty.pieceCount }) }}</th>
                 <td>{{ difficulty.completions }}</td>
                 <td>{{ formatNumber(difficulty.averageMoves) }}</td>
@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { formatPuzzleDate } from '#shared/types/puzzle'
-interface AccountStats { publicName: string; publicProfileToken: string | null; completedCount: number; currentStreak: number; bestMoves: number | null; verifiedStats: { completedCount: number; difficulties: { gridSize: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[] }; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
+interface AccountStats { publicName: string; publicProfileToken: string | null; completedCount: number; currentStreak: number; bestMoves: number | null; verifiedStats: { completedCount: number; difficulties: { gridRows: number; gridColumns: number; pieceCount: number; completions: number; averageMoves: number; bestMoves: number; worstMoves: number }[] }; completions: { puzzleDate: string; moves: number; completedAt: string }[] }
 definePageMeta({ name: 'account' })
 const { $defineI18nRoute } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account' } })

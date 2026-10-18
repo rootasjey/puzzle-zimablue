@@ -40,7 +40,7 @@
               </button>
             </div>
             <span>{{ formatPuzzleDate(previewPuzzle.date, { day: 'numeric', month: 'long' }, $getLocale() === 'en' ? 'en-US' : 'fr-FR') }}</span>
-            <span>{{ t('admin.eventDescription', { count: previewPuzzle.gridSize ** 2, image: previewPuzzle.imageName }) }}</span>
+            <span>{{ t('admin.eventDescription', { count: previewPuzzle.pieceCount, image: previewPuzzle.imageName }) }}</span>
           </div>
         </div>
       </template>
@@ -268,7 +268,7 @@ function toCalendarEvent(puzzle: DailyPuzzle): Event {
   return {
     id: puzzle.date,
     title: puzzle.title,
-    description: t('admin.eventDescription', { count: puzzle.gridSize ** 2, image: puzzle.imageName }),
+    description: t('admin.eventDescription', { count: puzzle.pieceCount, image: puzzle.imageName }),
     start,
     end: start,
     allDay: true,

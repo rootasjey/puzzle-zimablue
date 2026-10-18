@@ -55,7 +55,7 @@ export async function getPuzzleLeaderboard(event: H3Event, date: string) {
       date: puzzle.date,
       title: puzzle.title,
       titleEn: puzzle.titleEn,
-      gridSize: puzzle.gridSize,
+      pieceCount: puzzle.pieceCount,
     },
     metrics: {
       participantCount: sortedMoves.length,
