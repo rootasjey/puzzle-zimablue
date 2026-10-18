@@ -10,7 +10,7 @@
     </header>
 
     <div v-if="error" class="admin-alert" role="alert">{{ t('admin.metricsError') }}</div>
-    <div v-else-if="pending" class="calendar-loading">{{ t('admin.loading') }}</div>
+    <div v-else-if="pending" class="calendar-loading"><BrandLoader :label="t('admin.loading')" /></div>
     <template v-else-if="data">
       <section class="metrics-summary" :aria-label="t('admin.metricsSummary')">
         <article>

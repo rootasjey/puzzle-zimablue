@@ -19,12 +19,12 @@
 
     <div v-if="error" class="admin-alert" role="alert">{{ error }}</div>
     <div v-if="notice" class="admin-notice" role="status">{{ notice }}</div>
-    <div v-if="loading" class="calendar-loading">{{ t('admin.loading') }}</div>
+    <div v-if="loading" class="calendar-loading"><BrandLoader :label="t('admin.loading')" /></div>
     <ClientOnly v-else>
       <div class="calendar-frame" @pointerover="handleCalendarPointerOver" @pointerout="handleCalendarPointerOut" @focusin="handleCalendarFocusIn" @focusout="handleCalendarFocusOut">
         <DayFlowCalendar v-if="calendarApp" :calendar="calendarApp" />
       </div>
-      <template #fallback><div class="calendar-loading">{{ t('admin.loading') }}</div></template>
+      <template #fallback><div class="calendar-loading"><BrandLoader :label="t('admin.loading')" /></div></template>
     </ClientOnly>
 
     <NTooltip v-model:open="previewOpen" :delay-duration="0" :_tooltip-content="{ class: 'calendar-event-tooltip' }">

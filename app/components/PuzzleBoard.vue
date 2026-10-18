@@ -1,7 +1,8 @@
 <template>
   <section class="game-panel" :aria-label="t('game.boardLabel')">
-    <div v-if="!imageLoaded" class="board-loading" role="status">
-      {{ imageError ? t('game.imageError') : t('game.loading') }}
+    <div v-if="!imageLoaded" class="board-loading">
+      <BrandLoader v-if="!imageError" :label="t('game.loading')" />
+      <span v-else role="alert">{{ t('game.imageError') }}</span>
     </div>
     <TransitionGroup
       v-else
