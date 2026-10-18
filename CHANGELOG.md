@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.4] - 2026-10-18
+
+### Changed
+
+- Added more space between the main navigation divider and the account return link.
+
 ## [0.6.3] - 2026-10-18
 
 ### Changed
