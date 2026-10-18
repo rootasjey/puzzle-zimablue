@@ -2,6 +2,13 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-10-18
+
+### Added
+
+- Historical verified leaderboards for each published puzzle, with participant and score metrics.
+- Private cumulative player statistics and an explicitly opt-in public profile.
+
 ## [0.1.1] - 2026-10-18
 
 ### Changed

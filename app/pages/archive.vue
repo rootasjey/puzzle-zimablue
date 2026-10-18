@@ -7,15 +7,21 @@
       <p>{{ t('archive.description') }}</p>
     </header>
     <div class="archive-list">
-      <NuxtLink v-for="puzzle in archive" :key="puzzle.date" class="archive-card" :to="puzzlePath(puzzle.date)">
-        <img :src="puzzle.imageUrl" :alt="t('home.illustrationAlt', { name: puzzle.imageName })" loading="lazy">
-        <div class="archive-card-copy">
-          <span>{{ formatPuzzleDate(puzzle.date, { day: 'numeric', month: 'long', year: 'numeric' }) }}</span>
-          <strong>{{ puzzleTitle(puzzle) }}</strong>
-          <small>{{ t('archive.replay', { count: puzzle.gridSize ** 2 }) }}</small>
-        </div>
-        <span class="card-open" aria-hidden="true">↗</span>
-      </NuxtLink>
+      <article v-for="puzzle in archive" :key="puzzle.date" class="archive-history-item">
+        <NuxtLink class="archive-card" :to="puzzlePath(puzzle.date)">
+          <img :src="puzzle.imageUrl" :alt="t('home.illustrationAlt', { name: puzzle.imageName })" loading="lazy">
+          <div class="archive-card-copy">
+            <span>{{ formatPuzzleDate(puzzle.date, { day: 'numeric', month: 'long', year: 'numeric' }) }}</span>
+            <strong>{{ puzzleTitle(puzzle) }}</strong>
+            <small>{{ t('archive.replay', { count: puzzle.gridSize ** 2 }) }}</small>
+          </div>
+          <span class="card-open" aria-hidden="true">↗</span>
+        </NuxtLink>
+        <NuxtLink class="archive-history-board-link" :to="leaderboardPath(puzzle.date)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3" /></svg>
+          {{ t('archive.leaderboard') }}<span aria-hidden="true">↗</span>
+        </NuxtLink>
+      </article>
     </div>
   </main>
 </template>
@@ -33,6 +39,7 @@ const archive = computed(() => puzzles.value?.filter(puzzle => puzzle.date < par
 const language = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
 const formatPuzzleDate = (date: string, options?: Intl.DateTimeFormatOptions) => formatSharedPuzzleDate(date, options, language.value)
 const puzzlePath = (date: string) => $localePath({ name: 'play', params: { date } })
+const leaderboardPath = (date: string) => $localePath({ name: 'leaderboard-puzzle', params: { date } })
 const puzzleTitle = (puzzle: DailyPuzzle) => $getLocale() === 'en' && puzzle.titleEn ? puzzle.titleEn : puzzle.title
 usePageSeo({ title: () => t('archive.seoTitle'), description: () => t('archive.description') })
 defineOgImage('Puzzle.takumi', {

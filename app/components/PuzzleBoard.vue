@@ -97,9 +97,9 @@
             <div class="completion-result">
               <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
               <span v-if="completionSavePending && progressEnabled" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
-              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard' })">
+              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard-puzzle', params: { date: puzzle.date } })">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3" /></svg>
-                <span>{{ t('leaderboard.link') }}</span>
+                <span>{{ t('leaderboard.puzzleLink') }}</span>
               </NuxtLink>
             </div>
             <div v-if="progressEnabled" class="completion-actions">

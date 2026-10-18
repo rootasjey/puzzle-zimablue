@@ -14,12 +14,15 @@ export default defineEventHandler(async (event) => {
   }
 
   const database = getDatabase(event)
-  const activeUser = await database.prepare('SELECT id FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
+  const activeUser = await database.prepare('SELECT id, public_profile_token FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
     .bind(user.id)
-    .first<{ id: string }>()
+    .first<{ id: string; public_profile_token: string | null }>()
   if (!activeUser) {
     await clearUserSession(event)
     throw createError({ statusCode: 403, statusMessage: 'Session invalide.' })
+  }
+  if (!publicName && activeUser.public_profile_token) {
+    throw createError({ statusCode: 409, statusMessage: 'Désactive ton profil public avant d’effacer ton nom public.' })
   }
 
   await database.prepare('UPDATE users SET public_name = ?, updated_at = ? WHERE id = ?')

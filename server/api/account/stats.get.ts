@@ -1,20 +1,24 @@
 import { getDatabase } from '../../utils/cloudflare'
 import { requireSignedInUser } from '../../utils/auth'
+import { getVerifiedPlayerStats } from '../../utils/player-stats'
 
 interface CompletionRow { puzzle_date: string; moves: number; completed_at: string }
 
 export default defineEventHandler(async (event) => {
   const user = await requireSignedInUser(event)
   const database = getDatabase(event)
-  const activeUser = await database.prepare('SELECT id, public_name FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
-    .bind(user.id).first<{ id: string; public_name: string | null }>()
+  const activeUser = await database.prepare('SELECT id, public_name, public_profile_token FROM users WHERE id = ? AND disabled_at IS NULL AND email_verified_at IS NOT NULL')
+    .bind(user.id).first<{ id: string; public_name: string | null; public_profile_token: string | null }>()
   if (!activeUser) {
     await clearUserSession(event)
     throw createError({ statusCode: 403, statusMessage: 'Session invalide.' })
   }
-  const rows = await database.prepare('SELECT puzzle_date, moves, completed_at FROM puzzle_completions WHERE user_id = ? ORDER BY puzzle_date DESC')
-    .bind(user.id)
-    .all<CompletionRow>()
+  const [rows, verifiedStats] = await Promise.all([
+    database.prepare('SELECT puzzle_date, moves, completed_at FROM puzzle_completions WHERE user_id = ? ORDER BY puzzle_date DESC')
+      .bind(user.id)
+      .all<CompletionRow>(),
+    getVerifiedPlayerStats(database, user.id),
+  ])
   const completions = rows.results ?? []
   const completedDates = new Set(completions.map(row => row.puzzle_date))
   let streak = 0
@@ -33,9 +37,11 @@ export default defineEventHandler(async (event) => {
   const lowestMoves = completions.length ? Math.min(...completions.map(row => row.moves)) : null
   return {
     publicName: activeUser.public_name ?? '',
+    publicProfileToken: activeUser.public_profile_token,
     completedCount: completions.length,
     currentStreak: streak,
     bestMoves: lowestMoves,
+    verifiedStats,
     completions: completions.map(row => ({ puzzleDate: row.puzzle_date, moves: row.moves, completedAt: row.completed_at })),
   }
 })
