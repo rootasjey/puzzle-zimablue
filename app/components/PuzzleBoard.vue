@@ -45,8 +45,11 @@
       </Transition>
     </Teleport>
     <div class="board-tools" :style="boardStyle">
-      <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
-      <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
+      <div class="board-session-summary">
+        <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+        <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
+        <p v-if="progressEnabled" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
+      </div>
       <div class="board-tool-actions">
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
           <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
@@ -151,7 +154,8 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import type { DailyPuzzle } from '#shared/types/puzzle'
-import { encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
+import type { LocalPuzzleSession, PuzzleSessionSnapshot } from '#shared/types/puzzle-session'
+import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
 const props = withDefaults(defineProps<{ puzzle: DailyPuzzle; progressEnabled?: boolean }>(), { progressEnabled: true })
@@ -169,8 +173,19 @@ const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: 
 const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
 const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
 const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
-const { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, swap } = usePuzzleGame(props.puzzle)
+const { order, selected, moves, moveHistory, attemptGeneration, complete, newBoard, restoreBoard, swap } = usePuzzleGame(props.puzzle)
 const attemptToken = computed(() => encodePuzzleAttempt(attemptGeneration.value, moveHistory.value))
+type SessionStatus = 'loading' | 'saving' | 'saved' | 'deviceSaved' | 'updated' | 'conflict' | 'error'
+const sessionStatus = ref<SessionStatus>('loading')
+const sessionStatusKey = computed(() => ({
+  loading: 'game.sessionLoading',
+  saving: 'game.sessionSaving',
+  saved: 'game.sessionSaved',
+  deviceSaved: 'game.sessionDeviceSaved',
+  updated: 'game.sessionUpdated',
+  conflict: 'game.sessionConflict',
+  error: 'game.sessionError',
+}[sessionStatus.value]))
 const imageLoaded = ref(false)
 const imageError = ref(false)
 const imageDimensions = ref({ width: 1, height: 1 })
@@ -182,6 +197,18 @@ const dragging = ref<{ pointerId: number; pointerType: string; from: number; pie
 const ignoreClick = ref(false)
 let ignoreClickTimer: ReturnType<typeof setTimeout> | undefined
 let dragSettleTimer: ReturnType<typeof setTimeout> | undefined
+let sessionSaveTimer: ReturnType<typeof setTimeout> | undefined
+let sessionRetryTimer: ReturnType<typeof setTimeout> | undefined
+let sessionPollTimer: ReturnType<typeof setInterval> | undefined
+let sessionReady = false
+let sessionSaveInFlight = false
+let sessionRevision = 0
+let lastServerAttempt = ''
+let lastAppliedAttempt = ''
+let latestLocalSaveAt = 0
+let sessionRetryDelay = 2000
+
+const localSessionKey = `puzzle-zimablue:session:${props.puzzle.date}:${props.puzzle.gridSize}`
 
 const dragGhostStyle = computed(() => {
   if (!dragging.value) return {}
@@ -225,6 +252,233 @@ function updateViewportSize() {
   viewportSize.value = { width: window.innerWidth, height: window.innerHeight }
 }
 
+function readLocalSession(): LocalPuzzleSession | null {
+  try {
+    const value = window.localStorage.getItem(localSessionKey)
+    if (!value) return null
+    const parsed = JSON.parse(value) as Partial<LocalPuzzleSession>
+    if (parsed.version !== 1 || parsed.date !== props.puzzle.date || parsed.gridSize !== props.puzzle.gridSize
+      || typeof parsed.savedAt !== 'number' || typeof parsed.attempt !== 'string'
+      || !decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, parsed.attempt)) return null
+    return parsed as LocalPuzzleSession
+  } catch {
+    return null
+  }
+}
+
+function writeLocalSession(attempt = attemptToken.value) {
+  const savedAt = Date.now()
+  latestLocalSaveAt = savedAt
+  const snapshot: LocalPuzzleSession = {
+    version: 1,
+    date: props.puzzle.date,
+    gridSize: props.puzzle.gridSize,
+    attempt,
+    savedAt,
+  }
+  try {
+    window.localStorage.setItem(localSessionKey, JSON.stringify(snapshot))
+  } catch {
+    // Local storage can be disabled or full; the account copy remains available when signed in.
+  }
+}
+
+function applyAttempt(attempt: string): boolean {
+  const decoded = decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, attempt)
+  if (!decoded) return false
+  dragging.value = null
+  if (dragSettleTimer) clearTimeout(dragSettleTimer)
+  lastAppliedAttempt = attempt
+  restoreBoard(decoded.generation, decoded.moves)
+  return true
+}
+
+function acceptRemoteSession(session: PuzzleSessionSnapshot, status: 'updated' | 'conflict') {
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
+  sessionSaveTimer = undefined
+  sessionRetryTimer = undefined
+  sessionRevision = session.revision
+  lastServerAttempt = session.attempt
+  if (!applyAttempt(session.attempt)) {
+    sessionStatus.value = 'error'
+    return
+  }
+  writeLocalSession(session.attempt)
+  sessionStatus.value = status
+}
+
+function scheduleSessionSave() {
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
+  sessionRetryTimer = undefined
+  sessionStatus.value = loggedIn.value ? 'saving' : 'deviceSaved'
+  if (!loggedIn.value) return
+  sessionSaveTimer = setTimeout(() => void saveSession(), 350)
+}
+
+function scheduleSessionRetry() {
+  if (!loggedIn.value || !sessionReady || sessionRetryTimer) return
+  const delay = sessionRetryDelay
+  sessionRetryDelay = Math.min(sessionRetryDelay * 2, 30_000)
+  sessionRetryTimer = setTimeout(() => {
+    sessionRetryTimer = undefined
+    void saveSession()
+  }, delay)
+}
+
+async function saveSession() {
+  if (!sessionReady || !props.progressEnabled || !loggedIn.value || sessionSaveInFlight) return
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  sessionSaveTimer = undefined
+  const attempt = attemptToken.value
+  if (attempt === lastServerAttempt && sessionRevision > 0) return
+
+  sessionSaveInFlight = true
+  sessionStatus.value = 'saving'
+  try {
+    const result = await $fetch<{ saved: boolean; session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
+      method: 'PUT',
+      body: { puzzleDate: props.puzzle.date, attempt, expectedRevision: sessionRevision },
+    })
+    if (!result.saved && result.session) {
+      acceptRemoteSession(result.session, 'conflict')
+      return
+    }
+    if (!result.session) throw new Error('The session save returned no revision.')
+    sessionRevision = result.session.revision
+    lastServerAttempt = attempt
+    sessionRetryDelay = 2000
+    if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
+    sessionRetryTimer = undefined
+    writeLocalSession(attempt)
+    sessionStatus.value = attemptToken.value === attempt ? 'saved' : 'saving'
+  } catch {
+    writeLocalSession(attempt)
+    sessionStatus.value = 'error'
+    scheduleSessionRetry()
+  } finally {
+    sessionSaveInFlight = false
+    if (sessionReady && loggedIn.value && attemptToken.value !== lastServerAttempt) scheduleSessionSave()
+  }
+}
+
+async function pollSession() {
+  if (!sessionReady || !loggedIn.value || sessionSaveInFlight || document.visibilityState !== 'visible') return
+  try {
+    const result = await $fetch<{ session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
+      query: { puzzleDate: props.puzzle.date },
+    })
+    if (result.session && result.session.revision > sessionRevision) {
+      const localChanged = attemptToken.value !== lastServerAttempt
+      acceptRemoteSession(result.session, localChanged ? 'conflict' : 'updated')
+    } else if (attemptToken.value !== lastServerAttempt) {
+      scheduleSessionRetry()
+    }
+  } catch {
+    if (sessionStatus.value !== 'saving') sessionStatus.value = 'error'
+  }
+}
+
+function startSessionPolling() {
+  if (sessionPollTimer) clearInterval(sessionPollTimer)
+  if (!loggedIn.value || !props.progressEnabled) return
+  sessionPollTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') void pollSession()
+  }, 1800)
+}
+
+async function initializeSession(isLoggedIn = loggedIn.value) {
+  if (!props.progressEnabled) {
+    newBoard()
+    sessionReady = true
+    return
+  }
+
+  sessionReady = false
+  sessionStatus.value = 'loading'
+  if (sessionPollTimer) clearInterval(sessionPollTimer)
+  if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
+  sessionRetryTimer = undefined
+  sessionRevision = 0
+  lastServerAttempt = ''
+
+  if (isLoggedIn) {
+    try {
+      const result = await $fetch<{ session: PuzzleSessionSnapshot | null }>('/api/account/puzzle-session', {
+        query: { puzzleDate: props.puzzle.date },
+      })
+      if (result.session) {
+        sessionRevision = result.session.revision
+        lastServerAttempt = result.session.attempt
+        if (!applyAttempt(result.session.attempt)) throw new Error('Invalid saved puzzle session.')
+        writeLocalSession(result.session.attempt)
+        sessionStatus.value = 'saved'
+      } else {
+        const local = readLocalSession()
+        if (local) applyAttempt(local.attempt)
+        else newBoard()
+        sessionStatus.value = 'saving'
+      }
+      sessionReady = true
+      startSessionPolling()
+      if (!result.session) void saveSession()
+      return
+    } catch {
+      const local = readLocalSession()
+      if (local) applyAttempt(local.attempt)
+      else newBoard()
+      sessionStatus.value = 'error'
+      sessionReady = true
+      startSessionPolling()
+      return
+    }
+  }
+
+  const local = readLocalSession()
+  if (local) {
+    latestLocalSaveAt = local.savedAt
+    applyAttempt(local.attempt)
+  } else {
+    newBoard()
+  }
+  sessionReady = true
+  writeLocalSession()
+  sessionStatus.value = 'deviceSaved'
+}
+
+function handleGuestStorage(event: StorageEvent) {
+  if (loggedIn.value || event.key !== localSessionKey || !event.newValue) return
+  try {
+    const local = JSON.parse(event.newValue) as Partial<LocalPuzzleSession>
+    if (local.version !== 1 || local.date !== props.puzzle.date || local.gridSize !== props.puzzle.gridSize
+      || typeof local.savedAt !== 'number' || local.savedAt <= latestLocalSaveAt || typeof local.attempt !== 'string'
+      || !decodePuzzleAttempt(props.puzzle.date, props.puzzle.gridSize, local.attempt)) return
+    latestLocalSaveAt = local.savedAt
+    if (applyAttempt(local.attempt)) sessionStatus.value = 'updated'
+  } catch {
+    // Ignore malformed data from another tab.
+  }
+}
+
+function handleBrowserOnline() {
+  if (sessionStatus.value === 'error' && loggedIn.value) scheduleSessionSave()
+}
+
+watch(attemptToken, (attempt) => {
+  if (!sessionReady || !props.progressEnabled) return
+  if (attempt === lastAppliedAttempt) {
+    lastAppliedAttempt = ''
+    return
+  }
+  writeLocalSession(attempt)
+  scheduleSessionSave()
+}, { flush: 'post' })
+
+watch(loggedIn, (isLoggedIn) => {
+  if (sessionReady && props.progressEnabled) void initializeSession(isLoggedIn)
+})
+
 watch(complete, async (isComplete) => {
   if (!import.meta.client) return
   document.querySelector('.site-shell')?.toggleAttribute('inert', isComplete)
@@ -232,6 +486,7 @@ watch(complete, async (isComplete) => {
   if (isComplete) {
     playSound('complete')
     if (loggedIn.value && props.progressEnabled) {
+      void saveSession()
       completionSavePending.value = true
       try {
         await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } })
@@ -416,22 +671,33 @@ function pieceStyle(piece: number) {
 onMounted(async () => {
   updateViewportSize()
   window.addEventListener('resize', updateViewportSize)
+  window.addEventListener('storage', handleGuestStorage)
+  window.addEventListener('online', handleBrowserOnline)
+  document.addEventListener('visibilitychange', pollSession)
   const image = new Image()
   image.src = props.puzzle.imageUrl
   try {
     await image.decode()
     imageDimensions.value = { width: image.naturalWidth, height: image.naturalHeight }
+    await initializeSession()
     imageLoaded.value = true
-    if (!started.value) newBoard()
   } catch {
     imageError.value = true
   }
 })
 
 onBeforeUnmount(() => {
-  if (import.meta.client) window.removeEventListener('resize', updateViewportSize)
+  if (import.meta.client) {
+    window.removeEventListener('resize', updateViewportSize)
+    window.removeEventListener('storage', handleGuestStorage)
+    window.removeEventListener('online', handleBrowserOnline)
+    document.removeEventListener('visibilitychange', pollSession)
+  }
   if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
   if (dragSettleTimer) clearTimeout(dragSettleTimer)
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
+  if (sessionPollTimer) clearInterval(sessionPollTimer)
   if (import.meta.client) document.querySelector('.site-shell')?.removeAttribute('inert')
 })
 </script>

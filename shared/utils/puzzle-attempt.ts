@@ -1,5 +1,11 @@
 export type PuzzleMove = [number, number]
 
+export interface DecodedPuzzleAttempt {
+  generation: number
+  moves: PuzzleMove[]
+  order: number[]
+}
+
 const MOVE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
 const MAX_ATTEMPT_GENERATION = 2_000
 const MAX_ATTEMPT_MOVES = 2_500
@@ -31,8 +37,8 @@ export function encodePuzzleAttempt(generation: number, moves: readonly PuzzleMo
   return `${generation.toString(36)}.${packedMoves}`
 }
 
-/** Returns the verified move count, or null when the transcript is invalid. */
-export function verifyPuzzleAttempt(date: string, gridSize: number, attempt: unknown): number | null {
+/** Decodes a saved board state, including unfinished attempts. */
+export function decodePuzzleAttempt(date: string, gridSize: number, attempt: unknown): DecodedPuzzleAttempt | null {
   if (typeof attempt !== 'string' || attempt.length > MAX_ATTEMPT_MOVES * 2 + 5) return null
   const separator = attempt.indexOf('.')
   if (separator < 1 || attempt.indexOf('.', separator + 1) !== -1) return null
@@ -43,16 +49,25 @@ export function verifyPuzzleAttempt(date: string, gridSize: number, attempt: unk
   if (!Number.isInteger(generation) || generation < 0 || generation > MAX_ATTEMPT_GENERATION) return null
 
   const packedMoves = attempt.slice(separator + 1)
-  if (!packedMoves.length || packedMoves.length % 2 !== 0 || packedMoves.length > MAX_ATTEMPT_MOVES * 2) return null
+  if (packedMoves.length % 2 !== 0 || packedMoves.length > MAX_ATTEMPT_MOVES * 2) return null
 
   const order = createPuzzleOrder(date, gridSize, generation)
   if (order.length < 2 || order.length > MOVE_ALPHABET.length) return null
+  const moves: PuzzleMove[] = []
   for (let index = 0; index < packedMoves.length; index += 2) {
     const first = MOVE_ALPHABET.indexOf(packedMoves[index]!)
     const second = MOVE_ALPHABET.indexOf(packedMoves[index + 1]!)
     if (first < 0 || second < 0 || first >= order.length || second >= order.length || first === second) return null
     ;[order[first], order[second]] = [order[second]!, order[first]!]
+    moves.push([first, second])
   }
 
-  return order.every((piece, slot) => piece === slot) ? packedMoves.length / 2 : null
+  return { generation, moves, order }
+}
+
+/** Returns the verified move count, or null when the transcript is invalid. */
+export function verifyPuzzleAttempt(date: string, gridSize: number, attempt: unknown): number | null {
+  const decoded = decodePuzzleAttempt(date, gridSize, attempt)
+  if (!decoded?.moves.length || !decoded.order.every((piece, slot) => piece === slot)) return null
+  return decoded.moves.length
 }

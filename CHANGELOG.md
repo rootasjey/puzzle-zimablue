@@ -2,6 +2,13 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-10-18
+
+### Added
+
+- Automatic puzzle-session saves for guests on their device and for signed-in players across devices.
+- Periodic session synchronization with revision checks and a notice when a newer save replaces the current board.
+
 ## [0.2.0] - 2026-10-18
 
 ### Added

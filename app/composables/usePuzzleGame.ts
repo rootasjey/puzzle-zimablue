@@ -22,6 +22,20 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
     started.value = true
   }
 
+  function restoreBoard(generation: number, restoreMoves: readonly PuzzleMove[]) {
+    const restoredOrder = createPuzzleOrder(puzzle.date, puzzle.gridSize, generation)
+    for (const [first, second] of restoreMoves) {
+      ;[restoredOrder[first], restoredOrder[second]] = [restoredOrder[second]!, restoredOrder[first]!]
+    }
+    attemptGeneration.value = generation
+    order.value = restoredOrder
+    selected.value = null
+    moves.value = restoreMoves.length
+    moveHistory.value = [...restoreMoves]
+    boardGeneration = Math.max(boardGeneration, generation + 1)
+    started.value = true
+  }
+
   function choose(slot: number) {
     if (complete.value) return
     if (selected.value === null) {
@@ -46,5 +60,5 @@ export function usePuzzleGame(puzzle: DailyPuzzle) {
     selected.value = null
   }
 
-  return { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, choose, swap }
+  return { order, selected, moves, moveHistory, attemptGeneration, complete, started, newBoard, restoreBoard, choose, swap }
 }
