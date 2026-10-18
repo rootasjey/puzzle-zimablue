@@ -284,12 +284,16 @@ h1,h2 { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; let
 .settings-volume label { font-size: .88rem; font-weight: 750; }
 .settings-volume output { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
 .settings-volume input { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
-.settings-avatars { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .6rem; }
-.settings-avatar-option { display: grid; justify-items: center; gap: .35rem; padding: .45rem; border: 2px solid var(--line); background: var(--white); color: var(--ink); font: inherit; font-size: .7rem; font-weight: 750; cursor: pointer; }
+.settings-avatars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+.settings-avatar-option { display: grid; min-width: 0; min-height: 7.5rem; justify-items: center; align-content: center; gap: .5rem; padding: .7rem; border: 2px solid var(--line); background: var(--white); color: var(--ink); font: inherit; font-size: .78rem; font-weight: 750; cursor: pointer; }
 .settings-avatar-option[aria-pressed="true"] { border-color: var(--blue); box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--blue); }
-.settings-avatar-option img { display: block; width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+.settings-avatar-option img { display: block; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; }
 .settings-save { margin-top: 1.5rem; }
 html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,html[data-reduced-motion="true"] *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+
+@media (max-width: 520px) {
+  .settings-avatars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .completion-leaderboard-link svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .completion-leaderboard-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .completion-save-status { color: var(--muted); font-size: .78rem; font-weight: 700; }

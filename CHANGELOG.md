@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.5.1] - 2026-10-18
+
+### Changed
+
+- Reflowed account avatar choices into a responsive grid with larger previews and touch targets.
+
 ## [0.5.0] - 2026-10-18
 
 ### Added
