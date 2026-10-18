@@ -94,7 +94,14 @@
               <div v-for="piece in order" :key="piece" class="completion-piece" :style="pieceStyle(piece)" />
             </div>
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
-            <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+            <div class="completion-result">
+              <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+              <span v-if="completionSavePending && progressEnabled" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
+              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard' })">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3" /></svg>
+                <span>{{ t('leaderboard.link') }}</span>
+              </NuxtLink>
+            </div>
             <div v-if="progressEnabled" class="completion-actions">
               <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
                 <button class="completion-action-icon" type="button" :aria-label="t('game.share')" @click="sharePuzzle">
@@ -126,12 +133,13 @@
               <NuxtLink class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
                 {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
               </NuxtLink>
-              <span v-if="completionSavePending" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
-              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard' })">{{ t('leaderboard.link') }}</NuxtLink>
             </div>
             <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
-            <NuxtLink v-else-if="!loggedIn && progressEnabled" class="play-link completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
-            <NuxtLink v-if="!loggedIn && progressEnabled" class="completion-login-link" :to="signInLink">{{ t('account.alreadyHaveAccount') }}</NuxtLink>
+            <div v-else-if="!loggedIn" class="completion-account-actions">
+              <NuxtLink class="completion-account-link" :to="registerLink">{{ t('game.saveProgress') }}</NuxtLink>
+              <span aria-hidden="true">·</span>
+              <NuxtLink class="completion-login-link" :to="signInLink">{{ t('account.alreadyHaveAccount') }}</NuxtLink>
+            </div>
             <p v-else-if="completionSaveError && progressEnabled" class="completion-account-note" role="status">{{ t('game.saveProgressError') }}</p>
           </div>
         </section>
