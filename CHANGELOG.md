@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] - 2026-10-18
+
+### Changed
+
+- Matched the Settings content width to the My account page.
+
 ## [0.6.0] - 2026-10-18
 
 ### Changed
