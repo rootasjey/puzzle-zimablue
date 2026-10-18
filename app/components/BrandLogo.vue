@@ -10,7 +10,6 @@
       </g>
       <g class="brand-logo-card brand-logo-card--front">
         <rect x="8" y="8" width="21" height="27" rx="3.5" fill="#3986FF" stroke="#18224E" stroke-width="1.8" />
-        <path d="M11 11.5h7" stroke="#F7F5EE" stroke-width="2" stroke-linecap="round" />
       </g>
     </svg>
     <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>

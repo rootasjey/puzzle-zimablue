@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] - 2026-10-18
+
+### Changed
+
+- Removed the white accent line from the blue card in the brand mark.
+
 ## [0.3.1] - 2026-10-18
 
 ### Added
