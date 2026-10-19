@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title">
+  <title id="title">Illustration carrée de démonstration, à remplacer</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#d7f0eb" />
+      <stop offset="1" stop-color="#a9deeb" />
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#56c4dd" />
+      <stop offset="0.48" stop-color="#278ee0" />
+      <stop offset="1" stop-color="#254be8" />
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="0.8">
+      <stop offset="0" stop-color="#eff5d8" />
+      <stop offset="1" stop-color="#cce9c6" />
+    </linearGradient>
+    <pattern id="brushes" width="132" height="114" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)">
+      <path d="M8 28c21-15 45-16 68 0M38 80c20-14 42-11 82 1" fill="none" stroke="#b7eaf1" stroke-linecap="round" stroke-width="16" opacity=".45" />
+      <path d="M83 43c12-8 23-8 37-1" fill="none" stroke="#8cd8e9" stroke-linecap="round" stroke-width="10" opacity=".55" />
+    </pattern>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="16" />
+    </filter>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#sky)" />
+  <circle cx="890" cy="230" r="150" fill="#ffdc4b" opacity=".28" filter="url(#soft)" />
+  <circle cx="890" cy="230" r="88" fill="#ffdc4b" />
+  <path d="M0 382c154-52 276-8 391 33 160 57 251 40 412-20 157-59 275-64 397-22v827H0Z" fill="url(#water)" />
+  <path d="M0 382c154-52 276-8 391 33 160 57 251 40 412-20 157-59 275-64 397-22v827H0Z" fill="url(#brushes)" opacity=".72" />
+  <path d="M0 858c176-77 315-44 469 26 155 70 289 75 436 30 120-37 212-37 295-6v292H0Z" fill="#1674d2" opacity=".53" />
+  <path d="M0 1006c149-43 302-37 461 14 163 53 298 61 439 26 125-31 211-30 300-4v158H0Z" fill="#182f9a" opacity=".42" />
+  <path d="M0 756c106-36 202-46 304-31 82 12 153 40 247 40 77 0 157-20 232-42-79 60-176 88-274 82-159-10-295-88-509 12Z" fill="none" stroke="#b5eced" stroke-linecap="round" stroke-width="18" opacity=".82" />
+  <path d="M0 918c111-34 206-37 302-14m493 29c130-39 257-50 405-19" fill="none" stroke="#9de2ec" stroke-linecap="round" stroke-width="14" opacity=".72" />
+  <path d="M0 1112c158-38 291-25 429 7 151 35 275 25 398-11 138-41 250-43 373-12v116H0Z" fill="url(#sand)" />
+  <path d="M0 1112c158-38 291-25 429 7 151 35 275 25 398-11 138-41 250-43 373-12" fill="none" stroke="#18224e" stroke-width="7" opacity=".34" />
+  <g fill="none" stroke="#18224e" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M180 297c31-27 65-27 95 0m-18 3c19-15 39-15 58 0" stroke-width="8" opacity=".42" />
+    <path d="M995 487c24-21 51-21 76 0m-15 2c15-11 31-11 46 0" stroke-width="7" opacity=".36" />
+    <path d="M550 597v319" stroke-width="13" />
+    <path d="M550 608 363 865h187Z" fill="#f7f5ee" stroke-width="11" />
+    <path d="M571 666 744 858H571Z" fill="#ffdc4b" stroke-width="11" />
+    <path d="M326 890c136 24 295 25 453 0l-72 111c-110 31-231 29-319-3Z" fill="#ed6554" stroke-width="13" />
+    <path d="M475 927h184" stroke-width="8" opacity=".65" />
+  </g>
+  <circle cx="523" cy="1004" r="12" fill="#18224e" />
+  <path d="M603 1003c26 11 51 10 75-1" fill="none" stroke="#18224e" stroke-linecap="round" stroke-width="8" opacity=".55" />
+  <g fill="#f7f5ee" opacity=".82">
+    <circle cx="190" cy="482" r="8" /><circle cx="254" cy="537" r="5" />
+    <circle cx="1031" cy="692" r="7" /><circle cx="961" cy="763" r="5" />
+    <circle cx="169" cy="1016" r="6" /><circle cx="1070" cy="1056" r="9" />
+  </g>
+</svg>

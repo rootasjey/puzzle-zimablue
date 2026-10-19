@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ee">
+  <title>Prototype Master hebdomadaire — Puzzle Zimablue</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18224e;
+      --muted: #5c6175;
+      --blue: #254be8;
+      --blue-foreground: #fff;
+      --yellow: #ffdc4b;
+      --yellow-foreground: #18224e;
+      --coral: #ed6554;
+      --paper: #f7f5ee;
+      --line: #dedbd2;
+      --white: #fff;
+      --shadow: 4px 4px 0 var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-width: 320px; min-height: 100%; margin: 0; }
+    body { min-height: 100svh; -webkit-font-smoothing: antialiased; }
+    button { color: inherit; font: inherit; }
+    button:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+    .prototype-shell { display: flex; min-height: 100svh; flex-direction: column; }
+    .topbar { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem clamp(1rem, 4vw, 3.2rem); border-bottom: 2px solid var(--ink); }
+    .wordmark { display: flex; align-items: center; gap: .6rem; font-size: .92rem; font-weight: 850; letter-spacing: -.035em; }
+    .wordmark-mark { display: grid; width: 1.85rem; height: 1.85rem; place-items: center; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 2px 2px 0 var(--ink); font-size: .82rem; }
+    .prototype-tag { display: inline-flex; min-height: 2rem; align-items: center; gap: .45rem; padding: .35rem .65rem; border: 1px solid var(--line); color: var(--muted); font-size: .72rem; font-weight: 700; }
+    .prototype-tag::before { width: .45rem; height: .45rem; border-radius: 50%; background: var(--coral); content: ""; }
+    .challenge-heading { display: flex; align-items: end; justify-content: space-between; gap: 1.25rem; width: min(100%, 1600px); margin-inline: auto; padding: clamp(1rem, 2.4vh, 1.8rem) clamp(1rem, 4vw, 3.2rem) .7rem; }
+    .eyebrow { margin: 0 0 .35rem; color: var(--blue); font-size: .74rem; font-weight: 850; letter-spacing: .03em; }
+    h1 { margin: 0; font-size: clamp(1.65rem, 3.2vw, 2.7rem); font-weight: 880; letter-spacing: -.07em; line-height: .98; }
+    .week-range { display: flex; align-items: center; gap: .55rem; margin: .65rem 0 0; color: var(--muted); font-size: .83rem; font-weight: 650; }
+    .week-pill { display: inline-flex; min-height: 1.55rem; align-items: center; padding: .12rem .4rem; border: 1.5px solid var(--ink); background: var(--yellow); color: var(--yellow-foreground); font-size: .69rem; font-weight: 850; }
+    .rank-state { display: inline-flex; flex: none; align-items: center; gap: .4rem; padding: .45rem .62rem; border: 2px solid var(--ink); background: var(--white); box-shadow: 2px 2px 0 var(--ink); font-size: .7rem; font-weight: 800; }
+    .rank-state svg { width: .9rem; height: .9rem; fill: none; stroke: var(--blue); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+    .game-layout { display: grid; grid-template-columns: minmax(0, 1fr) 274px; align-items: center; gap: clamp(1.25rem, 4vw, 3.4rem); width: min(100%, 1600px); flex: 1; margin-inline: auto; padding: .5rem clamp(1rem, 4vw, 3.2rem) clamp(1.15rem, 3vh, 2rem); }
+    .play-zone { display: grid; min-width: 0; justify-items: center; gap: .8rem; }
+    .board-stage { position: relative; width: min(68svh, 100%, 800px); aspect-ratio: 1; overflow: hidden; border: 3px solid var(--ink); background: var(--ink); box-shadow: 7px 7px 0 var(--yellow); touch-action: none; }
+    .art-placeholder-tag { position: absolute; z-index: 2; top: .45rem; left: .45rem; padding: .24rem .42rem; border: 1px solid var(--ink); background: var(--paper); color: var(--muted); font-size: .58rem; font-weight: 700; pointer-events: none; }
+    .puzzle-board { display: grid; width: 100%; height: 100%; gap: 2px; padding: 2px; background: var(--ink); transform: translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0) scale(var(--zoom, 1)); transform-origin: center; will-change: transform; }
+    .tile { position: relative; min-width: 0; min-height: 0; border: 0; padding: 0; background-color: #a9deeb; background-image: var(--image); background-repeat: no-repeat; background-size: calc(var(--size) * 100%) calc(var(--size) * 100%); cursor: pointer; touch-action: none; }
+    .tile:hover { filter: brightness(1.08); }
+    .tile.is-selected { z-index: 1; outline: 3px solid var(--yellow); outline-offset: -4px; box-shadow: inset 0 0 0 2px var(--coral); }
+    .tile:focus-visible { z-index: 2; outline: 3px solid var(--coral); outline-offset: -4px; }
+    .stage-tools { display: flex; min-height: 2.55rem; align-items: center; justify-content: center; gap: .38rem; }
+    .tool-button { display: inline-grid; width: 2.45rem; height: 2.45rem; place-items: center; border: 2px solid var(--ink); background: var(--white); box-shadow: 2px 2px 0 var(--ink); color: var(--blue); cursor: pointer; font-size: 1.1rem; font-weight: 800; }
+    .tool-button:hover { background: var(--yellow); color: var(--ink); }
+    .zoom-readout { min-width: 3.9rem; color: var(--muted); font-size: .75rem; font-weight: 750; font-variant-numeric: tabular-nums; text-align: center; }
+    .fit-button { min-height: 2.45rem; margin-left: .25rem; padding: .35rem .65rem; border: 2px solid var(--ink); background: var(--white); color: var(--ink); cursor: pointer; font-size: .72rem; font-weight: 750; }
+    .fit-button:hover { background: var(--yellow); }
+    .landscape-tools { display: none; align-items: center; justify-content: start; gap: .28rem; }
+    .control-rail { display: grid; align-content: center; gap: 1.1rem; min-width: 0; }
+    .score-block { padding: 0 0 .9rem; border-bottom: 2px solid var(--ink); }
+    .score-label { margin: 0 0 .25rem; color: var(--muted); font-size: .73rem; font-weight: 700; }
+    .score-number { display: flex; align-items: baseline; gap: .45rem; margin: 0; font-size: clamp(2.8rem, 4.2vw, 4.15rem); font-weight: 880; letter-spacing: -.075em; line-height: 1; font-variant-numeric: tabular-nums; }
+    .score-number span { color: var(--muted); font-size: .85rem; font-weight: 700; letter-spacing: -.02em; }
+    .score-hint { margin: .55rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+    .rail-section { display: grid; gap: .52rem; }
+    .rail-title { margin: 0; font-size: .78rem; font-weight: 850; }
+    .size-options { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+    .size-option { display: grid; min-height: 3.45rem; align-content: center; gap: .14rem; padding: .45rem .5rem; border: 2px solid var(--ink); background: var(--white); box-shadow: 2px 2px 0 var(--ink); color: var(--ink); cursor: pointer; text-align: left; }
+    .size-option strong { font-size: .87rem; font-weight: 850; }
+    .size-option span { color: var(--muted); font-size: .66rem; font-weight: 650; }
+    .size-option[aria-pressed="true"] { background: var(--blue); color: var(--blue-foreground); box-shadow: 2px 2px 0 var(--yellow); }
+    .size-option[aria-pressed="true"] span { color: #e2e8ff; }
+    .interaction-note { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.55; }
+    .image-note { display: flex; align-items: start; gap: .55rem; padding-top: .8rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .68rem; line-height: 1.45; }
+    .image-note svg { width: .95rem; height: .95rem; flex: none; fill: none; stroke: var(--blue); stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .shuffle-button { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: .45rem; padding: .5rem .7rem; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); color: var(--ink); cursor: pointer; font-size: .76rem; font-weight: 850; }
+    .shuffle-button:hover { background: var(--blue); color: var(--blue-foreground); }
+    .shuffle-button svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+    .demo-disclaimer { width: min(100%, 1600px); margin: 0 auto; padding: .5rem clamp(1rem, 4vw, 3.2rem) .95rem; color: var(--muted); font-size: .65rem; text-align: right; }
+
+    @media (max-width: 980px) and (min-width: 741px) {
+      .game-layout { grid-template-columns: minmax(0, 1fr) 232px; gap: 1.5rem; }
+      .board-stage { width: min(62svh, 100%, 640px); }
+      .control-rail { gap: .85rem; }
+    }
+
+    @media (max-width: 740px) and (orientation: portrait) {
+      .topbar { min-height: 54px; padding-inline: 1rem; }
+      .prototype-tag { min-height: 1.8rem; padding: .25rem .48rem; font-size: .63rem; }
+      .challenge-heading { align-items: center; padding: .62rem 1rem .4rem; }
+      .eyebrow { margin-bottom: .25rem; font-size: .64rem; }
+      h1 { font-size: clamp(1.45rem, 6vw, 1.85rem); white-space: nowrap; }
+      .week-range { margin-top: .35rem; font-size: .71rem; }
+      .rank-state { width: 1.9rem; min-height: 1.9rem; justify-content: center; gap: 0; padding: .3rem; }
+      .rank-state svg { width: .78rem; height: .78rem; }
+      .rank-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
+      .game-layout { display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; gap: .3rem; padding: .1rem 1rem .45rem; }
+      .play-zone { flex: 1; grid-template-rows: minmax(0,1fr) auto; align-content: stretch; gap: .35rem; }
+      .board-stage { width: min(92vw, 46svh, 500px); align-self: center; }
+      .puzzle-board { gap: 1.5px; padding: 1.5px; }
+      .stage-tools { min-height: 2rem; }
+      .tool-button,.fit-button { min-height: 1.95rem; height: 1.95rem; }
+      .tool-button { width: 1.95rem; }
+      .fit-button { font-size: .67rem; }
+      .control-rail { grid-template-columns: minmax(0,.78fr) minmax(0,1.22fr); align-items: center; gap: .45rem .7rem; padding-top: .45rem; border-top: 2px solid var(--ink); }
+      .score-block { display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: .4rem; padding: 0; border: 0; }
+      .score-label { grid-column: 1 / -1; margin: 0 0 .12rem; font-size: .62rem; }
+      .score-number { font-size: 2rem; }
+      .score-number span { font-size: .7rem; }
+      .score-hint { display: none; }
+      .rail-section { gap: .3rem; }
+      .rail-title { font-size: .67rem; }
+      .control-rail > .rail-section:nth-of-type(3),.image-note { display: none; }
+      .size-option { min-height: 2.35rem; padding: .25rem .35rem; }
+      .size-option strong { font-size: .72rem; }
+      .size-option span { font-size: .56rem; }
+      .shuffle-button { min-height: 2rem; grid-column: 1 / -1; font-size: .69rem; }
+      .demo-disclaimer { display: none; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .prototype-shell { height: 100svh; min-height: 320px; overflow: hidden; }
+      .topbar { min-height: 48px; padding-inline: 1rem; }
+      .prototype-tag { min-height: 1.65rem; font-size: .6rem; }
+      .challenge-heading { min-height: 72px; align-items: center; padding: .3rem 1rem .15rem; }
+      .eyebrow { margin-bottom: .2rem; font-size: .62rem; }
+      h1 { font-size: 1.45rem; }
+      .week-range { margin-top: .25rem; font-size: .65rem; }
+      .week-pill { min-height: 1.3rem; font-size: .6rem; }
+      .rank-state { padding: .3rem .4rem; font-size: .58rem; }
+      .game-layout { grid-template-columns: minmax(0, 1fr) 230px; gap: .85rem; padding: 0 1rem .4rem; }
+      .board-stage { width: min(58svh, 100%, 500px); }
+      .stage-tools { display: none; }
+      .landscape-tools { display: flex; }
+      .tool-button,.fit-button { min-height: 1.9rem; height: 1.9rem; }
+      .tool-button { width: 1.9rem; }
+      .fit-button { min-height: 1.9rem; height: 1.9rem; padding-inline: .5rem; font-size: .64rem; }
+      .control-rail { gap: .38rem; }
+      .score-block { padding-bottom: .3rem; }
+      .score-number { font-size: 2.2rem; }
+      .score-hint { margin-top: .25rem; font-size: .6rem; }
+      .control-rail > .rail-section:nth-of-type(3),.interaction-note,.image-note { display: none; }
+      .size-option { min-height: 2.65rem; }
+      .shuffle-button { min-height: 1.9rem; }
+      .demo-disclaimer { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype-shell">
+    <header class="topbar">
+      <div class="wordmark"><span class="wordmark-mark" aria-hidden="true">Z</span><span>Puzzle Zimablue</span></div>
+      <span class="prototype-tag">Prototype interactif</span>
+    </header>
+
+    <section class="challenge-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">MASTER HEBDOMADAIRE</p>
+        <h1 id="page-title">Le puzzle de la semaine</h1>
+        <p class="week-range"><span class="week-pill">Semaine 43</span><span>19–25 octobre 2026</span></p>
+      </div>
+      <span class="rank-state" aria-label="Tentative classée">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3"/></svg>
+        <span class="rank-label">Tentative classée</span>
+      </span>
+    </section>
+
+    <main class="game-layout">
+      <section class="play-zone" aria-label="Plateau du Master hebdomadaire">
+        <div class="board-stage" id="boardStage">
+          <div class="puzzle-board" id="puzzleBoard" role="grid" aria-label="Plateau Master, 16 lignes par 16 colonnes"></div>
+          <span class="art-placeholder-tag">Illustration temporaire</span>
+        </div>
+        <div class="stage-tools" aria-label="Commandes de zoom">
+          <button class="tool-button" id="zoomOut" data-zoom="out" type="button" aria-label="Dézoomer">−</button>
+          <span class="zoom-readout" id="zoomReadout" aria-live="polite">100 %</span>
+          <button class="tool-button" id="zoomIn" data-zoom="in" type="button" aria-label="Zoomer">+</button>
+          <button class="fit-button" id="fitBoard" data-zoom="fit" type="button">Ajuster</button>
+        </div>
+      </section>
+
+      <aside class="control-rail" aria-label="Progression et réglages de la maquette">
+        <section class="score-block" aria-live="polite">
+          <p class="score-label">Coups dans cette maquette</p>
+          <p class="score-number"><strong id="moveCount">0</strong><span>coups</span></p>
+          <p class="score-hint" id="gameStatus">Échange deux pièces pour reconstituer l’image.</p>
+        </section>
+
+        <section class="rail-section" aria-labelledby="grid-size-title">
+          <h2 class="rail-title" id="grid-size-title">Comparer la taille</h2>
+          <div class="size-options" role="group" aria-label="Taille du plateau">
+            <button class="size-option" type="button" data-size="16" aria-pressed="true"><strong>16 × 16</strong><span>256 pièces</span></button>
+            <button class="size-option" type="button" data-size="20" aria-pressed="false"><strong>20 × 20</strong><span>400 pièces</span></button>
+          </div>
+        </section>
+
+        <div class="landscape-tools" aria-label="Commandes de zoom">
+          <button class="tool-button" data-zoom="out" type="button" aria-label="Dézoomer">−</button>
+          <span class="zoom-readout" aria-live="polite">100 %</span>
+          <button class="tool-button" data-zoom="in" type="button" aria-label="Zoomer">+</button>
+          <button class="fit-button" data-zoom="fit" type="button">Ajuster</button>
+        </div>
+
+        <section class="rail-section">
+          <h2 class="rail-title">Sur téléphone</h2>
+          <p class="interaction-note">Pince pour zoomer, glisse pour déplacer le plateau et touche deux pièces pour les échanger.</p>
+        </section>
+
+        <div class="image-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span>Visuel carré provisoire, à remplacer par l’illustration Master.</span>
+        </div>
+
+        <button class="shuffle-button" id="shuffleBoard" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 3 5 5-5 5"/><path d="M4 20 21 3m-5 18 5-5-5-5"/><path d="M4 4l5 5m2 2 5 5"/></svg>
+          Réinitialiser la maquette
+        </button>
+      </aside>
+    </main>
+
+    <p class="demo-disclaimer">Prototype visuel : les coups ne sont pas sauvegardés et ne comptent pas dans le classement.</p>
+  </div>
+  <script src="./master-weekly.js" defer></script>
+</body>
+</html>
