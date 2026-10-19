@@ -11,6 +11,7 @@ import {
   isPuzzleId,
   verifyPuzzleAttempt,
 } from '../shared/utils/puzzle-attempt.ts'
+import { isMasterGridSize, isZimablueImageUrl } from '../shared/utils/master-config.ts'
 
 function createSolvedAttempt(layout) {
   const order = createPuzzleOrder(layout.puzzleId, layout.gridRows, layout.gridColumns, 7)
@@ -34,10 +35,33 @@ test('daily and Master puzzle IDs are stable and validated', () => {
   assert.equal(isPuzzleId('master:2020-w53'), true)
 })
 
+test('ISO week helper validates keys and calculates Monday dates across year boundaries', async () => {
+  const { getIsoWeekKeyForDate, getIsoWeekKeyFromMonday, getIsoWeekStart, isValidIsoWeekKey } = await import('../shared/utils/iso-week.ts')
+  assert.equal(isValidIsoWeekKey('2026-w43'), true)
+  assert.equal(isValidIsoWeekKey('2026-w54'), false)
+  assert.equal(getIsoWeekStart('2026-w43'), '2026-10-19')
+  assert.equal(getIsoWeekStart('2020-w53'), '2020-12-28')
+  assert.equal(getIsoWeekKeyForDate('2026-10-25'), '2026-w43')
+  assert.equal(getIsoWeekKeyForDate('2026-10-26'), '2026-w44')
+  assert.equal(getIsoWeekKeyForDate('2021-01-01'), '2020-w53')
+  assert.equal(getIsoWeekKeyFromMonday('2026-10-19'), '2026-w43')
+  assert.throws(() => getIsoWeekKeyFromMonday('2026-10-20'), RangeError)
+})
+
 test('daily puzzle difficulties allow square grids from 3x3 through 8x8', () => {
   assert.deepEqual(DAILY_PUZZLE_GRID_SIZES, [3, 4, 5, 6, 7, 8])
   for (const size of DAILY_PUZZLE_GRID_SIZES) assert.equal(isDailyPuzzleGridSize(size), true)
   for (const value of [2, 9, 3.5, '8', null]) assert.equal(isDailyPuzzleGridSize(value), false)
+})
+
+test('Master setup accepts only the planned sizes and trusted Zimablue image URLs', () => {
+  assert.equal(isMasterGridSize(16), true)
+  assert.equal(isMasterGridSize(20), true)
+  for (const size of [3, 15, 21, '16', null]) assert.equal(isMasterGridSize(size), false)
+  assert.equal(isZimablueImageUrl('https://zimablue.cc/images/real-thing.jpeg'), true)
+  for (const url of ['http://zimablue.cc/images/a.jpeg', 'https://evil.test/images/a.jpeg', 'https://zimablue.cc/illustrations/a']) {
+    assert.equal(isZimablueImageUrl(url), false)
+  }
 })
 
 test('v2 attempts round-trip the daily 3x3 layout', () => {

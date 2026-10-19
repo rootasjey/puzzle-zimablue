@@ -4,8 +4,19 @@
       <BrandLoader v-if="!imageError" :label="t('game.loading')" />
       <span v-else role="alert">{{ t('game.imageError') }}</span>
     </div>
-    <TransitionGroup
+    <div
       v-else
+      class="master-board-viewport"
+      :class="{ 'is-master': masterMode, 'is-pan-mode': panMode }"
+      :style="masterViewportStyle"
+      @pointerdown="startPan"
+      @pointermove="movePan"
+      @pointerup="finishPan"
+      @pointercancel="finishPan"
+      @lostpointercapture="finishPan"
+    >
+    <div class="master-board-transform" :style="masterTransformStyle">
+    <TransitionGroup
       name="piece"
       tag="div"
       class="puzzle-board"
@@ -37,6 +48,8 @@
         @click="choosePiece(slot, $event)"
       />
     </TransitionGroup>
+    </div>
+    </div>
     <Teleport to="body">
       <Transition name="ghost-lift" appear>
         <div v-if="dragging?.moved" class="puzzle-drag-ghost" :class="{ settling: dragging.phase === 'settling', touch: dragging.pointerType === 'touch' }" :style="dragGhostStyle" aria-hidden="true">
@@ -50,8 +63,18 @@
         <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
         <p v-if="moveLimitReached" class="move-limit-note" role="status">{{ t('game.moveLimitReached') }}</p>
         <p v-if="progressEnabled" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
+        <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
+        <p v-if="masterMode && masterAttemptStatus === 'guest'" class="master-login-prompt"><NuxtLink :to="signInLink">{{ t('master.signInBeforeMove') }}</NuxtLink></p>
+        <p v-if="masterActionError" class="master-attempt-status is-error" role="alert">{{ masterActionError }}</p>
       </div>
       <div class="board-tool-actions">
+        <div v-if="masterMode" class="master-zoom-tools" :aria-label="t('master.zoomControls')">
+          <button type="button" :aria-label="t('master.zoomOut')" :disabled="masterZoom <= 1" @click="changeMasterZoom(-0.25)">−</button>
+          <button type="button" :aria-label="t('master.fitBoard')" @click="fitMasterBoard">{{ t('master.fit') }}</button>
+          <button type="button" :aria-label="t('master.zoomIn')" :disabled="masterZoom >= 3" @click="changeMasterZoom(0.25)">+</button>
+          <button type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">{{ t(panMode ? 'master.panDone' : 'master.pan') }}</button>
+        </div>
+        <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
           <button class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -78,7 +101,7 @@
           <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
         </NTooltip>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button class="restart-icon-button" type="button" :aria-label="t('game.restart')" @click="newBoard">
+          <button class="restart-icon-button" type="button" :aria-label="t('game.restart')" @click="requestRestart">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
           </button>
           <template #content>{{ t('game.restart') }}</template>
@@ -116,12 +139,13 @@
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <div class="completion-result">
               <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
+              <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
               <div v-if="puzzle.imageDescription" class="completion-art-description">
                 <strong>{{ t('game.artDescription') }}</strong>
                 <p>{{ puzzle.imageDescription }}</p>
               </div>
               <span v-if="completionSavePending && progressEnabled" class="completion-save-status" role="status">{{ t('game.savingScore') }}</span>
-              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="$localePath({ name: 'leaderboard-puzzle', params: { date: puzzle.date } })">
+              <NuxtLink v-else-if="progressEnabled" class="completion-leaderboard-link" :to="leaderboardPath">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a3 3 0 0 0 3 3m8-5h3v2a3 3 0 0 1-3 3m-4 1v4m-4 3h8m-7 0v-3h6v3" /></svg>
                 <span>{{ t('leaderboard.puzzleLink') }}</span>
               </NuxtLink>
@@ -149,13 +173,16 @@
             <p v-if="shareFeedback" class="completion-share-feedback" role="status">{{ shareFeedback }}</p>
             <div class="completion-navigation-actions">
               <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-                <button class="restart-icon-button completion-restart" type="button" :aria-label="t('game.restart')" @click="newBoard">
+                <button class="restart-icon-button completion-restart" type="button" :aria-label="t('game.restart')" @click="requestRestart">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
                 </button>
                 <template #content>{{ t('game.restart') }}</template>
               </NTooltip>
-              <NuxtLink class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
+              <NuxtLink v-if="!masterMode" class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
                 {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
+              </NuxtLink>
+              <NuxtLink v-else class="play-link completion-archive-link" :to="$localePath({ name: 'index' })">
+                {{ t('master.backHome') }} <span aria-hidden="true">↗</span>
               </NuxtLink>
             </div>
             <p v-if="!progressEnabled" class="completion-account-note" role="status">{{ t('game.previewNoProgress') }}</p>
@@ -174,17 +201,21 @@
 
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
-import type { DailyPuzzle } from '#shared/types/puzzle'
+import type { DailyPuzzle, WeeklyPuzzle } from '#shared/types/puzzle'
+import type { MasterAttemptSnapshot, MasterAttemptStatus } from '#shared/types/master'
 import type { LocalPuzzleSession, PuzzleSessionSnapshot } from '#shared/types/puzzle-session'
 import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
-const props = withDefaults(defineProps<{ puzzle: DailyPuzzle; progressEnabled?: boolean }>(), { progressEnabled: true })
+const props = withDefaults(defineProps<{ puzzle: DailyPuzzle | WeeklyPuzzle; progressEnabled?: boolean; masterMode?: boolean }>(), { progressEnabled: true, masterMode: false })
 const accountPreferences = useAccountPreferences()
 const showReferenceImage = computed(() => accountPreferences.preferences.value.showReferenceImage)
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
+const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.startsWith('master:'))
+const puzzleDate = computed(() => 'date' in props.puzzle ? props.puzzle.date : '')
+const weekKey = computed(() => 'weekKey' in props.puzzle ? props.puzzle.weekKey : '')
 const { loggedIn } = useUserSession()
 const { $localePath } = useNuxtApp()
 const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
@@ -195,14 +226,40 @@ function toggleReferenceImage() {
 const completionSaveError = ref(false)
 const completionSavePending = ref(false)
 const shareFeedback = ref('')
-const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } }))
-const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } }))
+const masterActionError = ref('')
+const accountReturnQuery = computed(() => masterMode.value
+  ? { returnTo: 'master' }
+  : puzzleDate.value ? { puzzleDate: puzzleDate.value, attempt: attemptToken.value } : {})
+const registerLink = computed(() => $localePath({ name: 'account-sign-up', query: accountReturnQuery.value }))
+const signInLink = computed(() => $localePath({ name: 'account-sign-in', query: accountReturnQuery.value }))
 const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${encodeURIComponent(props.puzzle.imageSlug)}`)
-const downloadLink = computed(() => `/api/puzzles/${encodeURIComponent(props.puzzle.date)}/download`)
-const downloadFilename = computed(() => `${props.puzzle.imageSlug || props.puzzle.date}.jpg`)
+const downloadLink = computed(() => puzzleDate.value ? `/api/puzzles/${encodeURIComponent(puzzleDate.value)}/download` : props.puzzle.imageUrl)
+const downloadFilename = computed(() => `${props.puzzle.imageSlug || puzzleDate.value || weekKey.value}.jpg`)
 const { order, selected, moves, moveHistory, attemptGeneration, complete, moveLimitReached, newBoard, restoreBoard, swap } = usePuzzleGame(props.puzzle)
 const attemptLayout = computed(() => ({ puzzleId: props.puzzle.puzzleId, gridRows: props.puzzle.gridRows, gridColumns: props.puzzle.gridColumns }))
 const attemptToken = computed(() => encodePuzzleAttempt(attemptLayout.value, attemptGeneration.value, moveHistory.value))
+const leaderboardPath = computed(() => masterMode.value
+  ? $localePath({ name: 'master-leaderboard-weekKey', params: { weekKey: weekKey.value } })
+  : $localePath({ name: 'leaderboard-puzzle', params: { date: puzzleDate.value } }))
+const masterAttemptStatus = ref<MasterAttemptStatus | 'guest' | 'claiming' | 'error'>('available')
+const masterAttemptId = ref<string | null>(null)
+const masterRankedGeneration = ref<number | null>(null)
+const masterStatusKey = computed(() => ({
+  available: 'master.rankAvailable',
+  in_progress: 'master.rankInProgress',
+  completed: 'master.rankUsed',
+  forfeited: 'master.rankForfeited',
+  practice: 'master.practiceMode',
+  guest: 'master.guestMode',
+  claiming: 'master.claimingAttempt',
+  error: 'master.rankUnavailable',
+}[masterAttemptStatus.value]))
+const masterZoom = ref(1)
+const panMode = ref(false)
+const masterPan = reactive({ x: 0, y: 0 })
+let panPointer: { id: number; x: number; y: number; originX: number; originY: number } | null = null
+let masterClaimPromise: Promise<void> | null = null
+let masterSaveTimer: ReturnType<typeof setTimeout> | undefined
 type SessionStatus = 'loading' | 'saving' | 'saved' | 'deviceSaved' | 'updated' | 'conflict' | 'error'
 const sessionStatus = ref<SessionStatus>('loading')
 const sessionStatusKey = computed(() => ({
@@ -251,6 +308,11 @@ const dragGhostStyle = computed(() => {
 
 const imageAspectRatio = computed(() => imageDimensions.value.width / imageDimensions.value.height)
 const boardMaxWidth = computed(() => {
+  if (masterMode.value) {
+    const maxWidth = Math.max(220, viewportSize.value.width - (viewportSize.value.width <= 760 ? 28 : 48))
+    const heightBudget = viewportSize.value.height - (viewportSize.value.width <= 760 ? 460 : 360)
+    return Math.min(920, maxWidth, Math.max(220, heightBudget))
+  }
   const maxHeight = viewportSize.value.width <= 600 ? viewportSize.value.height * .58 : 590
   return Math.min(590, maxHeight * imageAspectRatio.value)
 })
@@ -269,6 +331,10 @@ const boardStyle = computed(() => ({
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
 }))
+const masterViewportStyle = computed(() => ({ '--master-stage-size': `${boardMaxWidth.value}px` }))
+const masterTransformStyle = computed(() => masterMode.value ? {
+  transform: `translate(${masterPan.x}px, ${masterPan.y}px) scale(${masterZoom.value})`,
+} : {})
 const completionBoardStyle = computed(() => completionOrigin.value ? {
   ...boardStyle.value,
   width: `${completionBoardWidth.value}px`,
@@ -330,12 +396,14 @@ function acceptRemoteSession(session: PuzzleSessionSnapshot, status: 'updated' |
   sessionRetryTimer = undefined
   sessionRevision = session.revision
   lastServerAttempt = session.attempt
-  if (!applyAttempt(session.attempt)) {
+  const decoded = decodePuzzleAttempt(attemptLayout.value, session.attempt)
+  if (!decoded || !applyAttempt(session.attempt)) {
     sessionStatus.value = 'error'
     return
   }
   writeLocalSession(session.attempt)
   sessionStatus.value = status
+  if (masterMode.value && masterAttemptStatus.value === 'in_progress' && decoded.generation !== masterRankedGeneration.value) void refreshMasterAttempt()
 }
 
 function scheduleSessionSave() {
@@ -408,6 +476,7 @@ async function pollSession() {
   } catch {
     if (sessionStatus.value !== 'saving') sessionStatus.value = 'error'
   }
+  if (masterMode.value) await refreshMasterAttempt()
 }
 
 function startSessionPolling() {
@@ -421,6 +490,7 @@ function startSessionPolling() {
 async function initializeSession(isLoggedIn = loggedIn.value) {
   if (!props.progressEnabled) {
     newBoard()
+    if (masterMode.value) masterAttemptStatus.value = 'practice'
     sessionReady = true
     return
   }
@@ -450,6 +520,7 @@ async function initializeSession(isLoggedIn = loggedIn.value) {
         else newBoard()
         sessionStatus.value = 'saving'
       }
+      await initializeMasterAttempt()
       sessionReady = true
       startSessionPolling()
       if (!result.session) void saveSession()
@@ -459,6 +530,7 @@ async function initializeSession(isLoggedIn = loggedIn.value) {
       if (local) applyAttempt(local.attempt)
       else newBoard()
       sessionStatus.value = 'error'
+      await initializeMasterAttempt()
       sessionReady = true
       startSessionPolling()
       return
@@ -475,7 +547,175 @@ async function initializeSession(isLoggedIn = loggedIn.value) {
   sessionReady = true
   writeLocalSession()
   sessionStatus.value = 'deviceSaved'
+  if (masterMode.value) masterAttemptStatus.value = moves.value ? 'practice' : 'guest'
 }
+
+async function initializeMasterAttempt() {
+  if (!masterMode.value) return
+  masterAttemptId.value = null
+  masterRankedGeneration.value = null
+  if (!loggedIn.value || !props.progressEnabled) {
+    masterAttemptStatus.value = moves.value ? 'practice' : 'guest'
+    return
+  }
+  try {
+    const result = await $fetch<{ attempt: MasterAttemptSnapshot & { attempt?: string | null } }>(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`)
+    const saved = result.attempt
+    if (saved.status === 'available') {
+      masterAttemptStatus.value = moves.value ? 'practice' : 'available'
+      return
+    }
+    if (saved.status === 'completed') {
+      masterAttemptStatus.value = 'completed'
+      return
+    }
+    if (saved.status === 'forfeited') {
+      masterAttemptStatus.value = 'forfeited'
+      return
+    }
+    masterAttemptId.value = saved.attemptId
+    masterRankedGeneration.value = saved.generation
+    const current = decodePuzzleAttempt(attemptLayout.value, attemptToken.value)
+    const ranked = saved.attempt ? decodePuzzleAttempt(attemptLayout.value, saved.attempt) : null
+    if (!ranked || ranked.generation !== saved.generation) {
+      masterAttemptStatus.value = 'practice'
+      return
+    }
+    if (!current || current.generation !== saved.generation || current.moves.length < ranked.moves.length) applyAttempt(saved.attempt!)
+    else if (current.moves.length > ranked.moves.length) void saveMasterAttempt(attemptToken.value)
+    masterAttemptStatus.value = 'in_progress'
+  } catch {
+    masterAttemptStatus.value = 'error'
+  }
+}
+
+async function refreshMasterAttempt() {
+  if (!masterMode.value || !loggedIn.value || !props.progressEnabled || masterClaimPromise) return
+  try {
+    const result = await $fetch<{ attempt: MasterAttemptSnapshot & { attempt?: string | null } }>(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`)
+    const saved = result.attempt
+    if (saved.status === 'completed') {
+      masterAttemptStatus.value = 'completed'
+      return
+    }
+    if (saved.status === 'forfeited') {
+      masterAttemptStatus.value = 'forfeited'
+      return
+    }
+    if (saved.status === 'available') {
+      if (masterAttemptStatus.value === 'error') masterAttemptStatus.value = moves.value ? 'practice' : 'available'
+      return
+    }
+    if (saved.status !== 'in_progress') return
+
+    masterAttemptId.value = saved.attemptId
+    masterRankedGeneration.value = saved.generation
+    const ranked = saved.attempt ? decodePuzzleAttempt(attemptLayout.value, saved.attempt) : null
+    const current = decodePuzzleAttempt(attemptLayout.value, attemptToken.value)
+    if (!ranked || ranked.generation !== saved.generation) {
+      masterAttemptStatus.value = 'practice'
+      return
+    }
+    if (!current || current.generation !== saved.generation || current.moves.length < ranked.moves.length) applyAttempt(saved.attempt!)
+    else if (current.moves.length > ranked.moves.length) void saveMasterAttempt(attemptToken.value)
+    masterAttemptStatus.value = 'in_progress'
+  } catch {
+    // Keep the current attempt status when a background check fails.
+  }
+}
+
+async function claimMasterAttempt(attempt: string) {
+  if (!masterMode.value || masterAttemptStatus.value !== 'available' || !loggedIn.value) return
+  masterAttemptStatus.value = 'claiming'
+  masterClaimPromise = (async () => {
+    try {
+      const result = await $fetch<{ ranked: boolean; attempt: MasterAttemptSnapshot }>(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`, {
+        method: 'POST',
+        body: { attempt },
+      })
+      if (result.ranked && result.attempt.attemptId && result.attempt.generation === attemptGeneration.value) {
+        masterAttemptId.value = result.attempt.attemptId
+        masterRankedGeneration.value = result.attempt.generation
+        masterAttemptStatus.value = 'in_progress'
+        if (attemptToken.value !== attempt) void saveMasterAttempt(attemptToken.value)
+      } else {
+        masterAttemptStatus.value = 'practice'
+      }
+    } catch {
+      masterAttemptStatus.value = 'error'
+    } finally {
+      masterClaimPromise = null
+    }
+  })()
+  await masterClaimPromise
+}
+
+function scheduleMasterAttemptSave(attempt: string) {
+  if (!masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
+  if (masterSaveTimer) clearTimeout(masterSaveTimer)
+  masterSaveTimer = setTimeout(() => void saveMasterAttempt(attempt), 350)
+}
+
+async function saveMasterAttempt(attempt: string) {
+  if (!masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
+  try {
+    const result = await $fetch<{ ranked: boolean }>(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`, {
+      method: 'PUT',
+      body: { attemptId: masterAttemptId.value, attempt },
+    })
+    if (!result.ranked && masterRankedGeneration.value !== attemptGeneration.value) masterAttemptStatus.value = 'practice'
+  } catch {
+    // The regular puzzle session is still saved; a failed ranked-attempt update cannot create a score.
+  }
+}
+
+async function requestRestart() {
+  if (masterClaimPromise) await masterClaimPromise
+  if (masterMode.value && masterAttemptStatus.value === 'in_progress' && moves.value > 0) {
+    if (!window.confirm(t('master.resetConfirm'))) return
+    if (!await forfeitMasterAttempt()) return
+  } else if (masterMode.value && masterAttemptStatus.value === 'completed' && moves.value > 0) {
+    if (!window.confirm(t('master.resetCompletedConfirm'))) return
+    masterAttemptStatus.value = 'practice'
+  }
+  newBoard()
+  fitMasterBoard()
+}
+
+async function abandonMasterAttempt() {
+  if (masterClaimPromise) await masterClaimPromise
+  if (masterAttemptStatus.value !== 'in_progress' || !window.confirm(t('master.abandonConfirm'))) return
+  await forfeitMasterAttempt()
+}
+
+async function forfeitMasterAttempt(): Promise<boolean> {
+  if (!masterAttemptId.value) return false
+  masterActionError.value = ''
+  try {
+    await $fetch(`/api/master/${encodeURIComponent(weekKey.value)}/forfeit`, {
+      method: 'POST',
+      body: { attemptId: masterAttemptId.value },
+    })
+    masterAttemptStatus.value = 'forfeited'
+    return true
+  } catch {
+    masterActionError.value = t('master.forfeitError')
+    return false
+  }
+}
+
+function shouldConfirmMasterLeave() {
+  return masterMode.value && !complete.value && moves.value > 0
+    && (masterAttemptStatus.value === 'in_progress' || masterAttemptStatus.value === 'claiming')
+}
+
+function handleMasterBeforeUnload(event: BeforeUnloadEvent) {
+  if (!shouldConfirmMasterLeave()) return
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onBeforeRouteLeave(() => !shouldConfirmMasterLeave() || window.confirm(t('master.leaveConfirm')))
 
 function handleGuestStorage(event: StorageEvent) {
   if (loggedIn.value || event.key !== localSessionKey || !event.newValue) return
@@ -503,6 +743,11 @@ watch(attemptToken, (attempt) => {
   }
   writeLocalSession(attempt)
   scheduleSessionSave()
+  if (masterMode.value) {
+    if (masterAttemptStatus.value === 'available') void claimMasterAttempt(attempt)
+    else if (masterAttemptStatus.value === 'guest') masterAttemptStatus.value = 'practice'
+    else if (masterAttemptStatus.value === 'in_progress' && masterRankedGeneration.value === attemptGeneration.value) scheduleMasterAttemptSave(attempt)
+  }
 }, { flush: 'post' })
 
 watch(loggedIn, (isLoggedIn) => {
@@ -515,11 +760,28 @@ watch(complete, async (isComplete) => {
 
   if (isComplete) {
     playSound('complete')
-    if (loggedIn.value && props.progressEnabled) {
+    if (masterMode.value) {
+      if (masterClaimPromise) await masterClaimPromise
+      if (loggedIn.value && props.progressEnabled && masterAttemptStatus.value === 'in_progress' && masterAttemptId.value) {
+        void saveSession()
+        completionSavePending.value = true
+        try {
+          await $fetch(`/api/master/${encodeURIComponent(weekKey.value)}/complete`, {
+            method: 'POST',
+            body: { attemptId: masterAttemptId.value, attempt: attemptToken.value },
+          })
+          masterAttemptStatus.value = 'completed'
+        } catch {
+          completionSaveError.value = true
+        } finally {
+          completionSavePending.value = false
+        }
+      }
+    } else if (loggedIn.value && props.progressEnabled) {
       void saveSession()
       completionSavePending.value = true
       try {
-        await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: props.puzzle.date, attempt: attemptToken.value } })
+        await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: puzzleDate.value, attempt: attemptToken.value } })
       } catch {
         completionSaveError.value = true
       } finally {
@@ -552,7 +814,7 @@ watch(complete, async (isComplete) => {
 })
 
 function startDrag(slot: number, event: PointerEvent) {
-  if (complete.value || event.button !== 0) return
+  if (complete.value || panMode.value || event.button !== 0) return
   const button = event.currentTarget
   if (!(button instanceof HTMLButtonElement)) return
   if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -628,6 +890,7 @@ function cancelDrag() {
 }
 
 function choosePiece(slot: number, event: MouseEvent) {
+  if (panMode.value) return
   if (ignoreClick.value) {
     ignoreClick.value = false
     if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
@@ -656,9 +919,43 @@ function swapWithFeedback(first: number, second: number) {
   playSound(firstPiece === second || secondPiece === first ? 'placed' : 'misplaced')
 }
 
+function changeMasterZoom(amount: number) {
+  masterZoom.value = Math.min(3, Math.max(1, Math.round((masterZoom.value + amount) * 100) / 100))
+  if (masterZoom.value === 1) {
+    masterPan.x = 0
+    masterPan.y = 0
+  }
+}
+
+function fitMasterBoard() {
+  masterZoom.value = 1
+  masterPan.x = 0
+  masterPan.y = 0
+  panMode.value = false
+}
+
+function startPan(event: PointerEvent) {
+  if (!masterMode.value || !panMode.value || event.button !== 0 || !(event.currentTarget instanceof HTMLElement)) return
+  event.currentTarget.setPointerCapture(event.pointerId)
+  panPointer = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: masterPan.x, originY: masterPan.y }
+}
+
+function movePan(event: PointerEvent) {
+  if (!panPointer || panPointer.id !== event.pointerId) return
+  masterPan.x = panPointer.originX + event.clientX - panPointer.x
+  masterPan.y = panPointer.originY + event.clientY - panPointer.y
+}
+
+function finishPan(event: PointerEvent) {
+  if (panPointer?.id === event.pointerId) panPointer = null
+}
+
 async function sharePuzzle() {
   if (!import.meta.client || !props.progressEnabled) return
-  const url = new URL($localePath({ name: 'play', params: { date: props.puzzle.date } }), window.location.origin).href
+  const puzzleRoute = masterMode.value
+    ? $localePath({ name: 'master' })
+    : $localePath({ name: 'play', params: { date: puzzleDate.value } })
+  const url = new URL(puzzleRoute, window.location.origin).href
   const shareData = {
     title: displayedTitle.value,
     text: t('game.shareMessage', { title: displayedTitle.value }),
@@ -701,6 +998,7 @@ function pieceStyle(piece: number) {
 
 onMounted(async () => {
   updateViewportSize()
+  window.addEventListener('beforeunload', handleMasterBeforeUnload)
   window.addEventListener('resize', updateViewportSize)
   window.addEventListener('storage', handleGuestStorage)
   window.addEventListener('online', handleBrowserOnline)
@@ -720,6 +1018,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('resize', updateViewportSize)
+    window.removeEventListener('beforeunload', handleMasterBeforeUnload)
     window.removeEventListener('storage', handleGuestStorage)
     window.removeEventListener('online', handleBrowserOnline)
     document.removeEventListener('visibilitychange', pollSession)
@@ -729,6 +1028,7 @@ onBeforeUnmount(() => {
   if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
   if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
   if (sessionPollTimer) clearInterval(sessionPollTimer)
+  if (masterSaveTimer) clearTimeout(masterSaveTimer)
   if (import.meta.client) document.querySelector('.site-shell')?.removeAttribute('inert')
 })
 </script>
@@ -753,7 +1053,28 @@ onBeforeUnmount(() => {
   .reference-panel p { grid-column: 1; }
 }
 
+.master-board-viewport:not(.is-master) { display: contents; }
+.master-board-transform { width: 100%; }
+.master-board-viewport.is-master { display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
+.master-board-viewport.is-master .master-board-transform { display: grid; height: 100%; place-items: center; transition: transform .12s ease-out; }
+.master-board-viewport.is-pan-mode { cursor: grab; }
+.master-board-viewport.is-pan-mode:active { cursor: grabbing; }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+.master-zoom-tools { display: flex; align-items: center; gap: .28rem; }
+.master-zoom-tools button { min-width: 2rem; min-height: 2rem; border: 1.5px solid var(--ink); background: var(--white); color: var(--blue); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
+.master-zoom-tools button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-foreground); }
+.master-zoom-tools button:disabled { opacity: .45; cursor: not-allowed; }
+.master-zoom-tools button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.board-tools:has(.master-zoom-tools) { flex-wrap: wrap; align-items: flex-start; }
+.board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+.master-abandon-button { min-height: 2rem; border: 0; padding: .2rem .3rem; background: transparent; color: var(--coral); font: inherit; font-size: .7rem; font-weight: 750; text-decoration: underline; text-underline-offset: .18rem; cursor: pointer; }
+.master-abandon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.master-attempt-status { margin: .15rem 0 0; color: var(--blue); font-size: .74rem; font-weight: 750; }
+.master-attempt-status.is-practice, .master-attempt-status.is-guest { color: var(--muted); }
+.master-attempt-status.is-error { color: var(--coral); }
+.master-login-prompt { margin: 0; font-size: .75rem; }
+.master-login-prompt a { color: var(--blue); font-weight: 750; text-underline-offset: .16rem; }
+.master-attempt-status:has(+ .completion-leaderboard-link) { text-align: center; }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }

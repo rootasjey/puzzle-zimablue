@@ -1,3 +1,5 @@
+import { isValidIsoWeekKey } from './iso-week.ts'
+
 export type PuzzleMove = [number, number]
 
 export interface DecodedPuzzleAttempt {
@@ -165,22 +167,4 @@ function isValidDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value)
     && !Number.isNaN(Date.parse(`${value}T12:00:00Z`))
     && new Date(`${value}T12:00:00Z`).toISOString().startsWith(value)
-}
-
-function isValidIsoWeekKey(value: string): boolean {
-  const match = /^(\d{4})-w(0[1-9]|[1-4]\d|5[0-3])$/.exec(value)
-  if (!match) return false
-  const year = Number(match[1])
-  const week = Number(match[2])
-  if (year < 1) return false
-
-  const janFourth = new Date(Date.UTC(year, 0, 4))
-  const weekOneMonday = new Date(Date.UTC(year, 0, 4 - ((janFourth.getUTCDay() + 6) % 7)))
-  const targetMonday = new Date(weekOneMonday.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000)
-  const targetThursday = new Date(targetMonday.getTime() + 3 * 24 * 60 * 60 * 1000)
-  const targetYear = targetThursday.getUTCFullYear()
-  const targetJanFourth = new Date(Date.UTC(targetYear, 0, 4))
-  const targetWeekOneMonday = new Date(Date.UTC(targetYear, 0, 4 - ((targetJanFourth.getUTCDay() + 6) % 7)))
-  const targetWeek = Math.floor((targetMonday.getTime() - targetWeekOneMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
-  return targetYear === year && targetWeek === week
 }

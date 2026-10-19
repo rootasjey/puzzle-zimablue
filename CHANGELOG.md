@@ -2,6 +2,17 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-10-20
+
+### Added
+
+- Added the weekly Master with an admin-configurable square illustration, 16 × 16 or 20 × 20 grid, a ranked attempt per account, practice retries, and a weekly leaderboard.
+- Added zoom and pan controls for the Master board, plus explicit confirmation before abandoning or resetting a ranked run.
+
+### Changed
+
+- Adjusted the Master board and mobile navigation to keep the puzzle usable on narrow and short screens.
+
 ## [0.8.0] - 2026-10-19
 
 ### Added

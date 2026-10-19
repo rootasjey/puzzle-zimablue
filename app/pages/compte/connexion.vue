@@ -34,9 +34,12 @@ const { $getLocale } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const route = useRoute()
 const dateLocale = computed(() => $getLocale() === 'en' ? 'en-US' : 'fr-FR')
+const returnToMaster = computed(() => route.query.returnTo === 'master')
 const puzzleDate = computed(() => typeof route.query.puzzleDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(route.query.puzzleDate) ? route.query.puzzleDate : '')
 const puzzleAttempt = computed(() => typeof route.query.attempt === 'string' && route.query.attempt.length <= MAX_ATTEMPT_LENGTH ? route.query.attempt : '')
-const accountQuery = computed(() => puzzleDate.value && puzzleAttempt.value ? { puzzleDate: puzzleDate.value, attempt: puzzleAttempt.value } : {})
+const accountQuery = computed(() => returnToMaster.value
+  ? { returnTo: 'master' }
+  : puzzleDate.value && puzzleAttempt.value ? { puzzleDate: puzzleDate.value, attempt: puzzleAttempt.value } : {})
 async function login() {
   busy.value = true
   error.value = ''
@@ -46,7 +49,7 @@ async function login() {
     if (puzzleDate.value && puzzleAttempt.value) {
       await $fetch('/api/account/progress', { method: 'POST', body: { puzzleDate: puzzleDate.value, attempt: puzzleAttempt.value } })
     }
-    await navigateTo(useNuxtApp().$localePath({ name: 'account' }))
+    await navigateTo(useNuxtApp().$localePath({ name: returnToMaster.value ? 'master' : 'account' }))
   } catch (cause: any) {
     error.value = cause?.statusCode === 403 ? t('account.verifyFirst') : t('auth.loginError')
   } finally {

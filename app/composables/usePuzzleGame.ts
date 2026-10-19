@@ -1,7 +1,6 @@
-import type { DailyPuzzle } from '#shared/types/puzzle'
 import { createPuzzleOrder, MAX_ATTEMPT_MOVES, type PuzzleMove } from '#shared/utils/puzzle-attempt'
 
-export function usePuzzleGame(puzzle: DailyPuzzle) {
+export function usePuzzleGame(puzzle: { puzzleId: string; gridRows: number; gridColumns: number }) {
   const order = ref<number[]>([])
   const selected = ref<number | null>(null)
   const moves = ref(0)

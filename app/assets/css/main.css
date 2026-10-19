@@ -176,11 +176,12 @@ button:not(.puzzle-piece):not(.theme-toggle):not(.sound-toggle):not(.restart-ico
   .metrics-table thead th { font-size: .62rem; }
 }
 @media (max-width: 470px) {
-  .site-header { gap: .55rem; padding-inline: 1.1rem; }
+  .site-header { height: auto; min-height: 68px; gap: .55rem; padding-block: .45rem; padding-inline: 1.1rem; }
   .wordmark { flex: none; }
   .nav-link { font-size: .7rem; }
-  .site-header nav { flex: 1; justify-content: flex-end; gap: .5rem; min-width: 0; }
-  .site-header nav > .nav-link:first-child { display: none; }
+  .site-header nav { flex: 1; flex-wrap: wrap; justify-content: flex-end; gap: .35rem .5rem; min-width: 0; }
+  .site-header nav > .nav-link:first-child,
+  .site-header nav > .nav-link:not(.master-nav-link):not(.account-nav) { display: none; }
   .archive-card { grid-template-columns: 70px minmax(0,1fr) auto; min-height: 88px; gap: .7rem; padding: .55rem; }
   .archive-card img { width: 70px; height: 70px; }
   .archive-card-copy strong { font-size: .84rem; }

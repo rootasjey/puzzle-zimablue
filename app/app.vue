@@ -6,6 +6,7 @@
       </NuxtLink>
       <nav :aria-label="t('app.navigation')">
         <NuxtLink class="nav-link" :to="$localePath({ name: 'index' })">{{ t('app.home') }}</NuxtLink>
+        <NuxtLink class="nav-link master-nav-link" :to="$localePath({ name: 'master' })">{{ t('app.master') }}</NuxtLink>
         <NuxtLink class="nav-link" :to="$localePath({ name: 'archive' })">{{ t('app.archive') }}</NuxtLink>
         <NuxtLink v-if="loggedIn && user" class="nav-link account-nav" :to="$localePath({ name: 'account' })">
           <img v-if="preferences.avatarUrl()" class="account-nav-avatar" :src="preferences.avatarUrl()" alt="">
@@ -13,6 +14,7 @@
         </NuxtLink>
         <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
         <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-calendar' })">{{ t('app.admin') }}</NuxtLink>
+        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-master' })">Master</NuxtLink>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
           {{ nextLanguageCode }}
         </button>

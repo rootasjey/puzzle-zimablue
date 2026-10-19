@@ -18,6 +18,19 @@
     </section>
     <p v-else class="empty-state">{{ t('home.empty') }}</p>
 
+    <section v-if="weeklyMaster" class="master-home-feature" aria-labelledby="master-home-title">
+      <NuxtLink class="master-home-art" :to="$localePath({ name: 'master' })" :aria-label="t('home.masterPlay')">
+        <img :src="weeklyMaster.imageUrl" :alt="t('home.illustrationAlt', { name: weeklyMaster.imageName })" loading="lazy">
+        <span>{{ weeklyMaster.weekKey }}</span>
+      </NuxtLink>
+      <div>
+        <p class="section-kicker">{{ t('home.masterKicker') }}</p>
+        <h2 id="master-home-title">{{ t('home.masterTitle') }}</h2>
+        <p>{{ t('home.masterDescription') }}</p>
+        <NuxtLink class="play-link" :to="$localePath({ name: 'master' })">{{ t('home.masterPlay') }} <span aria-hidden="true">↗</span></NuxtLink>
+      </div>
+    </section>
+
     <section class="archive-preview" aria-labelledby="archive-title">
       <div class="section-heading">
         <div>
@@ -43,13 +56,15 @@
 </template>
 
 <script setup lang="ts">
-import type { DailyPuzzle } from '#shared/types/puzzle'
+import type { DailyPuzzle, WeeklyPuzzle } from '#shared/types/puzzle'
 import { formatPuzzleDate as formatSharedPuzzleDate } from '#shared/types/puzzle'
 definePageMeta({ name: 'index' })
 const { $getLocale, $localePath, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 
 const { data: puzzles } = await useFetch<DailyPuzzle[]>('/api/puzzles', { key: 'published-puzzles-home' })
+const { data: weeklyMasterData } = await useFetch<WeeklyPuzzle | null>('/api/master/current', { key: 'weekly-master-home' })
+const weeklyMaster = computed(() => weeklyMasterData.value ?? null)
 const parisToday = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris' }).format(new Date())
 const featured = computed(() => puzzles.value?.find(puzzle => puzzle.date === parisToday))
 const archive = computed(() => puzzles.value?.filter(puzzle => puzzle.date < parisToday).slice(0, 2) ?? [])
@@ -73,6 +88,12 @@ defineOgImage('Puzzle.takumi', {
 <style>
 .home-page { flex: 1; padding-top: clamp(2rem, 5vw, 4rem); padding-bottom: 4rem; }
 .daily-feature { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(280px, .96fr); align-items: center; gap: clamp(2rem, 7vw, 6rem); }
+.master-home-feature { display: grid; grid-template-columns: minmax(230px, .65fr) minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 6vw, 4rem); margin-top: clamp(3rem, 7vw, 5rem); padding: clamp(1rem, 3vw, 2rem); border: 2px solid var(--ink); background: var(--yellow); box-shadow: var(--shadow); }
+.master-home-art { position: relative; display: block; min-width: 0; aspect-ratio: 1; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.master-home-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.master-home-art span { position: absolute; right: .6rem; bottom: .6rem; padding: .3rem .5rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); font-size: .68rem; font-weight: 800; }
+.master-home-feature h2 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.05; font-weight: 850; }
+.master-home-feature > div > p:not(.section-kicker) { max-width: 42ch; color: var(--yellow-foreground); line-height: 1.6; }
 .feature-art-link { display: block; min-width: 0; color: inherit; text-decoration: none; }
 .feature-art-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 5px; }
 .feature-art { position: relative; min-width: 0; aspect-ratio: 1.18; overflow: hidden; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-.6deg); transition: transform .2s ease; }
@@ -101,6 +122,8 @@ defineOgImage('Puzzle.takumi', {
 .play-link:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 @media (max-width: 760px) {
   .daily-feature { grid-template-columns: 1fr; gap: 1.4rem; }
+  .master-home-feature { grid-template-columns: minmax(0, 1fr); }
+  .master-home-art { width: min(100%, 400px); }
   .feature-art { aspect-ratio: 1.22; max-height: 440px; }
   .feature-copy { padding: 0; }
   .feature-copy h1 { font-size: clamp(2.7rem, 11vw, 4rem); }

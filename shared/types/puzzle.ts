@@ -18,7 +18,7 @@ export interface DailyPuzzle {
   status: PuzzleStatus
 }
 
-/** Data contract for a future weekly Master puzzle; image variants can be supplied independently. */
+/** Published weekly Master puzzle. The square source image is shared across all devices. */
 export interface WeeklyPuzzle {
   puzzleId: string
   weekKey: string
