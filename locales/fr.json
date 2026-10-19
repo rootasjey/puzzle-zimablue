@@ -83,6 +83,7 @@
     "finishPan": "Terminer le déplacement du puzzle",
     "pan": "Déplacer",
     "panDone": "Terminé",
+    "touchGestureHint": "À deux doigts, pince pour zoomer et déplace le plateau. À un doigt, sélectionne ou déplace une pièce.",
     "resetConfirm": "Recommencer ? Ta tentative classée sera consommée et ne pourra pas être rejouée. La nouvelle grille sera en entraînement.",
     "resetCompletedConfirm": "Recommencer en entraînement ? Ta tentative classée est terminée et ne pourra pas être rejouée.",
     "abandon": "Abandonner la tentative classée",

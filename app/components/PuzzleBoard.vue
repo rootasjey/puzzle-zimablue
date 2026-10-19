@@ -7,10 +7,10 @@
     <div
       v-else
       class="master-board-viewport"
-      :class="{ 'is-master': masterMode, 'is-pan-mode': panMode }"
+      :class="{ 'is-master': masterMode, 'is-pan-mode': panMode, 'is-touch-gesture': touchGestureActive }"
       :style="masterViewportStyle"
-      @pointerdown="startPan"
-      @pointermove="movePan"
+      @pointerdown.capture="startPan"
+      @pointermove.capture="movePan"
       @pointerup="finishPan"
       @pointercancel="finishPan"
       @lostpointercapture="finishPan"
@@ -74,6 +74,7 @@
           <button type="button" :aria-label="t('master.zoomIn')" :disabled="masterZoom >= 3" @click="changeMasterZoom(0.25)">+</button>
           <button type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">{{ t(panMode ? 'master.panDone' : 'master.pan') }}</button>
         </div>
+        <p v-if="masterMode" class="master-touch-hint">{{ t('master.touchGestureHint') }}</p>
         <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
           <button class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
@@ -205,6 +206,7 @@ import type { DailyPuzzle, WeeklyPuzzle } from '#shared/types/puzzle'
 import type { MasterAttemptSnapshot, MasterAttemptStatus } from '#shared/types/master'
 import type { LocalPuzzleSession, PuzzleSessionSnapshot } from '#shared/types/puzzle-session'
 import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
+import { createMasterGestureStart, updateMasterGesture } from '~/utils/master-gesture'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
 const props = withDefaults(defineProps<{ puzzle: DailyPuzzle | WeeklyPuzzle; progressEnabled?: boolean; masterMode?: boolean }>(), { progressEnabled: true, masterMode: false })
@@ -256,8 +258,11 @@ const masterStatusKey = computed(() => ({
 }[masterAttemptStatus.value]))
 const masterZoom = ref(1)
 const panMode = ref(false)
+const touchGestureActive = ref(false)
 const masterPan = reactive({ x: 0, y: 0 })
-let panPointer: { id: number; x: number; y: number; originX: number; originY: number } | null = null
+const activeTouchPointers = new Map<number, { x: number; y: number }>()
+let touchGestureStart: ReturnType<typeof createMasterGestureStart> | null = null
+let panPointer: { id: number; x: number; y: number; originX: number; originY: number; moved: boolean } | null = null
 let masterClaimPromise: Promise<void> | null = null
 let masterSaveTimer: ReturnType<typeof setTimeout> | undefined
 type SessionStatus = 'loading' | 'saving' | 'saved' | 'deviceSaved' | 'updated' | 'conflict' | 'error'
@@ -814,7 +819,7 @@ watch(complete, async (isComplete) => {
 })
 
 function startDrag(slot: number, event: PointerEvent) {
-  if (complete.value || panMode.value || event.button !== 0) return
+  if (complete.value || panMode.value || touchGestureActive.value || event.button !== 0) return
   const button = event.currentTarget
   if (!(button instanceof HTMLButtonElement)) return
   if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -924,7 +929,9 @@ function changeMasterZoom(amount: number) {
   if (masterZoom.value === 1) {
     masterPan.x = 0
     masterPan.y = 0
+    return
   }
+  constrainMasterPan()
 }
 
 function fitMasterBoard() {
@@ -935,19 +942,106 @@ function fitMasterBoard() {
 }
 
 function startPan(event: PointerEvent) {
-  if (!masterMode.value || !panMode.value || event.button !== 0 || !(event.currentTarget instanceof HTMLElement)) return
-  event.currentTarget.setPointerCapture(event.pointerId)
-  panPointer = { id: event.pointerId, x: event.clientX, y: event.clientY, originX: masterPan.x, originY: masterPan.y }
+  if (!masterMode.value || !(event.currentTarget instanceof HTMLElement)) return
+
+  if (event.pointerType === 'touch') {
+    activeTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    if (activeTouchPointers.size >= 2) {
+      const [first, second] = [...activeTouchPointers.values()]
+      if (!first || !second) return
+      touchGestureStart = createMasterGestureStart(first, second, masterZoom.value, masterPan.x, masterPan.y)
+      touchGestureActive.value = true
+      panPointer = null
+      if (dragging.value?.phase === 'dragging') dragging.value = null
+      suppressPieceClick()
+      event.preventDefault()
+      return
+    }
+    if (panMode.value) beginPan(event, event.currentTarget)
+    return
+  }
+
+  if (!panMode.value || event.button !== 0) return
+  beginPan(event, event.currentTarget)
 }
 
 function movePan(event: PointerEvent) {
+  if (event.pointerType === 'touch') {
+    const point = activeTouchPointers.get(event.pointerId)
+    if (!point) return
+    point.x = event.clientX
+    point.y = event.clientY
+
+    if (touchGestureActive.value && touchGestureStart && activeTouchPointers.size >= 2) {
+      const [first, second] = [...activeTouchPointers.values()]
+      if (!first || !second) return
+      const transform = updateMasterGesture(touchGestureStart, first, second, {
+        width: event.currentTarget instanceof HTMLElement ? event.currentTarget.clientWidth : boardMaxWidth.value,
+        height: event.currentTarget instanceof HTMLElement ? event.currentTarget.clientHeight : boardMaxWidth.value,
+      })
+      masterZoom.value = transform.zoom
+      masterPan.x = transform.panX
+      masterPan.y = transform.panY
+      event.preventDefault()
+      return
+    }
+  }
+
   if (!panPointer || panPointer.id !== event.pointerId) return
-  masterPan.x = panPointer.originX + event.clientX - panPointer.x
-  masterPan.y = panPointer.originY + event.clientY - panPointer.y
+  const deltaX = event.clientX - panPointer.x
+  const deltaY = event.clientY - panPointer.y
+  if (Math.abs(deltaX) + Math.abs(deltaY) > 5) panPointer.moved = true
+  if (!panPointer.moved) return
+  masterPan.x = panPointer.originX + deltaX
+  masterPan.y = panPointer.originY + deltaY
+  constrainMasterPan()
 }
 
 function finishPan(event: PointerEvent) {
-  if (panPointer?.id === event.pointerId) panPointer = null
+  // Touch pointers use the browser's implicit pointer capture; their lost-capture
+  // notification can also fire when pinch control is handed back to the browser.
+  if (event.pointerType === 'touch') {
+    if (event.type === 'lostpointercapture') return
+    activeTouchPointers.delete(event.pointerId)
+    if (touchGestureActive.value && activeTouchPointers.size < 2) {
+      touchGestureActive.value = false
+      touchGestureStart = null
+      suppressPieceClick()
+    }
+  }
+
+  if (panPointer?.id === event.pointerId) {
+    if (panPointer.moved) suppressPieceClick()
+    panPointer = null
+  }
+}
+
+function beginPan(event: PointerEvent, viewport: HTMLElement) {
+  if (event.pointerType !== 'touch') viewport.setPointerCapture(event.pointerId)
+  panPointer = {
+    id: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    originX: masterPan.x,
+    originY: masterPan.y,
+    moved: false,
+  }
+}
+
+function constrainMasterPan() {
+  const viewport = document.querySelector<HTMLElement>('.master-board-viewport.is-master')
+  const width = viewport?.clientWidth ?? boardMaxWidth.value
+  const height = viewport?.clientHeight ?? boardMaxWidth.value
+  const maxX = width * (masterZoom.value - 1) / 2
+  const maxY = height * (masterZoom.value - 1) / 2
+  masterPan.x = Math.max(-maxX, Math.min(maxX, masterPan.x))
+  masterPan.y = Math.max(-maxY, Math.min(maxY, masterPan.y))
+}
+
+function suppressPieceClick() {
+  ignoreClick.value = true
+  if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
+  ignoreClickTimer = setTimeout(() => { ignoreClick.value = false }, 0)
 }
 
 async function sharePuzzle() {
@@ -1057,6 +1151,7 @@ onBeforeUnmount(() => {
 .master-board-transform { width: 100%; }
 .master-board-viewport.is-master { display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
 .master-board-viewport.is-master .master-board-transform { display: grid; height: 100%; place-items: center; transition: transform .12s ease-out; }
+.master-board-viewport.is-pan-mode .master-board-transform, .master-board-viewport.is-touch-gesture .master-board-transform { transition: none; }
 .master-board-viewport.is-pan-mode { cursor: grab; }
 .master-board-viewport.is-pan-mode:active { cursor: grabbing; }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
@@ -1065,6 +1160,8 @@ onBeforeUnmount(() => {
 .master-zoom-tools button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-foreground); }
 .master-zoom-tools button:disabled { opacity: .45; cursor: not-allowed; }
 .master-zoom-tools button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.master-touch-hint { display: none; }
+@media (max-width: 760px) { .master-touch-hint { display: block; flex-basis: 100%; margin: 0; color: var(--muted); font-size: .66rem; line-height: 1.4; text-align: right; } }
 .board-tools:has(.master-zoom-tools) { flex-wrap: wrap; align-items: flex-start; }
 .board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
 .master-abandon-button { min-height: 2rem; border: 0; padding: .2rem .3rem; background: transparent; color: var(--coral); font: inherit; font-size: .7rem; font-weight: 750; text-decoration: underline; text-underline-offset: .18rem; cursor: pointer; }

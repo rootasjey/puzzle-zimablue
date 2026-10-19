@@ -89,6 +89,7 @@
     "finishPan": "Finish panning the puzzle",
     "pan": "Pan",
     "panDone": "Done",
+    "touchGestureHint": "Use two fingers to pinch-zoom and move the board. Use one finger to select or move a piece.",
     "resetConfirm": "Restart? Your ranked attempt will be consumed and cannot be replayed. The new board will be practice.",
     "resetCompletedConfirm": "Restart in practice? Your ranked attempt is complete and cannot be replayed.",
     "abandon": "Abandon ranked attempt",

@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.1] - 2026-10-20
+
+### Fixed
+
+- Restored two-finger pinch zoom and panning on the weekly Master board on mobile.
+
 ## [0.9.0] - 2026-10-20
 
 ### Added
