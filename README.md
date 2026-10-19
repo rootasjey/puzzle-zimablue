@@ -12,7 +12,7 @@
 
 - One shared puzzle each day, with an archive of previous puzzles.
 - A responsive board that follows the illustration’s aspect ratio.
-- Three difficulty levels: 9, 16, or 25 pieces.
+- Six daily difficulty levels: 9, 16, 25, 36, 49, or 64 pieces.
 - Optional accounts for saving progress and viewing statistics across devices.
 - An admin calendar for selecting illustrations, scheduling puzzles, and publishing drafts.
 - French and English interfaces, light and dark themes, and optional sound effects.

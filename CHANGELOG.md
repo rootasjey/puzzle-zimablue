@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-10-19
+
+### Added
+
+- Expanded daily puzzle difficulties to 36, 49, and 64 pieces, with a searchable Una UI combobox in the admin editor.
+
 ## [0.7.0] - 2026-10-19
 
 ### Added

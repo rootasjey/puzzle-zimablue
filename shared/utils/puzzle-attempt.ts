@@ -23,6 +23,11 @@ export const MAX_PUZZLE_ROWS = 32
 export const MAX_PUZZLE_COLUMNS = 32
 export const MAX_PUZZLE_CELLS = 1_024
 export const MAX_ATTEMPT_LENGTH = 10_080
+export const DAILY_PUZZLE_GRID_SIZES = [3, 4, 5, 6, 7, 8] as const
+
+export function isDailyPuzzleGridSize(value: unknown): value is typeof DAILY_PUZZLE_GRID_SIZES[number] {
+  return typeof value === 'number' && DAILY_PUZZLE_GRID_SIZES.includes(value as typeof DAILY_PUZZLE_GRID_SIZES[number])
+}
 
 export function createDailyPuzzleId(date: string): string {
   if (!isValidDate(date)) throw new RangeError('Invalid daily puzzle date.')

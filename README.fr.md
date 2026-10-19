@@ -12,7 +12,7 @@
 
 - Un puzzle commun chaque jour et une archive des jours précédents.
 - Un plateau adaptatif qui respecte le format de l’illustration.
-- Trois niveaux de difficulté : 9, 16 ou 25 pièces.
+- Six niveaux de difficulté quotidiens : 9, 16, 25, 36, 49 ou 64 pièces.
 - Des comptes facultatifs pour sauvegarder sa progression et retrouver ses statistiques sur plusieurs appareils.
 - Un calendrier d’administration pour sélectionner les illustrations, programmer les puzzles et publier les brouillons.
 - Interfaces française et anglaise, thèmes clair et sombre, effets sonores facultatifs.

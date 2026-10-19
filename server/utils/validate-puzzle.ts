@@ -1,5 +1,6 @@
 import type { PuzzleStatus } from '../../shared/types/puzzle'
 import { isIsoDate } from './puzzles'
+import { isDailyPuzzleGridSize } from '../../shared/utils/puzzle-attempt'
 
 export interface PuzzleInput {
   date?: unknown
@@ -27,7 +28,7 @@ export function validatePuzzleInput(body: PuzzleInput) {
     || typeof imageDescription !== 'string' || imageDescription.length > 2000
     || typeof body.imageName !== 'string' || !body.imageName.trim() || body.imageName.length > 160
     || typeof body.imageSlug !== 'string' || !/^[\w-]{1,180}$/.test(body.imageSlug)
-    || typeof body.gridSize !== 'number' || !Number.isInteger(body.gridSize) || body.gridSize < 3 || body.gridSize > 5
+    || !isDailyPuzzleGridSize(body.gridSize)
     || (body.status !== 'draft' && body.status !== 'published') || !imageUrl) {
     throw createError({ statusCode: 400, statusMessage: 'Les informations du puzzle sont invalides.' })
   }

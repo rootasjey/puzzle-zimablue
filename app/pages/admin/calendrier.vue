@@ -117,11 +117,21 @@
             <div class="puzzle-details-grid">
               <label class="detail-meta-field">{{ t('admin.date') }}<input v-model="form.date" type="date" required></label>
               <label class="detail-meta-field">{{ t('admin.pieceCount') }}
-                <select v-model.number="form.gridSize">
-                  <option :value="3">{{ t('admin.easy', { count: 9 }) }}</option>
-                  <option :value="4">{{ t('admin.balanced', { count: 16 }) }}</option>
-                  <option :value="5">{{ t('admin.challenging', { count: 25 }) }}</option>
-                </select>
+                <NCombobox
+                  v-model="selectedGridSizeOption"
+                  class="daily-grid-size-combobox"
+                  :items="gridSizeOptions"
+                  label-key="label"
+                  value-key="value"
+                  :text-empty="t('admin.noDifficultyResults')"
+                  :_combobox-trigger="{ class: 'daily-grid-size-trigger', btn: 'solid-white', block: true, ariaLabel: t('admin.pieceCount'), trailing: 'i-lucide-chevron-down' }"
+                  :_combobox-input="{ class: 'daily-grid-size-search', placeholder: t('admin.searchDifficulty'), 'aria-label': t('admin.searchDifficulty') }"
+                  :_combobox-list="{ class: 'daily-grid-size-list' }"
+                >
+                  <template #trigger>
+                    <span>{{ selectedGridSizeOption?.label }}</span>
+                  </template>
+                </NCombobox>
               </label>
               <label class="detail-text-field">{{ t('admin.title') }}
                 <span class="field-control-row">
@@ -175,6 +185,7 @@ import type { CalendarType, Event, UseCalendarAppReturn } from '@dayflow/vue'
 import { createDayView, createMonthView, createWeekView, createYearView, DayFlowCalendar, useCalendarApp } from '@dayflow/vue'
 import type { DailyPuzzle } from '#shared/types/puzzle'
 import { formatPuzzleDate } from '#shared/types/puzzle'
+import { DAILY_PUZZLE_GRID_SIZES, isDailyPuzzleGridSize } from '#shared/utils/puzzle-attempt'
 
 definePageMeta({ name: 'admin-calendar', middleware: 'admin' })
 const { $getLocale, $t } = useI18n()
@@ -196,6 +207,7 @@ interface PuzzleForm {
   gridSize: number
   status: 'draft' | 'published'
 }
+interface GridSizeOption { value: number; label: string }
 
 const calendarApp = shallowRef<UseCalendarAppReturn>()
 const allPuzzles = ref<DailyPuzzle[]>([])
@@ -228,6 +240,24 @@ const previewAnchor = reactive({ x: 0, y: 0 })
 const previewAnchorStyle = computed(() => ({ left: `${previewAnchor.x}px`, top: `${previewAnchor.y}px` }))
 const panelStage = ref<HTMLElement>()
 const form = reactive<PuzzleForm>(emptyForm())
+const gridSizeDifficultyKeys: Record<number, string> = {
+  3: 'admin.easy',
+  4: 'admin.balanced',
+  5: 'admin.challenging',
+  6: 'admin.hard',
+  7: 'admin.veryHard',
+  8: 'admin.expert',
+}
+const gridSizeOptions = computed<GridSizeOption[]>(() => DAILY_PUZZLE_GRID_SIZES.map((size) => ({
+  value: size,
+  label: t(gridSizeDifficultyKeys[size]!, { count: size * size }),
+})))
+const selectedGridSizeOption = computed<GridSizeOption | null>({
+  get: () => gridSizeOptions.value.find(option => option.value === form.gridSize) ?? gridSizeOptions.value[0] ?? null,
+  set: (option) => {
+    if (option && isDailyPuzzleGridSize(option.value)) form.gridSize = option.value
+  },
+})
 let autosaveTimer: ReturnType<typeof setTimeout> | undefined
 let previewCloseTimer: ReturnType<typeof setTimeout> | undefined
 let panelHeightTimer: ReturnType<typeof setTimeout> | undefined
@@ -717,6 +747,14 @@ onBeforeUnmount(() => {
 .puzzle-form { display: grid; gap: 1rem; }
 .puzzle-form label { display: grid; gap: .4rem; color: var(--ink); font-size: .82rem; font-weight: 750; }
 .puzzle-form input, .puzzle-form textarea, .puzzle-form select { width: 100%; min-height: 2.8rem; padding: .65rem .75rem; border: 2px solid var(--ink); border-radius: 0; background: var(--white); color: var(--ink); font: inherit; font-size: .9rem; }
+.daily-grid-size-combobox { display: block; width: 100%; }
+.daily-grid-size-trigger { width: 100%; min-height: 2.8rem; justify-content: space-between; border: 2px solid var(--ink) !important; border-radius: 0 !important; background: var(--white) !important; color: var(--ink) !important; padding: .65rem .75rem !important; font: inherit !important; font-size: .9rem !important; text-align: left; }
+.daily-grid-size-trigger:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.daily-grid-size-list { z-index: 120 !important; min-width: var(--reka-popper-anchor-width); border: 2px solid var(--ink); border-radius: 0; background: var(--white); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.daily-grid-size-list input { width: 100%; min-height: 2.65rem; padding: .6rem .75rem; border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: var(--white); color: var(--ink); font: inherit; font-size: .88rem; }
+.daily-grid-size-list input:focus-visible { outline: 3px solid var(--yellow); outline-offset: -3px; }
+.daily-grid-size-list [data-slot="combobox-item"] { min-height: 2.5rem; padding: .6rem .75rem; color: var(--ink); font-size: .88rem; }
+.daily-grid-size-list [data-slot="combobox-item"][data-highlighted] { background: var(--yellow); color: var(--ink); }
 .puzzle-form textarea { resize: vertical; }
 .puzzle-form input:focus, .puzzle-form textarea:focus, .puzzle-form select:focus { outline: 3px solid var(--yellow); outline-offset: 2px; }
 .calendar-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.3rem; margin: 1rem 0 .8rem; color: var(--muted); font-size: .77rem; }

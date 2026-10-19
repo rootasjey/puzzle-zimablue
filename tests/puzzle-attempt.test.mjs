@@ -5,7 +5,9 @@ import {
   createMasterPuzzleId,
   createPuzzleOrder,
   decodePuzzleAttempt,
+  DAILY_PUZZLE_GRID_SIZES,
   encodePuzzleAttempt,
+  isDailyPuzzleGridSize,
   isPuzzleId,
   verifyPuzzleAttempt,
 } from '../shared/utils/puzzle-attempt.ts'
@@ -30,6 +32,12 @@ test('daily and Master puzzle IDs are stable and validated', () => {
   assert.equal(isPuzzleId('master:2026-w54'), false)
   assert.equal(isPuzzleId('master:2021-w53'), false)
   assert.equal(isPuzzleId('master:2020-w53'), true)
+})
+
+test('daily puzzle difficulties allow square grids from 3x3 through 8x8', () => {
+  assert.deepEqual(DAILY_PUZZLE_GRID_SIZES, [3, 4, 5, 6, 7, 8])
+  for (const size of DAILY_PUZZLE_GRID_SIZES) assert.equal(isDailyPuzzleGridSize(size), true)
+  for (const value of [2, 9, 3.5, '8', null]) assert.equal(isDailyPuzzleGridSize(value), false)
 })
 
 test('v2 attempts round-trip the daily 3x3 layout', () => {
