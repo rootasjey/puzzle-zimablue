@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.10] - 2026-10-20
+
+### Improved
+
+- Bring the stepped cards closer together on hover and use the same mark for the favicon.
+
 ## [0.10.9] - 2026-10-20
 
 ### Fixed

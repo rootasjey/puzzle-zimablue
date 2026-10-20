@@ -50,17 +50,17 @@
 
   .brand-logo:hover .brand-logo-card--left,
   :global(.wordmark:focus-visible) .brand-logo-card--left {
-    transform: translate(-2px, -1px) rotate(-2deg);
+    transform: translate(1.5px, 1.5px);
   }
 
   .brand-logo:hover .brand-logo-card--right,
   :global(.wordmark:focus-visible) .brand-logo-card--right {
-    transform: translate(2px, -1px) rotate(2deg);
+    transform: translate(.5px, .5px);
   }
 
   .brand-logo:hover .brand-logo-card--front,
   :global(.wordmark:focus-visible) .brand-logo-card--front {
-    transform: translateY(-1px);
+    transform: translate(-.5px, -.5px);
   }
 
   .brand-logo:hover .wordmark-blue,
