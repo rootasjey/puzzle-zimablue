@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.6] - 2026-10-20
+
+### Improved
+
+- Refined the top-bar brand mark with squarer, more angular cards and individual shadows.
+
 ## [0.10.5] - 2026-10-20
 
 ### Improved

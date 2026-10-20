@@ -1,15 +1,17 @@
 <template>
   <span class="brand-logo" aria-hidden="true">
     <svg class="brand-logo-mark" viewBox="0 0 40 40" fill="none">
-      <rect x="10" y="7" width="21" height="27" rx="3.5" transform="rotate(13 20.5 20.5)" fill="#18224E" />
       <g class="brand-logo-card brand-logo-card--right">
-        <rect x="14" y="4" width="21" height="27" rx="3.5" transform="rotate(13 24.5 17.5)" fill="#FFDC4B" stroke="#18224E" stroke-width="1.6" />
+        <rect x="13" y="7" width="23" height="23" rx="2" transform="rotate(10 24.5 18.5)" fill="#18224E" />
+        <rect x="11" y="5" width="23" height="23" rx="2" transform="rotate(10 22.5 16.5)" fill="#FFDC4B" stroke="#18224E" stroke-width="1.6" />
       </g>
       <g class="brand-logo-card brand-logo-card--left">
-        <rect x="3" y="6" width="21" height="27" rx="3.5" transform="rotate(-14 13.5 19.5)" fill="#65D0F4" stroke="#18224E" stroke-width="1.6" />
+        <rect x="6" y="9" width="23" height="23" rx="2" transform="rotate(-11 17.5 20.5)" fill="#18224E" />
+        <rect x="4" y="7" width="23" height="23" rx="2" transform="rotate(-11 15.5 18.5)" fill="#65D0F4" stroke="#18224E" stroke-width="1.6" />
       </g>
       <g class="brand-logo-card brand-logo-card--front">
-        <rect x="8" y="8" width="21" height="27" rx="3.5" fill="#3986FF" stroke="#18224E" stroke-width="1.8" />
+        <rect x="10" y="11" width="23" height="23" rx="2" fill="#18224E" />
+        <rect x="8" y="9" width="23" height="23" rx="2" fill="#3986FF" stroke="#18224E" stroke-width="1.8" />
       </g>
     </svg>
     <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
