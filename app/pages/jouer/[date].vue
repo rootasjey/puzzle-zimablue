@@ -91,7 +91,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
 .play-identity { grid-column: 2; grid-row: 1; min-width: 0; max-width: min(48vw, 32rem); text-align: center; }
 .play-heading h1 { overflow: hidden; margin: 0; font-size: clamp(1.15rem, 1.8vw, 1.45rem); font-weight: 850; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .play-identity time { display: block; margin-top: .12rem; color: var(--muted); font-size: .68rem; line-height: 1.2; }
-.play-stage { display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; }
+.play-stage { --play-stage-gap: clamp(1rem, 3vw, 2rem); display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, min(57.5rem, calc(100svh - 15rem), calc(100% - 14rem - var(--play-stage-gap)))) minmax(14rem, 19rem); align-items: center; justify-content: center; gap: var(--play-stage-gap); }
 .game-panel { width: 100%; min-width: 0; }
 .board-tools { display: flex; width: min(100%, var(--board-max-width, 590px)); min-height: 2.5rem; align-items: center; justify-content: space-between; gap: .8rem; margin: .55rem auto 0; }
 .board-session-summary { display: grid; min-width: 0; gap: .12rem; }
@@ -114,14 +114,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
 .restart-icon-button:active { transform: translate(1px, 1px); box-shadow: none; }
 .restart-icon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .restart-icon-button svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.reference-disclosure { width: min(100%, 46rem); margin: .15rem auto 0; color: var(--ink); font-size: .76rem; }
-.reference-disclosure summary { display: flex; min-height: 2.1rem; align-items: center; justify-content: center; gap: .4rem; color: var(--blue); font-weight: 800; cursor: pointer; list-style: none; }
+.reference-disclosure { width: 100%; max-width: 20rem; align-self: start; justify-self: center; margin: .25rem 0 0; color: var(--ink); font-size: .76rem; }
+.reference-disclosure summary { display: flex; min-height: 2.1rem; align-items: center; justify-content: flex-start; gap: .4rem; color: var(--blue); font-weight: 800; cursor: pointer; list-style: none; }
 .reference-disclosure summary::-webkit-details-marker { display: none; }
 .reference-disclosure summary:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
 .reference-chevron { width: .9rem; height: .9rem; transition: transform .18s ease; }
 .reference-disclosure[open] .reference-chevron { transform: rotate(180deg); }
-.reference-preview { display: flex; min-height: 4.5rem; align-items: center; justify-content: center; gap: 1rem; padding: .55rem .75rem; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 2px 2px 0 var(--ink); }
-.reference-preview img { display: block; width: min(7rem, 24vw); max-height: 24svh; border: 1px solid var(--ink); background: var(--white); object-fit: contain; }
+.reference-preview { display: grid; min-height: 4.5rem; justify-items: center; gap: .75rem; padding: .65rem; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 2px 2px 0 var(--ink); }
+.reference-preview img { display: block; width: 100%; max-width: 20rem; max-height: 38svh; border: 1px solid var(--ink); background: var(--white); object-fit: contain; }
 .source-link { color: var(--blue); font-size: .78rem; font-weight: 800; text-decoration: underline; text-underline-offset: .18em; }
 @media (max-width: 760px) {
   .play-page { min-height: calc(100svh - 58px); padding-top: .2rem; padding-bottom: .35rem; }
@@ -129,7 +129,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
   .play-identity { grid-column: 2; max-width: 66vw; text-align: right; }
   .play-heading h1 { font-size: 1.1rem; }
   .play-back-link { gap: .28rem; font-size: .68rem; white-space: nowrap; }
-  .play-stage { justify-content: center; }
+  .play-stage { grid-template-columns: minmax(0, 1fr); align-content: center; gap: .45rem; }
+  .reference-disclosure { width: min(100%, 36rem); max-width: none; align-self: auto; }
+  .reference-preview { display: flex; min-height: 4.5rem; justify-content: center; gap: 1rem; }
   .reference-preview img { width: min(6rem, 28vw); max-height: 20svh; }
 }
 @media (max-width: 470px) {

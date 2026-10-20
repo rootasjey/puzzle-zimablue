@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.15] - 2026-10-21
+
+### Improved
+
+- Moved the daily puzzle reference image into a side panel on desktop and kept it below the board on smaller screens.
+
 ## [0.10.14] - 2026-10-21
 
 ### Improved
