@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.3] - 2026-10-20
+
+### Changed
+
+- Grouped the admin calendar and Master editor under one Admin menu.
+
 ## [0.9.2] - 2026-10-20
 
 ### Fixed

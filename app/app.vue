@@ -13,8 +13,21 @@
           {{ t('app.account') }}
         </NuxtLink>
         <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
-        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-calendar' })">{{ t('app.admin') }}</NuxtLink>
-        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath('/admin/master')">{{ t('app.configureMaster') }}</NuxtLink>
+        <details
+          v-if="loggedIn && user?.role === 'admin'"
+          ref="adminMenu"
+          class="admin-menu"
+          @keydown.esc.prevent.stop="closeAdminMenuAndFocus"
+        >
+          <summary class="nav-link admin-nav admin-menu-trigger">
+            {{ t('app.admin') }}
+            <span class="i-lucide-chevron-down admin-menu-chevron" aria-hidden="true" />
+          </summary>
+          <div class="admin-menu-panel">
+            <NuxtLink :to="$localePath({ name: 'admin-calendar' })" @click="dismissAdminMenu">{{ t('admin.calendarTitle') }}</NuxtLink>
+            <NuxtLink :to="$localePath('/admin/master')" @click="dismissAdminMenu">{{ t('app.configureMaster') }}</NuxtLink>
+          </div>
+        </details>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
           {{ nextLanguageCode }}
         </button>
@@ -79,6 +92,7 @@ const theme = computed<ThemePreference>(() => validThemes.includes(themeCookie.v
 const themeMenu = ref<HTMLElement>()
 const themeToggle = ref<HTMLButtonElement>()
 const themeMenuOpen = ref(false)
+const adminMenu = ref<HTMLDetailsElement>()
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'theme.system' },
   { value: 'light', label: 'theme.light' },
@@ -115,10 +129,26 @@ function closeThemeMenu(event: PointerEvent | KeyboardEvent) {
   }
 }
 
+function dismissAdminMenu() {
+  if (adminMenu.value) adminMenu.value.open = false
+}
+
+function closeAdminMenuOnOutsideClick(event: PointerEvent) {
+  if (event.target instanceof Node && !adminMenu.value?.contains(event.target)) {
+    dismissAdminMenu()
+  }
+}
+
+function closeAdminMenuAndFocus() {
+  dismissAdminMenu()
+  adminMenu.value?.querySelector('summary')?.focus()
+}
+
 onMounted(() => {
   void (loggedIn.value ? preferences.loadAccount() : preferences.loadGuest())
   document.addEventListener('pointerdown', closeThemeMenu)
   document.addEventListener('keydown', closeThemeMenu)
+  document.addEventListener('pointerdown', closeAdminMenuOnOutsideClick)
 })
 
 watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
@@ -129,6 +159,7 @@ watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', closeThemeMenu)
   document.removeEventListener('keydown', closeThemeMenu)
+  document.removeEventListener('pointerdown', closeAdminMenuOnOutsideClick)
 })
 
 function switchLanguage() {
