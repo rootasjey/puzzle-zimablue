@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.17] - 2026-10-21
+
+### Improved
+
+- Animated the desktop puzzle's shift when the reference image opens or closes, and removed the mobile preview frame while placing its illustration link below the image.
+
 ## [0.10.16] - 2026-10-21
 
 ### Improved

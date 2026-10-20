@@ -92,10 +92,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
 .play-heading h1 { overflow: hidden; margin: 0; font-size: clamp(1.15rem, 1.8vw, 1.45rem); font-weight: 850; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .play-identity time { display: block; margin-top: .12rem; color: var(--muted); font-size: .68rem; line-height: 1.2; }
 .play-stage { --play-stage-gap: clamp(1rem, 3vw, 2rem); display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, min(57.5rem, calc(100svh - 15rem), calc(100% - 14rem - var(--play-stage-gap)))) minmax(14rem, 19rem); align-items: center; justify-content: center; gap: var(--play-stage-gap); }
-.play-stage > .game-panel { grid-column: 1 / -1; grid-row: 1; }
+.play-stage > .game-panel { grid-column: 1 / -1; grid-row: 1; transition: transform .36s cubic-bezier(.2, .8, .25, 1); }
 .play-stage > .reference-disclosure { grid-column: 2; grid-row: 1; }
 .play-stage > .reference-disclosure:not([open]) summary { justify-content: flex-end; }
-.play-stage:has(.reference-disclosure[open]) > .game-panel { grid-column: 1; }
+@media (min-width: 761px) {
+  .play-stage:has(.reference-disclosure[open]) > .game-panel { transform: translateX(calc(-9.5rem - clamp(.5rem, 1.5vw, 1rem))); }
+}
+@media (prefers-reduced-motion: reduce) { .play-stage > .game-panel { transition: none; } }
 .game-panel { width: 100%; min-width: 0; }
 .board-tools { display: flex; width: min(100%, var(--board-max-width, 590px)); min-height: 2.5rem; align-items: center; justify-content: space-between; gap: .8rem; margin: .55rem auto 0; }
 .board-session-summary { display: grid; min-width: 0; gap: .12rem; }
@@ -137,8 +140,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
   .play-stage > .game-panel { grid-column: 1; }
   .play-stage > .reference-disclosure { grid-column: 1; grid-row: 2; width: min(100%, 36rem); max-width: none; align-self: auto; }
   .reference-disclosure summary { justify-content: center; }
-  .reference-preview { display: flex; min-height: 4.5rem; justify-content: center; gap: 1rem; }
-  .reference-preview img { width: min(6rem, 28vw); max-height: 20svh; }
+  .reference-preview { display: grid; min-height: 0; grid-template-columns: 1fr; justify-items: center; gap: .45rem; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .reference-preview img { width: min(8rem, 40vw); max-height: 24svh; border: 0; background: transparent; }
 }
 @media (max-width: 470px) {
   .play-page { padding-inline: .9rem; }
@@ -146,6 +149,5 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
   .play-identity { max-width: none; }
   .play-heading h1 { font-size: 1rem; }
   .play-back-link > span:last-child { display: none; }
-  .reference-preview { gap: .65rem; padding: .45rem; }
 }
 </style>
