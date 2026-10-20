@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.14] - 2026-10-21
+
+### Improved
+
+- Matched the completion-screen sound and restart controls to their neighboring buttons in size and alignment.
+
 ## [0.10.13] - 2026-10-21
 
 ### Improved
