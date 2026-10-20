@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.12] - 2026-10-21
+
+### Fixed
+
+- Prevented a DOM insertion error during navigation to and from the daily puzzle by avoiding the delayed `out-in` page transition.
+
 ## [0.10.11] - 2026-10-20
 
 ### Improved

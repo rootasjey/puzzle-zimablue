@@ -60,7 +60,7 @@ export default defineNuxtConfig({
     '/en/account/**': { robots: false },
   },
   app: {
-    pageTransition: { name: 'page-turn', mode: 'out-in' },
+    pageTransition: { name: 'page-turn' },
     head: {
       title: 'Puzzle Zimablue',
       titleTemplate: '%s — Puzzle Zimablue',
