@@ -239,6 +239,7 @@
     "imageError": "Impossible de charger cette illustration.",
     "congratulations": "Bravo !",
     "home": "Accueil",
+    "replayPuzzle": "Rejouer ce puzzle",
     "chooseAnotherPuzzle": "Choisir un autre puzzle",
     "share": "Partager le puzzle",
     "shareMessage": "J’ai terminé « {title} » sur Puzzle Zimablue !",

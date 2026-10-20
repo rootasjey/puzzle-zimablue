@@ -173,13 +173,17 @@
             </div>
             <p v-if="shareFeedback" class="completion-share-feedback" role="status">{{ shareFeedback }}</p>
             <div class="completion-navigation-actions">
-              <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
+              <button v-if="reopenedCompletedPuzzle && !masterMode" class="completion-replay-button" type="button" @click="requestRestart">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
+                <span>{{ t('game.replayPuzzle') }}</span>
+              </button>
+              <NTooltip v-else :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
                 <button class="restart-icon-button completion-restart" type="button" :aria-label="t('game.restart')" @click="requestRestart">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
                 </button>
                 <template #content>{{ t('game.restart') }}</template>
               </NTooltip>
-              <NuxtLink v-if="!masterMode" class="play-link completion-archive-link" :to="$localePath({ name: 'archive' })">
+              <NuxtLink v-if="!masterMode" :class="['completion-archive-link', reopenedCompletedPuzzle ? 'completion-archive-secondary-link' : 'play-link']" :to="$localePath({ name: 'archive' })">
                 {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
               </NuxtLink>
               <NuxtLink v-else class="play-link completion-archive-link" :to="$localePath({ name: 'index' })">
@@ -227,6 +231,7 @@ function toggleReferenceImage() {
 }
 const completionSaveError = ref(false)
 const completionSavePending = ref(false)
+const reopenedCompletedPuzzle = ref(false)
 const shareFeedback = ref('')
 const masterActionError = ref('')
 const accountReturnQuery = computed(() => masterMode.value
@@ -391,6 +396,7 @@ function applyAttempt(attempt: string): boolean {
   if (dragSettleTimer) clearTimeout(dragSettleTimer)
   lastAppliedAttempt = attempt
   restoreBoard(decoded.generation, decoded.moves)
+  reopenedCompletedPuzzle.value = complete.value && !masterMode.value
   return true
 }
 
@@ -683,6 +689,7 @@ async function requestRestart() {
     if (!window.confirm(t('master.resetCompletedConfirm'))) return
     masterAttemptStatus.value = 'practice'
   }
+  reopenedCompletedPuzzle.value = false
   newBoard()
   fitMasterBoard()
 }
@@ -1195,6 +1202,13 @@ onBeforeUnmount(() => {
 .completion-account-actions { display: flex; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: .3rem .55rem; color: var(--muted); font-size: .78rem; }
 .completion-navigation-actions { display: flex; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: .7rem; }
 .completion-archive-link { min-height: 2.7rem; margin: 0; }
+.completion-replay-button { display: inline-flex; min-height: 3.1rem; align-items: center; justify-content: center; gap: .65rem; margin: 0; padding: .55rem 1.2rem; border: 2px solid var(--ink); background: var(--blue); box-shadow: var(--shadow); color: var(--blue-foreground); font: inherit; font-size: .87rem; font-weight: 800; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
+.completion-replay-button:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.completion-replay-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.completion-replay-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
+.completion-replay-button svg { width: 1.1rem; height: 1.1rem; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.completion-archive-secondary-link { min-height: 2.5rem; color: var(--blue); font-size: .8rem; font-weight: 750; text-decoration: underline; text-underline-offset: .2rem; }
+.completion-archive-secondary-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .completion-leaderboard-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--blue); font-size: .8rem; font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
 .completion-leaderboard-link svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .completion-leaderboard-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
@@ -1229,7 +1243,8 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .completion-board { width: min(82vw, 42svh, 420px); }
   .completion-actions { width: 100%; gap: .25rem .65rem; }
   .completion-navigation-actions { gap: .55rem; }
-  .completion-archive-link { gap: .5rem; padding-inline: .7rem; font-size: .78rem; } }
+  .completion-archive-link { gap: .5rem; padding-inline: .7rem; font-size: .78rem; }
+  .completion-replay-button { max-width: 100%; padding-inline: .85rem; font-size: .8rem; } }
 @media (max-width: 470px) {
   .puzzle-board { gap: 2px; }
   .puzzle-piece.is-selected { box-shadow: inset 0 0 0 3px var(--yellow), 0 0 0 2px var(--coral); } }

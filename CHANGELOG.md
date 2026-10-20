@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.1] - 2026-10-20
+
+### Improved
+
+- Made replaying a previously completed puzzle the primary action when reopening it.
+
 ## [0.10.0] - 2026-10-20
 
 ### Added
