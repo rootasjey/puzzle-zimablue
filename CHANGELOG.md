@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.5] - 2026-10-20
+
+### Improved
+
+- Keep the desktop account avatar and label on one line in the top navigation.
+
 ## [0.10.4] - 2026-10-20
 
 ### Improved
