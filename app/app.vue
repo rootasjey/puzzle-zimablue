@@ -1,10 +1,31 @@
 <template>
-  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden }">
-    <header class="site-header page-wrap" :inert="navBarsHidden" @focusin="showNavigationBars">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-daily-play-route': isDailyPlayRoute }">
+    <header class="site-header page-wrap" :class="{ 'is-daily-play-route': isDailyPlayRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo />
       </NuxtLink>
-      <nav class="primary-nav" :class="{ 'is-gameplay-route': isGameplayRoute }" :aria-label="t('app.navigation')">
+      <nav
+        ref="primaryNav"
+        class="primary-nav"
+        :class="{ 'is-gameplay-route': isGameplayRoute, 'is-daily-play-route': isDailyPlayRoute, 'is-open': gameNavigationOpen }"
+        :aria-label="t('app.navigation')"
+        @keydown.esc.prevent.stop="closeGameNavigationAndFocus"
+      >
+        <button
+          v-if="isDailyPlayRoute"
+          ref="gameNavigationTrigger"
+          class="play-navigation-trigger"
+          type="button"
+          aria-controls="primary-nav-links"
+          :aria-expanded="gameNavigationOpen"
+          :aria-label="t('app.navigation')"
+          @click="gameNavigationOpen = !gameNavigationOpen"
+        >
+          <span class="i-lucide-menu" aria-hidden="true" />
+          <span class="sr-only">{{ t('app.navigation') }}</span>
+        </button>
+        <Transition name="menu-pop">
+          <div v-if="!isDailyPlayRoute || gameNavigationOpen" id="primary-nav-links" class="primary-nav-links" :class="{ 'is-gameplay-menu': isDailyPlayRoute }">
         <NuxtLink
           class="nav-link mobile-nav-link"
           :class="{ 'is-current-section': isNavigationSectionActive('home') }"
@@ -64,10 +85,16 @@
           <span class="desktop-nav-label">{{ t('app.signIn') }}</span>
           <span class="mobile-nav-label">{{ t('app.mobileAccount') }}</span>
         </NuxtLink>
+            <template v-if="isDailyPlayRoute && loggedIn && user?.role === 'admin'">
+              <NuxtLink class="game-admin-link" :to="$localePath({ name: 'admin-calendar' })">{{ t('admin.calendarTitle') }}</NuxtLink>
+              <NuxtLink class="game-admin-link" :to="$localePath('/admin/master')">{{ t('app.configureMaster') }}</NuxtLink>
+            </template>
+          </div>
+        </Transition>
       </nav>
       <div class="header-tools">
         <div
-          v-if="loggedIn && user?.role === 'admin'"
+          v-if="loggedIn && user?.role === 'admin' && !isDailyPlayRoute"
           ref="adminMenu"
           class="admin-menu"
           @keydown.esc.prevent.stop="closeAdminMenuAndFocus"
@@ -130,7 +157,7 @@
     </header>
     <AccountSectionNavigation v-if="showAccountNavigation" />
     <NuxtPage :page-key="route => route.fullPath" />
-    <footer class="site-footer page-wrap">
+    <footer v-if="!isDailyPlayRoute" class="site-footer page-wrap">
       <NuxtLink class="site-footer-about" :to="$localePath({ name: 'about' })">{{ t('app.about') }}</NuxtLink>
       <NuxtLink class="site-footer-leaderboard" :to="$localePath({ name: 'leaderboard' })">{{ t('app.leaderboard') }}</NuxtLink>
       <span>{{ t('app.footerLine') }} <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
@@ -162,6 +189,9 @@ const themeMenuOpen = ref(false)
 const adminMenu = ref<HTMLElement>()
 const adminMenuTrigger = ref<HTMLButtonElement>()
 const adminMenuOpen = ref(false)
+const primaryNav = ref<HTMLElement>()
+const gameNavigationTrigger = ref<HTMLButtonElement>()
+const gameNavigationOpen = ref(false)
 const languageSaveError = ref(false)
 const navBarsHidden = ref(false)
 const isMobileViewport = ref(false)
@@ -180,7 +210,8 @@ const showAccountNavigation = computed(() => loggedIn.value && (
   || route.path === $localePath({ name: 'account-settings' })
 ))
 const routeName = computed(() => String(route.name ?? '').split('___')[0] ?? '')
-const isGameplayRoute = computed(() => routeName.value === 'play' || routeName.value === 'master')
+const isDailyPlayRoute = computed(() => /\/(?:play|jouer)\/[^/]+\/?$/.test(route.path))
+const isGameplayRoute = computed(() => isDailyPlayRoute.value || routeName.value === 'master' || routeName.value.startsWith('master-'))
 const themeLabels = computed(() => Object.fromEntries(themeOptions.map(option => [option.value, t(option.label)])) as Record<ThemePreference, string>)
 const currentLanguage = computed(() => $getLocale())
 const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 'FR')
@@ -231,6 +262,16 @@ function closeAdminMenuAndFocus() {
   adminMenuTrigger.value?.focus()
 }
 
+function closeGameNavigation(event?: PointerEvent) {
+  if (event && event.target instanceof Node && primaryNav.value?.contains(event.target)) return
+  gameNavigationOpen.value = false
+}
+
+function closeGameNavigationAndFocus() {
+  closeGameNavigation()
+  gameNavigationTrigger.value?.focus()
+}
+
 onMounted(() => {
   void loadAndApplyLanguagePreference()
   mobileViewportQuery = window.matchMedia('(max-width: 760px)')
@@ -241,6 +282,7 @@ onMounted(() => {
   document.addEventListener('pointerdown', closeThemeMenu)
   document.addEventListener('keydown', closeThemeMenu)
   document.addEventListener('pointerdown', closeAdminMenuOnOutsideClick)
+  document.addEventListener('pointerdown', closeGameNavigation)
 })
 
 watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
@@ -255,9 +297,11 @@ onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', closeThemeMenu)
   document.removeEventListener('keydown', closeThemeMenu)
   document.removeEventListener('pointerdown', closeAdminMenuOnOutsideClick)
+  document.removeEventListener('pointerdown', closeGameNavigation)
 })
 
 watch(() => route.fullPath, async () => {
+  gameNavigationOpen.value = false
   showNavigationBars()
   await nextTick()
   previousScrollY = window.scrollY
@@ -318,7 +362,7 @@ function updateNavigationVisibility() {
   const keyboardFocusInHeader = activeElement instanceof HTMLElement
     && activeElement.matches(':focus-visible')
     && activeElement.closest('.site-header')
-  const menuIsOpen = adminMenuOpen.value || themeMenuOpen.value || languageSaveError.value
+  const menuIsOpen = adminMenuOpen.value || themeMenuOpen.value || gameNavigationOpen.value || languageSaveError.value
 
   if (scrollDirection > 0) {
     if (currentScrollY > 88 && !keyboardFocusInHeader && !menuIsOpen) navBarsHidden.value = true

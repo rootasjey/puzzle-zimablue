@@ -213,7 +213,7 @@
     "socialsTitle": "Me retrouver ailleurs"
   },
   "play": {
-    "back": "← Revenir aux jours précédents",
+    "back": "Revenir aux jours précédents",
     "viewIllustration": "Voir l’illustration",
     "reference": "L’image à retrouver",
     "referenceAlt": "Aperçu de {name}",

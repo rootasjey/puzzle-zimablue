@@ -77,7 +77,7 @@
         <p v-if="masterMode" class="master-touch-hint">{{ t('master.touchGestureHint') }}</p>
         <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
+          <button v-if="showReferenceToggle" class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
               <circle v-if="showReferenceImage" cx="12" cy="12" r="2.5" />
@@ -213,7 +213,7 @@ import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-a
 import { createMasterGestureStart, updateMasterGesture } from '~/utils/master-gesture'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
-const props = withDefaults(defineProps<{ puzzle: DailyPuzzle | WeeklyPuzzle; progressEnabled?: boolean; masterMode?: boolean }>(), { progressEnabled: true, masterMode: false })
+const props = withDefaults(defineProps<{ puzzle: DailyPuzzle | WeeklyPuzzle; progressEnabled?: boolean; masterMode?: boolean; showReferenceToggle?: boolean }>(), { progressEnabled: true, masterMode: false, showReferenceToggle: true })
 const accountPreferences = useAccountPreferences()
 const showReferenceImage = computed(() => accountPreferences.preferences.value.showReferenceImage)
 const { $getLocale, $t } = useI18n()
@@ -323,8 +323,10 @@ const boardMaxWidth = computed(() => {
     const heightBudget = viewportSize.value.height - (viewportSize.value.width <= 760 ? 460 : 360)
     return Math.min(920, maxWidth, Math.max(220, heightBudget))
   }
-  const maxHeight = viewportSize.value.width <= 600 ? viewportSize.value.height * .58 : 590
-  return Math.min(590, maxHeight * imageAspectRatio.value)
+  const mobile = viewportSize.value.width <= 760
+  const maxWidth = Math.max(180, Math.min(mobile ? viewportSize.value.width - 28 : 920, viewportSize.value.width - 48))
+  const heightBudget = Math.max(180, viewportSize.value.height - (mobile ? 236 : 240))
+  return Math.min(maxWidth, heightBudget * imageAspectRatio.value)
 })
 const completionBoardWidth = computed(() => {
   const { width, height } = viewportSize.value
