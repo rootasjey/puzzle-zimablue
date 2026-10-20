@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.16] - 2026-10-21
+
+### Improved
+
+- Centered the daily puzzle while its reference is hidden, shifted it left when the reference opens, and removed the preview's yellow background.
+
 ## [0.10.15] - 2026-10-21
 
 ### Improved
