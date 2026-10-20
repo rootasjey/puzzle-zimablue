@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.4] - 2026-10-20
+
+### Changed
+
+- Matched the Admin button press feedback and popup transitions to the theme selector.
+
 ## [0.9.3] - 2026-10-20
 
 ### Changed

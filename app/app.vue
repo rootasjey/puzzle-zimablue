@@ -13,21 +13,30 @@
           {{ t('app.account') }}
         </NuxtLink>
         <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
-        <details
+        <div
           v-if="loggedIn && user?.role === 'admin'"
           ref="adminMenu"
           class="admin-menu"
           @keydown.esc.prevent.stop="closeAdminMenuAndFocus"
         >
-          <summary class="nav-link admin-nav admin-menu-trigger">
+          <button
+            ref="adminMenuTrigger"
+            class="nav-link admin-nav admin-menu-trigger"
+            type="button"
+            :aria-controls="adminMenuOpen ? 'admin-menu-options' : undefined"
+            :aria-expanded="adminMenuOpen"
+            @click="adminMenuOpen = !adminMenuOpen"
+          >
             {{ t('app.admin') }}
             <span class="i-lucide-chevron-down admin-menu-chevron" aria-hidden="true" />
-          </summary>
-          <div class="admin-menu-panel">
-            <NuxtLink :to="$localePath({ name: 'admin-calendar' })" @click="dismissAdminMenu">{{ t('admin.calendarTitle') }}</NuxtLink>
-            <NuxtLink :to="$localePath('/admin/master')" @click="dismissAdminMenu">{{ t('app.configureMaster') }}</NuxtLink>
-          </div>
-        </details>
+          </button>
+          <Transition name="menu-pop">
+            <div v-if="adminMenuOpen" id="admin-menu-options" class="admin-menu-panel">
+              <NuxtLink :to="$localePath({ name: 'admin-calendar' })" @click="dismissAdminMenu">{{ t('admin.calendarTitle') }}</NuxtLink>
+              <NuxtLink :to="$localePath('/admin/master')" @click="dismissAdminMenu">{{ t('app.configureMaster') }}</NuxtLink>
+            </div>
+          </Transition>
+        </div>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
           {{ nextLanguageCode }}
         </button>
@@ -45,7 +54,7 @@
             <span aria-hidden="true">◐</span>
             <span class="sr-only">{{ t('theme.label', { theme: themeLabels[theme] }) }}</span>
           </button>
-          <Transition name="theme-pop">
+          <Transition name="menu-pop">
             <div v-if="themeMenuOpen" id="theme-options" class="theme-options" role="group" :aria-label="t('theme.choose')">
               <button
                 v-for="option in themeOptions"
@@ -92,7 +101,9 @@ const theme = computed<ThemePreference>(() => validThemes.includes(themeCookie.v
 const themeMenu = ref<HTMLElement>()
 const themeToggle = ref<HTMLButtonElement>()
 const themeMenuOpen = ref(false)
-const adminMenu = ref<HTMLDetailsElement>()
+const adminMenu = ref<HTMLElement>()
+const adminMenuTrigger = ref<HTMLButtonElement>()
+const adminMenuOpen = ref(false)
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'theme.system' },
   { value: 'light', label: 'theme.light' },
@@ -130,7 +141,7 @@ function closeThemeMenu(event: PointerEvent | KeyboardEvent) {
 }
 
 function dismissAdminMenu() {
-  if (adminMenu.value) adminMenu.value.open = false
+  adminMenuOpen.value = false
 }
 
 function closeAdminMenuOnOutsideClick(event: PointerEvent) {
@@ -141,7 +152,7 @@ function closeAdminMenuOnOutsideClick(event: PointerEvent) {
 
 function closeAdminMenuAndFocus() {
   dismissAdminMenu()
-  adminMenu.value?.querySelector('summary')?.focus()
+  adminMenuTrigger.value?.focus()
 }
 
 onMounted(() => {
