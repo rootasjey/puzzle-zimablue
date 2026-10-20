@@ -24,6 +24,7 @@
     "configureMaster": "Configurer le Master",
     "language": "Langue",
     "switchLanguage": "Passer en {language}",
+    "languageSaveError": "La langue n’a pas pu être enregistrée. Réessaie.",
     "footerLine": "Un jeu quotidien autour des illustrations de",
     "footerTagline": "Une illustration à reconstituer, chaque jour."
   },
@@ -455,6 +456,8 @@
     "description": "Règle tes préférences de jeu et la visibilité de ton profil.",
     "signInRequired": "Connecte-toi pour gérer les réglages liés à ton compte.",
     "loading": "Chargement de tes paramètres…",
+    "languageTitle": "Langue",
+    "languageHelp": "Ce choix est enregistré sur ton compte et appliqué par défaut sur tes appareils.",
     "gameTitle": "Préférences de jeu",
     "showReference": "Afficher l’aperçu de l’image",
     "referenceHelp": "Tu peux aussi appuyer sur A pendant un puzzle, hors d’un champ de saisie.",

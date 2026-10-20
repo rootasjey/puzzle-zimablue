@@ -4,6 +4,7 @@ import { createOpaqueToken, requireSignedInUser } from '../../utils/auth'
 import { getDatabase } from '../../utils/cloudflare'
 
 interface PreferencesRow {
+  preferred_language: string
   show_reference_image: number
   reduce_motion: number
   sound_enabled: number
@@ -18,7 +19,7 @@ interface PreferencesRow {
 export default defineEventHandler(async (event): Promise<AccountPreferences> => {
   const sessionUser = await requireSignedInUser(event)
   const database = getDatabase(event)
-  let row = await database.prepare(`SELECT show_reference_image, reduce_motion, sound_enabled, sound_volume,
+  let row = await database.prepare(`SELECT preferred_language, show_reference_image, reduce_motion, sound_enabled, sound_volume,
     avatar_variant, avatar_seed, avatar_colors, disabled_at, email_verified_at FROM users WHERE id = ?`)
     .bind(sessionUser.id)
     .first<PreferencesRow>()
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
     await database.prepare("UPDATE users SET avatar_seed = ?, updated_at = ? WHERE id = ? AND avatar_seed = ''")
       .bind(seed, new Date().toISOString(), sessionUser.id)
       .run()
-    row = await database.prepare(`SELECT show_reference_image, reduce_motion, sound_enabled, sound_volume,
+    row = await database.prepare(`SELECT preferred_language, show_reference_image, reduce_motion, sound_enabled, sound_volume,
       avatar_variant, avatar_seed, avatar_colors, disabled_at, email_verified_at FROM users WHERE id = ?`)
       .bind(sessionUser.id)
       .first<PreferencesRow>()
@@ -44,6 +45,7 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
     : 'marble'
 
   return {
+    preferredLanguage: row.preferred_language === 'en' ? 'en' : 'fr',
     showReferenceImage: Boolean(row.show_reference_image),
     reduceMotion: Boolean(row.reduce_motion),
     soundEnabled: Boolean(row.sound_enabled),

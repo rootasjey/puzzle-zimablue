@@ -19,7 +19,8 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
     ? normalizeTroncheAvatarColors(account.avatar_colors.split(',').filter(Boolean))
     : normalizeTroncheAvatarColors(body.avatarColors)
 
-  if (typeof body.showReferenceImage !== 'boolean'
+  if ((body.preferredLanguage !== 'fr' && body.preferredLanguage !== 'en')
+    || typeof body.showReferenceImage !== 'boolean'
     || typeof body.reduceMotion !== 'boolean'
     || typeof body.soundEnabled !== 'boolean'
     || typeof body.soundVolume !== 'number'
@@ -32,13 +33,14 @@ export default defineEventHandler(async (event): Promise<AccountPreferences> => 
   }
 
   const seed = account.avatar_seed || createOpaqueAvatarSeed()
-  await database.prepare(`UPDATE users SET show_reference_image = ?, reduce_motion = ?, sound_enabled = ?, sound_volume = ?,
+  await database.prepare(`UPDATE users SET preferred_language = ?, show_reference_image = ?, reduce_motion = ?, sound_enabled = ?, sound_volume = ?,
     avatar_variant = ?, avatar_seed = ?, avatar_colors = ?, updated_at = ? WHERE id = ?`)
-    .bind(Number(body.showReferenceImage), Number(body.reduceMotion), Number(body.soundEnabled), body.soundVolume,
+    .bind(body.preferredLanguage, Number(body.showReferenceImage), Number(body.reduceMotion), Number(body.soundEnabled), body.soundVolume,
       body.avatarVariant, seed, avatarColors.join(','), new Date().toISOString(), sessionUser.id)
     .run()
 
   return {
+    preferredLanguage: body.preferredLanguage as 'fr' | 'en',
     showReferenceImage: body.showReferenceImage,
     reduceMotion: body.reduceMotion,
     soundEnabled: body.soundEnabled,

@@ -1,8 +1,10 @@
 export const TRONCHE_AVATAR_VARIANTS = ['marble', 'bauhaus', 'beam', 'pixel', 'ring', 'sunset'] as const
 
 export type TroncheAvatarVariant = typeof TRONCHE_AVATAR_VARIANTS[number]
+export type PreferredLanguage = 'fr' | 'en'
 
 export interface AccountPreferences {
+  preferredLanguage: PreferredLanguage
   showReferenceImage: boolean
   reduceMotion: boolean
   soundEnabled: boolean
@@ -13,6 +15,7 @@ export interface AccountPreferences {
 }
 
 export const DEFAULT_ACCOUNT_PREFERENCES: AccountPreferences = {
+  preferredLanguage: 'fr',
   showReferenceImage: true,
   reduceMotion: false,
   soundEnabled: true,

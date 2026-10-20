@@ -7,6 +7,21 @@
       <form :aria-busy="!preferences.loaded.value" @submit.prevent="saveSettings">
         <p v-if="!preferences.loaded.value" class="auth-intro" role="status">{{ t('settings.loading') }}</p>
         <fieldset class="settings-fieldset" :disabled="!preferences.loaded.value || preferences.saving.value">
+        <section class="settings-section" aria-labelledby="settings-language-title">
+          <h2 id="settings-language-title">{{ t('settings.languageTitle') }}</h2>
+          <p>{{ t('settings.languageHelp') }}</p>
+          <div class="settings-language-options" role="radiogroup" aria-labelledby="settings-language-title">
+            <label class="settings-language-option">
+              <input v-model="draft.preferredLanguage" type="radio" name="preferred-language" value="fr">
+              <span lang="fr">Français</span>
+            </label>
+            <label class="settings-language-option">
+              <input v-model="draft.preferredLanguage" type="radio" name="preferred-language" value="en">
+              <span lang="en">English</span>
+            </label>
+          </div>
+        </section>
+
         <section class="settings-section" aria-labelledby="settings-game-title">
           <h2 id="settings-game-title">{{ t('settings.gameTitle') }}</h2>
           <label class="settings-toggle">
@@ -162,7 +177,7 @@ interface AccountProfileStats { publicName: string; publicProfileToken: string |
 definePageMeta({ name: 'account-settings' })
 const { $defineI18nRoute, $localePath } = useNuxtApp()
 await $defineI18nRoute({ localeRoutes: { en: '/account/settings' } })
-const { $t } = useI18n()
+const { $getLocale, $switchLocale, $t } = useI18n()
 const t = (key: string): string => String($t(key as any) ?? '')
 const { loggedIn, fetch } = useUserSession()
 const { data: stats, error: statsError, refresh: refreshStats } = await useFetch<AccountProfileStats>('/api/account/stats', { immediate: loggedIn.value })
@@ -202,11 +217,13 @@ onMounted(async () => {
   if (!loggedIn.value) return
   await Promise.all([preferences.loadAccount(), refreshStats()])
   Object.assign(draft, preferences.preferences.value)
+  draft.preferredLanguage = $getLocale() === 'en' ? 'en' : 'fr'
 })
 
 async function saveSettings() {
   saved.value = false
   saveError.value = false
+  const selectedLanguage = draft.preferredLanguage
   const ok = await preferences.save({ ...draft })
   if (!ok) {
     saveError.value = true
@@ -214,6 +231,7 @@ async function saveSettings() {
   }
   Object.assign(draft, preferences.preferences.value)
   saved.value = true
+  if ($getLocale() !== selectedLanguage) $switchLocale(selectedLanguage)
 }
 
 function isPaletteSelected(colors: readonly string[]) {
@@ -302,6 +320,11 @@ async function savePublicProfile() {
 .settings-toggle span { display: grid; gap: .2rem; }
 .settings-toggle strong { font-size: .9rem; }
 .settings-toggle small { color: var(--muted); font-size: .77rem; line-height: 1.5; }
+.settings-language-options { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: .8rem; }
+.settings-language-option { display: flex; min-height: 2.75rem; align-items: center; gap: .55rem; padding: .5rem .75rem; border: 2px solid var(--line-divider); background: var(--white); cursor: pointer; transition: border-color .16s ease, background-color .16s ease; }
+.settings-language-option:has(input:checked) { border-color: var(--ink); background: var(--yellow); color: var(--yellow-foreground); }
+.settings-language-option input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--blue); }
+.settings-language-option span { font-size: .85rem; font-weight: 750; }
 .settings-volume { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .3rem 1rem; margin-top: 1rem; }
 .settings-volume label { font-size: .88rem; font-weight: 750; }
 .settings-volume output { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }

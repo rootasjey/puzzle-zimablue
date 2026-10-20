@@ -33,6 +33,7 @@ export function useAccountPreferences() {
           const parsed = JSON.parse(saved) as Partial<AccountPreferences>
           preferences.value = {
             ...preferences.value,
+            preferredLanguage: isPreferredLanguage(parsed.preferredLanguage) ? parsed.preferredLanguage : 'fr',
             showReferenceImage: typeof parsed.showReferenceImage === 'boolean' ? parsed.showReferenceImage : true,
             reduceMotion: typeof parsed.reduceMotion === 'boolean' ? parsed.reduceMotion : false,
             soundEnabled: typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : savedSound === null ? true : savedSound === 'true',
@@ -101,4 +102,8 @@ export function useAccountPreferences() {
 
 function isAvatarVariant(value: unknown): value is TroncheAvatarVariant {
   return typeof value === 'string' && ['marble', 'bauhaus', 'beam', 'pixel', 'ring', 'sunset'].includes(value)
+}
+
+function isPreferredLanguage(value: unknown): value is AccountPreferences['preferredLanguage'] {
+  return value === 'fr' || value === 'en'
 }

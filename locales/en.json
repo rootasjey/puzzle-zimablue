@@ -30,6 +30,7 @@
     "configureMaster": "Configure Master",
     "language": "Language",
     "switchLanguage": "Switch to {language}",
+    "languageSaveError": "Your language could not be saved. Try again.",
     "footerLine": "A daily game featuring illustrations from",
     "footerTagline": "A new illustration puzzle, every day."
   },
@@ -461,6 +462,8 @@
     "description": "Manage your game preferences and profile visibility.",
     "signInRequired": "Sign in to manage preferences linked to your account.",
     "loading": "Loading your settings…",
+    "languageTitle": "Language",
+    "languageHelp": "This choice is saved to your account and used by default on your devices.",
     "gameTitle": "Game preferences",
     "showReference": "Show the image preview",
     "referenceHelp": "You can also press A during a puzzle when focus is outside a text field.",

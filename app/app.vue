@@ -37,9 +37,14 @@
             </div>
           </Transition>
         </div>
-        <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
-          {{ nextLanguageCode }}
-        </button>
+        <div class="language-control">
+          <button class="language-switcher" type="button" :disabled="preferences.saving.value" :aria-busy="preferences.saving.value" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
+            {{ nextLanguageCode }}
+          </button>
+          <Transition name="menu-pop">
+            <span v-if="languageSaveError" class="language-save-status" role="status">{{ t('app.languageSaveError') }}</span>
+          </Transition>
+        </div>
         <div ref="themeMenu" class="theme-menu">
           <button
             ref="themeToggle"
@@ -104,6 +109,7 @@ const themeMenuOpen = ref(false)
 const adminMenu = ref<HTMLElement>()
 const adminMenuTrigger = ref<HTMLButtonElement>()
 const adminMenuOpen = ref(false)
+const languageSaveError = ref(false)
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'theme.system' },
   { value: 'light', label: 'theme.light' },
@@ -156,7 +162,7 @@ function closeAdminMenuAndFocus() {
 }
 
 onMounted(() => {
-  void (loggedIn.value ? preferences.loadAccount() : preferences.loadGuest())
+  void loadAndApplyLanguagePreference()
   document.addEventListener('pointerdown', closeThemeMenu)
   document.addEventListener('keydown', closeThemeMenu)
   document.addEventListener('pointerdown', closeAdminMenuOnOutsideClick)
@@ -164,7 +170,7 @@ onMounted(() => {
 
 watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
   if (isLoggedIn === wasLoggedIn) return
-  void (isLoggedIn ? preferences.loadAccount() : preferences.loadGuest())
+  void loadAndApplyLanguagePreference()
 })
 
 onBeforeUnmount(() => {
@@ -173,8 +179,24 @@ onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', closeAdminMenuOnOutsideClick)
 })
 
-function switchLanguage() {
-  $switchLocale(currentLanguage.value === 'fr' ? 'en' : 'fr')
+async function loadAndApplyLanguagePreference() {
+  if (loggedIn.value) await preferences.loadAccount()
+  else preferences.loadGuest()
+
+  const preferredLanguage = preferences.preferences.value.preferredLanguage
+  const shouldApplyPreference = preferences.source.value === 'account' || currentLanguage.value === 'fr'
+  if (shouldApplyPreference && currentLanguage.value !== preferredLanguage) $switchLocale(preferredLanguage)
+}
+
+async function switchLanguage() {
+  const nextLanguage = currentLanguage.value === 'fr' ? 'en' : 'fr'
+  languageSaveError.value = false
+  const saved = await preferences.save({ preferredLanguage: nextLanguage })
+  if (!saved) {
+    languageSaveError.value = true
+    return
+  }
+  $switchLocale(nextLanguage)
 }
 
 </script>

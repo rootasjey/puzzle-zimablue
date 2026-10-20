@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-10-20
+
+### Added
+
+- Added a saved account language preference, with a matching shortcut in the header and an option in account settings.
+
 ## [0.9.4] - 2026-10-20
 
 ### Changed
