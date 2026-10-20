@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.13] - 2026-10-21
+
+### Improved
+
+- Changed the puzzle sound and restart icon buttons to square corners.
+
 ## [0.10.12] - 2026-10-21
 
 ### Fixed

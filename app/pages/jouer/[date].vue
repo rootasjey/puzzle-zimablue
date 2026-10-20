@@ -100,6 +100,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
 .board-tool-actions { display: flex; align-items: center; gap: .6rem; }
 .reference-toggle svg { width: 1.05rem; height: 1.05rem; }
 .sound-toggle { display: grid; width: 2.15rem; height: 2.15rem; flex: none; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--muted); cursor: pointer; transition: transform .15s ease, border-color .15s ease, background-color .15s ease, color .15s ease; }
+.sound-toggle:not(.reference-toggle) { border-radius: 0; }
 .sound-toggle[aria-pressed="true"] { border-color: var(--blue); background: var(--paper); color: var(--blue); }
 .sound-toggle:hover { transform: translateY(-1px); color: var(--ink); }
 .sound-toggle:active { transform: translateY(1px); }
@@ -108,7 +109,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handlePreviewShortcu
 .move-count, .success-note { margin: 0; color: var(--muted); font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .move-limit-note { margin: 0; color: var(--coral); font-size: .75rem; font-weight: 700; }
 .success-note { color: var(--success); }
-.restart-icon-button { display: grid; width: 2.3rem; height: 2.3rem; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--blue); cursor: pointer; transition: transform .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease; }
+.restart-icon-button { display: grid; width: 2.3rem; height: 2.3rem; place-items: center; border: 1px solid var(--line); border-radius: 0; background: var(--white); color: var(--blue); cursor: pointer; transition: transform .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease; }
 .restart-icon-button:hover { transform: translateY(-1px); border-color: var(--blue); color: var(--coral); }
 .restart-icon-button:active { transform: translate(1px, 1px); box-shadow: none; }
 .restart-icon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
