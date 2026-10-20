@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.3] - 2026-10-20
+
+### Improved
+
+- Replaced the crowded mobile header navigation with a bottom navigation bar, hidden while playing.
+
 ## [0.10.2] - 2026-10-20
 
 ### Improved

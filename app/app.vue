@@ -1,18 +1,71 @@
 <template>
-  <div class="site-shell">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute }">
     <header class="site-header page-wrap">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo />
       </NuxtLink>
-      <nav :aria-label="t('app.navigation')">
-        <NuxtLink class="nav-link" :to="$localePath({ name: 'index' })">{{ t('app.home') }}</NuxtLink>
-        <NuxtLink class="nav-link master-nav-link" :to="$localePath({ name: 'master' })">{{ t('app.master') }}</NuxtLink>
-        <NuxtLink class="nav-link" :to="$localePath({ name: 'archive' })">{{ t('app.archive') }}</NuxtLink>
-        <NuxtLink v-if="loggedIn && user" class="nav-link account-nav" :to="$localePath({ name: 'account' })">
-          <img v-if="preferences.avatarUrl()" class="account-nav-avatar" :src="preferences.avatarUrl()" alt="">
-          {{ t('app.account') }}
+      <nav class="primary-nav" :class="{ 'is-gameplay-route': isGameplayRoute }" :aria-label="t('app.navigation')">
+        <NuxtLink
+          class="nav-link mobile-nav-link"
+          :class="{ 'is-current-section': isNavigationSectionActive('home') }"
+          :to="$localePath({ name: 'index' })"
+          :aria-label="t('app.home')"
+          :aria-current="isNavigationSectionActive('home') ? 'page' : undefined"
+        >
+          <span class="mobile-nav-icon i-lucide-house" aria-hidden="true" />
+          <span class="desktop-nav-label">{{ t('app.home') }}</span>
+          <span class="mobile-nav-label">{{ t('app.mobileHome') }}</span>
         </NuxtLink>
-        <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
+        <NuxtLink
+          class="nav-link mobile-nav-link master-nav-link"
+          :class="{ 'is-current-section': isNavigationSectionActive('master') }"
+          :to="$localePath({ name: 'master' })"
+          :aria-current="isNavigationSectionActive('master') ? 'page' : undefined"
+        >
+          <span class="mobile-nav-icon i-lucide-puzzle" aria-hidden="true" />
+          <span class="desktop-nav-label">{{ t('app.master') }}</span>
+          <span class="mobile-nav-label">{{ t('app.master') }}</span>
+        </NuxtLink>
+        <NuxtLink
+          class="nav-link mobile-nav-link"
+          :class="{ 'is-current-section': isNavigationSectionActive('archive') }"
+          :to="$localePath({ name: 'archive' })"
+          :aria-label="t('app.archive')"
+          :aria-current="isNavigationSectionActive('archive') ? 'page' : undefined"
+        >
+          <span class="mobile-nav-icon i-lucide-archive" aria-hidden="true" />
+          <span class="desktop-nav-label">{{ t('app.archive') }}</span>
+          <span class="mobile-nav-label">{{ t('app.archive') }}</span>
+        </NuxtLink>
+        <NuxtLink
+          v-if="loggedIn && user"
+          class="nav-link mobile-nav-link account-nav"
+          :class="{ 'is-current-section': isNavigationSectionActive('account') }"
+          :to="$localePath({ name: 'account' })"
+          :aria-label="t('app.account')"
+          :aria-current="isNavigationSectionActive('account') ? 'page' : undefined"
+        >
+          <span class="mobile-nav-icon i-lucide-user-round" aria-hidden="true" />
+          <span class="desktop-nav-label">
+            <img v-if="preferences.avatarUrl()" class="account-nav-avatar" :src="preferences.avatarUrl()" alt="">
+            {{ t('app.account') }}
+          </span>
+          <span class="mobile-nav-label">{{ t('app.mobileAccount') }}</span>
+        </NuxtLink>
+        <NuxtLink
+          v-else
+          class="nav-link mobile-nav-link account-nav"
+          :class="{ 'is-current-section': isNavigationSectionActive('account') }"
+          :to="$localePath({ name: 'account-sign-in' })"
+          :aria-label="t('app.signIn')"
+          :aria-current="isNavigationSectionActive('account') ? 'page' : undefined"
+        >
+          <span class="mobile-nav-icon i-lucide-user-round" aria-hidden="true" />
+          <span class="desktop-nav-label">{{ t('app.signIn') }}</span>
+          <span class="mobile-nav-label">{{ t('app.mobileAccount') }}</span>
+        </NuxtLink>
+      </nav>
+      <div class="header-tools">
         <div
           v-if="loggedIn && user?.role === 'admin'"
           ref="adminMenu"
@@ -73,7 +126,7 @@
             </div>
           </Transition>
         </div>
-      </nav>
+      </div>
     </header>
     <AccountSectionNavigation v-if="showAccountNavigation" />
     <NuxtPage :page-key="route => route.fullPath" />
@@ -119,6 +172,8 @@ const showAccountNavigation = computed(() => loggedIn.value && (
   route.path === $localePath({ name: 'account' })
   || route.path === $localePath({ name: 'account-settings' })
 ))
+const routeName = computed(() => String(route.name ?? '').split('___')[0] ?? '')
+const isGameplayRoute = computed(() => routeName.value === 'play' || routeName.value === 'master')
 const themeLabels = computed(() => Object.fromEntries(themeOptions.map(option => [option.value, t(option.label)])) as Record<ThemePreference, string>)
 const currentLanguage = computed(() => $getLocale())
 const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 'FR')
@@ -133,6 +188,14 @@ useSeoMeta({ ogSiteName: 'Puzzle Zimablue' })
 function setTheme(value: ThemePreference) {
   themeCookie.value = value
   themeMenuOpen.value = false
+}
+
+function isNavigationSectionActive(section: 'home' | 'master' | 'archive' | 'account') {
+  const name = routeName.value
+  if (section === 'home') return name === 'index' || name === 'play'
+  if (section === 'master') return name === 'master' || name.startsWith('master-')
+  if (section === 'archive') return name === 'archive' || name === 'leaderboard-puzzle'
+  return name === 'account' || name.startsWith('account-')
 }
 
 function closeThemeMenu(event: PointerEvent | KeyboardEvent) {
