@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.2] - 2026-10-20
+
+### Improved
+
+- Separated the secondary archive link from the primary replay button on the completion screen.
+
 ## [0.10.1] - 2026-10-20
 
 ### Improved

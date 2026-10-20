@@ -172,7 +172,7 @@
               </NTooltip>
             </div>
             <p v-if="shareFeedback" class="completion-share-feedback" role="status">{{ shareFeedback }}</p>
-            <div class="completion-navigation-actions">
+            <div class="completion-navigation-actions" :class="{ 'is-reopened': reopenedCompletedPuzzle && !masterMode }">
               <button v-if="reopenedCompletedPuzzle && !masterMode" class="completion-replay-button" type="button" @click="requestRestart">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
                 <span>{{ t('game.replayPuzzle') }}</span>
@@ -184,7 +184,7 @@
                 <template #content>{{ t('game.restart') }}</template>
               </NTooltip>
               <NuxtLink v-if="!masterMode" :class="['completion-archive-link', reopenedCompletedPuzzle ? 'completion-archive-secondary-link' : 'play-link']" :to="$localePath({ name: 'archive' })">
-                {{ t('game.chooseAnotherPuzzle') }} <span aria-hidden="true">↗</span>
+                {{ t('game.chooseAnotherPuzzle') }}<span v-if="!reopenedCompletedPuzzle" aria-hidden="true"> ↗</span>
               </NuxtLink>
               <NuxtLink v-else class="play-link completion-archive-link" :to="$localePath({ name: 'index' })">
                 {{ t('master.backHome') }} <span aria-hidden="true">↗</span>
@@ -1201,13 +1201,14 @@ onBeforeUnmount(() => {
 .completion-account-note { max-width: 34ch; margin: -.2rem 0 0; color: var(--success-foreground); font-size: .84rem; font-weight: 700; line-height: 1.5; text-align: center; }
 .completion-account-actions { display: flex; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: .3rem .55rem; color: var(--muted); font-size: .78rem; }
 .completion-navigation-actions { display: flex; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: .7rem; }
+.completion-navigation-actions.is-reopened { flex-direction: column; gap: .45rem; }
 .completion-archive-link { min-height: 2.7rem; margin: 0; }
 .completion-replay-button { display: inline-flex; min-height: 3.1rem; align-items: center; justify-content: center; gap: .65rem; margin: 0; padding: .55rem 1.2rem; border: 2px solid var(--ink); background: var(--blue); box-shadow: var(--shadow); color: var(--blue-foreground); font: inherit; font-size: .87rem; font-weight: 800; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
 .completion-replay-button:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
 .completion-replay-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .completion-replay-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; }
 .completion-replay-button svg { width: 1.1rem; height: 1.1rem; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.completion-archive-secondary-link { min-height: 2.5rem; color: var(--blue); font-size: .8rem; font-weight: 750; text-decoration: underline; text-underline-offset: .2rem; }
+.completion-archive-secondary-link { min-height: auto; padding: .1rem .25rem; color: var(--muted); font-size: .76rem; font-weight: 650; text-decoration: underline; text-underline-offset: .2rem; }
 .completion-archive-secondary-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .completion-leaderboard-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--blue); font-size: .8rem; font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: .2rem; }
 .completion-leaderboard-link svg { width: 1rem; height: 1rem; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
