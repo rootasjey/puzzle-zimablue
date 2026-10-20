@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.8] - 2026-10-20
+
+### Improved
+
+- Arrange the brand mark as a stepped stack of square cards.
+
 ## [0.10.7] - 2026-10-20
 
 ### Improved
