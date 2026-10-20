@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.7] - 2026-10-20
+
+### Improved
+
+- Hide the illustration source link when the reference image is hidden during daily play.
+
 ## [0.10.6] - 2026-10-20
 
 ### Improved

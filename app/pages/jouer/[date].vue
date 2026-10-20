@@ -9,7 +9,7 @@
         <h1>{{ displayedTitle }}</h1>
         <p class="play-note">{{ displayedNote }}</p>
       </div>
-      <a class="source-link" :href="`https://zimablue.cc/illustrations/${puzzle.imageSlug}`" target="_blank" rel="noreferrer">{{ t('play.viewIllustration') }} <span aria-hidden="true">↗</span></a>
+      <a v-if="showReferenceImage" class="source-link" :href="`https://zimablue.cc/illustrations/${puzzle.imageSlug}`" target="_blank" rel="noreferrer">{{ t('play.viewIllustration') }} <span aria-hidden="true">↗</span></a>
     </header>
     <p class="sr-only" role="status" aria-live="polite">{{ previewAnnouncement }}</p>
     <div class="play-layout" :class="{ 'is-reference-hidden': !showReferenceImage }">
