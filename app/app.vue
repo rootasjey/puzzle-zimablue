@@ -14,7 +14,7 @@
         </NuxtLink>
         <NuxtLink v-else class="nav-link account-nav" :to="$localePath({ name: 'account-sign-in' })">{{ t('app.signIn') }}</NuxtLink>
         <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-calendar' })">{{ t('app.admin') }}</NuxtLink>
-        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath({ name: 'admin-master' })">Master</NuxtLink>
+        <NuxtLink v-if="loggedIn && user?.role === 'admin'" class="nav-link admin-nav" :to="$localePath('/admin/master')">{{ t('app.configureMaster') }}</NuxtLink>
         <button class="language-switcher" type="button" :aria-label="t('app.switchLanguage', { language: nextLanguageLabel })" @click="switchLanguage">
           {{ nextLanguageCode }}
         </button>

@@ -27,6 +27,7 @@
     "account": "My account",
     "signIn": "Sign in",
     "admin": "Admin",
+    "configureMaster": "Configure Master",
     "language": "Language",
     "switchLanguage": "Switch to {language}",
     "footerLine": "A daily game featuring illustrations from",

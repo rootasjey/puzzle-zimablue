@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.2] - 2026-10-20
+
+### Fixed
+
+- Fixed the admin shortcut to the weekly Master and distinguished it from the public Master link.
+
 ## [0.9.1] - 2026-10-20
 
 ### Fixed

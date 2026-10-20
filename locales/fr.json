@@ -21,6 +21,7 @@
     "account": "Mon espace",
     "signIn": "Connexion",
     "admin": "Admin",
+    "configureMaster": "Configurer le Master",
     "language": "Langue",
     "switchLanguage": "Passer en {language}",
     "footerLine": "Un jeu quotidien autour des illustrations de",
