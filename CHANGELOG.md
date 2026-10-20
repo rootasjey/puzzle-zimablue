@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.9] - 2026-10-20
+
+### Fixed
+
+- Improved text and border contrast on the weekly Master feature in dark mode.
+
 ## [0.10.8] - 2026-10-20
 
 ### Improved

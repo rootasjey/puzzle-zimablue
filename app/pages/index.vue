@@ -88,12 +88,14 @@ defineOgImage('Puzzle.takumi', {
 <style>
 .home-page { flex: 1; padding-top: clamp(2rem, 5vw, 4rem); padding-bottom: 4rem; }
 .daily-feature { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(280px, .96fr); align-items: center; gap: clamp(2rem, 7vw, 6rem); }
-.master-home-feature { display: grid; grid-template-columns: minmax(230px, .65fr) minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 6vw, 4rem); margin-top: clamp(3rem, 7vw, 5rem); padding: clamp(1rem, 3vw, 2rem); border: 2px solid var(--ink); background: var(--yellow); box-shadow: var(--shadow); }
-.master-home-art { position: relative; display: block; min-width: 0; aspect-ratio: 1; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.master-home-feature { --master-ink: var(--yellow-foreground); display: grid; grid-template-columns: minmax(230px, .65fr) minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 6vw, 4rem); margin-top: clamp(3rem, 7vw, 5rem); padding: clamp(1rem, 3vw, 2rem); border: 2px solid var(--master-ink); background: var(--yellow); box-shadow: var(--shadow); color: var(--master-ink); }
+.master-home-feature .section-kicker { color: var(--master-ink); }
+.master-home-art { position: relative; display: block; min-width: 0; aspect-ratio: 1; border: 2px solid var(--master-ink); box-shadow: 4px 4px 0 var(--master-ink); }
 .master-home-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .master-home-art span { position: absolute; right: .6rem; bottom: .6rem; padding: .3rem .5rem; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); font-size: .68rem; font-weight: 800; }
 .master-home-feature h2 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.05; font-weight: 850; }
-.master-home-feature > div > p:not(.section-kicker) { max-width: 42ch; color: var(--yellow-foreground); line-height: 1.6; }
+.master-home-feature > div > p:not(.section-kicker) { max-width: 42ch; color: var(--master-ink); line-height: 1.6; }
+.master-home-feature .play-link { border-color: var(--master-ink); }
 .feature-art-link { display: block; min-width: 0; color: inherit; text-decoration: none; }
 .feature-art-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 5px; }
 .feature-art { position: relative; min-width: 0; aspect-ratio: 1.18; overflow: hidden; border: 2px solid var(--ink); background: var(--yellow); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-.6deg); transition: transform .2s ease; }
