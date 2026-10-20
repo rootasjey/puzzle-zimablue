@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.4] - 2026-10-20
+
+### Improved
+
+- Hide the mobile header and bottom navigation while scrolling down, and reveal them when scrolling up or reaching a page edge.
+
 ## [0.10.3] - 2026-10-20
 
 ### Improved

@@ -1,6 +1,6 @@
 <template>
-  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute }">
-    <header class="site-header page-wrap">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden }">
+    <header class="site-header page-wrap" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo />
       </NuxtLink>
@@ -163,6 +163,13 @@ const adminMenu = ref<HTMLElement>()
 const adminMenuTrigger = ref<HTMLButtonElement>()
 const adminMenuOpen = ref(false)
 const languageSaveError = ref(false)
+const navBarsHidden = ref(false)
+const isMobileViewport = ref(false)
+let mobileViewportQuery: MediaQueryList | undefined
+let previousScrollY = 0
+let scrollDirection = 0
+let scrollDirectionDistance = 0
+let scrollFrame = 0
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'theme.system' },
   { value: 'light', label: 'theme.light' },
@@ -226,6 +233,11 @@ function closeAdminMenuAndFocus() {
 
 onMounted(() => {
   void loadAndApplyLanguagePreference()
+  mobileViewportQuery = window.matchMedia('(max-width: 760px)')
+  isMobileViewport.value = mobileViewportQuery.matches
+  previousScrollY = window.scrollY
+  mobileViewportQuery.addEventListener('change', onMobileViewportChange)
+  window.addEventListener('scroll', scheduleNavigationVisibilityUpdate, { passive: true })
   document.addEventListener('pointerdown', closeThemeMenu)
   document.addEventListener('keydown', closeThemeMenu)
   document.addEventListener('pointerdown', closeAdminMenuOnOutsideClick)
@@ -237,10 +249,86 @@ watch(loggedIn, (isLoggedIn, wasLoggedIn) => {
 })
 
 onBeforeUnmount(() => {
+  mobileViewportQuery?.removeEventListener('change', onMobileViewportChange)
+  window.removeEventListener('scroll', scheduleNavigationVisibilityUpdate)
+  if (scrollFrame) window.cancelAnimationFrame(scrollFrame)
   document.removeEventListener('pointerdown', closeThemeMenu)
   document.removeEventListener('keydown', closeThemeMenu)
   document.removeEventListener('pointerdown', closeAdminMenuOnOutsideClick)
 })
+
+watch(() => route.fullPath, async () => {
+  showNavigationBars()
+  await nextTick()
+  previousScrollY = window.scrollY
+})
+
+function resetScrollDirection() {
+  previousScrollY = window.scrollY
+  scrollDirection = 0
+  scrollDirectionDistance = 0
+}
+
+function showNavigationBars() {
+  navBarsHidden.value = false
+  scrollDirection = 0
+  scrollDirectionDistance = 0
+}
+
+function onMobileViewportChange(event: MediaQueryListEvent) {
+  isMobileViewport.value = event.matches
+  showNavigationBars()
+  resetScrollDirection()
+}
+
+function scheduleNavigationVisibilityUpdate() {
+  if (scrollFrame) return
+  scrollFrame = window.requestAnimationFrame(updateNavigationVisibility)
+}
+
+function updateNavigationVisibility() {
+  scrollFrame = 0
+  const currentScrollY = Math.max(0, window.scrollY)
+  const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+  const isAtPageEdge = currentScrollY <= 8 || maxScrollY <= 8 || maxScrollY - currentScrollY <= 8
+
+  if (!isMobileViewport.value || isAtPageEdge) {
+    showNavigationBars()
+    previousScrollY = currentScrollY
+    return
+  }
+
+  const delta = currentScrollY - previousScrollY
+  previousScrollY = currentScrollY
+  if (Math.abs(delta) < 1) return
+
+  const nextDirection = Math.sign(delta)
+  if (nextDirection !== scrollDirection) {
+    scrollDirection = nextDirection
+    scrollDirectionDistance = Math.abs(delta)
+  }
+  else {
+    scrollDirectionDistance += Math.abs(delta)
+  }
+
+  const threshold = scrollDirection > 0 ? 40 : 12
+  if (scrollDirectionDistance < threshold) return
+
+  const activeElement = document.activeElement
+  const keyboardFocusInHeader = activeElement instanceof HTMLElement
+    && activeElement.matches(':focus-visible')
+    && activeElement.closest('.site-header')
+  const menuIsOpen = adminMenuOpen.value || themeMenuOpen.value || languageSaveError.value
+
+  if (scrollDirection > 0) {
+    if (currentScrollY > 88 && !keyboardFocusInHeader && !menuIsOpen) navBarsHidden.value = true
+  }
+  else {
+    navBarsHidden.value = false
+  }
+
+  scrollDirectionDistance = 0
+}
 
 async function loadAndApplyLanguagePreference() {
   if (loggedIn.value) await preferences.loadAccount()
