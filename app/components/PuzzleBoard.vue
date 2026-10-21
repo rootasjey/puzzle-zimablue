@@ -37,7 +37,7 @@
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
             }, placedGroupClasses(slot, piece)]"
-            :style="[pieceStyle(piece), dragStyle(piece), { '--piece-entrance-delay': `${slot * 7}ms` }]"
+            :style="[pieceStyle(piece), dragStyle(piece), { '--piece-entrance-delay': pieceEntranceDelays[slot] + 'ms' }]"
             :data-slot="slot"
             type="button"
             :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
@@ -249,6 +249,26 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.startsWith('master:'))
+const pieceEntranceDelays = computed(() => {
+  const { gridRows, gridColumns } = props.puzzle
+  const centerRow = (gridRows - 1) / 2
+  const centerColumn = (gridColumns - 1) / 2
+  const slots = Array.from({ length: gridRows * gridColumns }, (_, slot) => slot)
+
+  slots.sort((first, second) => {
+    const firstRow = Math.floor(first / gridColumns)
+    const firstColumn = first % gridColumns
+    const secondRow = Math.floor(second / gridColumns)
+    const secondColumn = second % gridColumns
+    const firstDistance = (firstRow - centerRow) ** 2 + (firstColumn - centerColumn) ** 2
+    const secondDistance = (secondRow - centerRow) ** 2 + (secondColumn - centerColumn) ** 2
+    return firstDistance - secondDistance || first - second
+  })
+
+  const delays = new Array<number>(slots.length)
+  slots.forEach((slot, rank) => { delays[slot] = rank * 7 })
+  return delays
+})
 const puzzleDate = computed(() => 'date' in props.puzzle ? props.puzzle.date : '')
 const weekKey = computed(() => 'weekKey' in props.puzzle ? props.puzzle.weekKey : '')
 const { loggedIn } = useUserSession()
@@ -1325,7 +1345,7 @@ onBeforeUnmount(() => {
 .master-login-prompt a { color: var(--blue); font-weight: 750; text-underline-offset: .16rem; }
 .master-attempt-status:has(+ .completion-leaderboard-link) { text-align: center; }
 .puzzle-board .puzzle-piece--arriving { animation: puzzle-piece-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-delay, 0ms) both; }
-@keyframes puzzle-piece-arrival { from { opacity: .74; } to { opacity: 1; } }
+@keyframes puzzle-piece-arrival { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }

@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.30] - 2026-10-21
+
+### Improved
+
+- Changed the puzzle-piece entrance to reveal tiles from the center outward over about two seconds on the Master board.
+
 ## [0.10.29] - 2026-10-21
 
 ### Improved
