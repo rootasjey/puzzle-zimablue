@@ -30,18 +30,20 @@
           <button
             v-for="(piece, slot) in order"
             :key="piece"
-            class="puzzle-piece puzzle-piece--arriving"
+            class="puzzle-piece"
             :class="[{
+              'puzzle-piece--arriving': arrivingPieces.has(piece),
               'is-selected': selected === slot,
               'is-placed': !masterMode && piece === slot && !complete,
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
             }, placedGroupClasses(slot, piece)]"
-            :style="[pieceStyle(piece), dragStyle(piece), { '--piece-entrance-delay': pieceEntranceDelays[slot] + 'ms' }]"
+            :style="[pieceStyle(piece), dragStyle(piece), { '--piece-entrance-delay': `${pieceEntranceDelays.get(piece) ?? 0}ms` }]"
             :data-slot="slot"
             type="button"
             :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
             :aria-pressed="selected === slot"
+            @animationend="finishPieceEntrance(piece, $event)"
             @pointerdown="startDrag(slot, $event)"
             @pointerup="finishDrag"
             @pointercancel="cancelDrag"
@@ -249,7 +251,13 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.startsWith('master:'))
-const pieceEntranceDelays = computed(() => {
+const pieceEntranceDuration = 180
+const pieceEntranceDelays = shallowRef(new Map<number, number>())
+const arrivingPieces = shallowRef(new Set<number>())
+let pieceEntranceCleanupTimer: ReturnType<typeof setTimeout> | undefined
+
+function preparePieceEntrance(initialOrder: readonly number[]) {
+  if (pieceEntranceCleanupTimer) clearTimeout(pieceEntranceCleanupTimer)
   const { gridRows, gridColumns } = props.puzzle
   const centerRow = (gridRows - 1) / 2
   const centerColumn = (gridColumns - 1) / 2
@@ -265,11 +273,35 @@ const pieceEntranceDelays = computed(() => {
     return firstDistance - secondDistance || first - second
   })
 
-  const delays = new Array<number>(slots.length)
-  slots.forEach((slot, rank) => { delays[slot] = rank * 7 })
-  return delays
-})
-const pieceEntranceFinalDelay = computed(() => Math.max(0, (props.puzzle.gridRows * props.puzzle.gridColumns - 1) * 7))
+  const delaysBySlot = new Array<number>(slots.length)
+  slots.forEach((slot, rank) => { delaysBySlot[slot] = rank * 7 })
+  const delaysByPiece = new Map<number, number>()
+  initialOrder.forEach((piece, slot) => { delaysByPiece.set(piece, delaysBySlot[slot] ?? 0) })
+
+  pieceEntranceDelays.value = delaysByPiece
+  arrivingPieces.value = new Set(initialOrder)
+  const finalDelay = Math.max(0, ...delaysBySlot)
+  pieceEntranceCleanupTimer = setTimeout(() => {
+    arrivingPieces.value = new Set()
+    pieceEntranceCleanupTimer = undefined
+  }, finalDelay + pieceEntranceDuration + 100)
+}
+
+function stopPieceEntrance(...pieces: number[]) {
+  if (!pieces.some(piece => arrivingPieces.value.has(piece))) return
+  const remaining = new Set(arrivingPieces.value)
+  pieces.forEach(piece => remaining.delete(piece))
+  arrivingPieces.value = remaining
+  if (!remaining.size && pieceEntranceCleanupTimer) {
+    clearTimeout(pieceEntranceCleanupTimer)
+    pieceEntranceCleanupTimer = undefined
+  }
+}
+
+function finishPieceEntrance(piece: number, event: AnimationEvent) {
+  if (event.animationName === 'puzzle-piece-arrival') stopPieceEntrance(piece)
+}
+
 const puzzleDate = computed(() => 'date' in props.puzzle ? props.puzzle.date : '')
 const weekKey = computed(() => 'weekKey' in props.puzzle ? props.puzzle.weekKey : '')
 const { loggedIn } = useUserSession()
@@ -429,7 +461,6 @@ const boardStyle = computed(() => ({
   '--image-url': `url('${props.puzzle.imageUrl}')`,
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
-  '--piece-entrance-final-delay': `${pieceEntranceFinalDelay.value}ms`,
 }))
 const masterRootStyle = computed(() => masterMode.value ? { '--master-stage-size': `${boardMaxWidth.value}px` } : {})
 const masterViewportStyle = computed(() => ({ '--master-stage-size': `${boardMaxWidth.value}px` }))
@@ -963,6 +994,7 @@ function startDrag(slot: number, event: PointerEvent) {
   const rect = button.getBoundingClientRect()
   const piece = order.value[slot]
   if (piece === undefined) return
+  stopPieceEntrance(piece)
   playSound('move')
   button.setPointerCapture(event.pointerId)
   dragging.value = {
@@ -1056,6 +1088,7 @@ function swapWithFeedback(first: number, second: number) {
   const secondPiece = order.value[second]
   if (firstPiece === undefined || secondPiece === undefined || first === second) return
 
+  stopPieceEntrance(firstPiece, secondPiece)
   swap(first, second)
   if (complete.value) return
   playSound(firstPiece === second || secondPiece === first ? 'placed' : 'misplaced')
@@ -1242,6 +1275,7 @@ onMounted(async () => {
     await image.decode()
     imageDimensions.value = { width: image.naturalWidth, height: image.naturalHeight }
     await initializeSession()
+    preparePieceEntrance(order.value)
     imageLoaded.value = true
   } catch {
     imageError.value = true
@@ -1262,6 +1296,7 @@ onBeforeUnmount(() => {
   if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
   if (sessionRetryTimer) clearTimeout(sessionRetryTimer)
   if (sessionPollTimer) clearInterval(sessionPollTimer)
+  if (pieceEntranceCleanupTimer) clearTimeout(pieceEntranceCleanupTimer)
   if (masterSaveTimer) clearTimeout(masterSaveTimer)
   if (import.meta.client) document.querySelector('.site-shell')?.removeAttribute('inert')
 })
