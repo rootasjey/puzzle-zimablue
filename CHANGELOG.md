@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.22] - 2026-10-21
+
+### Improved
+
+- Replaced the persistent Master sync sentence with a compact ranked badge and a save indicator shown only during active requests; removed the standalone abandon action.
+
 ## [0.10.21] - 2026-10-21
 
 ### Improved

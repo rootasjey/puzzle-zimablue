@@ -71,13 +71,16 @@
     <div class="board-tools" :style="boardStyle">
       <div class="board-session-summary">
         <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
-        <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
+        <p v-else class="move-count" aria-live="polite">
+          {{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}
+          <span v-if="masterMode && masterAttemptStatus === 'in_progress'" class="master-ranked-badge" :aria-label="t('master.rankedBadgeLabel')">{{ t('master.rankedBadge') }}</span>
+          <span v-if="masterMode && masterAttemptSaving" class="master-saving-status" role="status">{{ t('master.savingAttempt') }}</span>
+        </p>
         <p v-if="moveLimitReached" class="move-limit-note" role="status">{{ t('game.moveLimitReached') }}</p>
         <p v-if="progressEnabled && (!masterMode || sessionStatus === 'error' || sessionStatus === 'conflict')" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
-        <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
+        <p v-if="masterMode && masterAttemptStatus !== 'in_progress'" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
         <p v-if="masterMode && masterAttemptStatus === 'guest'" class="master-login-prompt"><NuxtLink :to="signInLink">{{ t('master.signInBeforeMove') }}</NuxtLink></p>
         <p v-if="masterActionError" class="master-attempt-status is-error" role="alert">{{ masterActionError }}</p>
-        <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
       </div>
       <div class="board-tool-actions" :class="{ 'is-master-control-rail': masterMode }">
         <div v-if="masterMode" class="master-zoom-tools" :aria-label="t('master.zoomControls')" aria-describedby="master-touch-hint">
@@ -146,7 +149,7 @@
             <h2 id="completion-title" ref="completionHeading" class="completion-title" tabindex="-1">{{ t('game.congratulations') }}</h2>
             <div class="completion-result">
               <p class="completion-copy" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
-              <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
+              <p v-if="masterMode && masterAttemptStatus !== 'in_progress'" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
               <div v-if="puzzle.imageDescription" class="completion-art-description">
                 <strong>{{ t('game.artDescription') }}</strong>
                 <p>{{ puzzle.imageDescription }}</p>
@@ -271,9 +274,11 @@ const leaderboardPath = computed(() => masterMode.value
 const masterAttemptStatus = ref<MasterAttemptStatus | 'guest' | 'claiming' | 'error'>('available')
 const masterAttemptId = ref<string | null>(null)
 const masterRankedGeneration = ref<number | null>(null)
+const masterAttemptSaveCount = ref(0)
+const masterAttemptSaving = computed(() => masterAttemptSaveCount.value > 0)
 const masterStatusKey = computed(() => ({
   available: 'master.rankAvailable',
-  in_progress: 'master.rankInProgress',
+  in_progress: 'master.rankedBadgeLabel',
   completed: 'master.rankUsed',
   forfeited: 'master.rankForfeited',
   practice: 'master.practiceMode',
@@ -697,6 +702,7 @@ function scheduleMasterAttemptSave(attempt: string) {
 
 async function saveMasterAttempt(attempt: string) {
   if (!masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
+  masterAttemptSaveCount.value++
   try {
     const result = await $fetch<{ ranked: boolean }>(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`, {
       method: 'PUT',
@@ -705,6 +711,8 @@ async function saveMasterAttempt(attempt: string) {
     if (!result.ranked && masterRankedGeneration.value !== attemptGeneration.value) masterAttemptStatus.value = 'practice'
   } catch {
     // The regular puzzle session is still saved; a failed ranked-attempt update cannot create a score.
+  } finally {
+    masterAttemptSaveCount.value = Math.max(0, masterAttemptSaveCount.value - 1)
   }
 }
 
@@ -720,12 +728,6 @@ async function requestRestart() {
   reopenedCompletedPuzzle.value = false
   newBoard()
   fitMasterBoard()
-}
-
-async function abandonMasterAttempt() {
-  if (masterClaimPromise) await masterClaimPromise
-  if (masterAttemptStatus.value !== 'in_progress' || !window.confirm(t('master.abandonConfirm'))) return
-  await forfeitMasterAttempt()
 }
 
 async function forfeitMasterAttempt(): Promise<boolean> {
@@ -1202,8 +1204,8 @@ onBeforeUnmount(() => {
 .master-zoom-tools button:disabled { cursor: not-allowed; }
 .board-tools:has(.master-zoom-tools) { flex-wrap: wrap; align-items: flex-start; }
 .board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
-.master-abandon-button { min-height: 2rem; border: 0; padding: .2rem .3rem; background: transparent; color: var(--coral); font: inherit; font-size: .7rem; font-weight: 750; text-decoration: underline; text-underline-offset: .18rem; cursor: pointer; }
-.master-abandon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.master-ranked-badge,.master-saving-status { display: inline-flex; align-items: center; margin-left: .4rem; border: 1px solid var(--line); padding: .05rem .32rem; color: var(--muted); font-size: .62rem; font-weight: 750; line-height: 1.35; vertical-align: middle; }
+.master-saving-status { color: var(--blue); }
 .game-panel.is-master-mode { position: relative; }
 .game-panel.is-master-mode .board-tools { align-items: flex-start; }
 .game-panel.is-master-mode .board-session-summary { width: 100%; }
@@ -1216,7 +1218,6 @@ onBeforeUnmount(() => {
 .game-panel.is-master-mode .master-control-button:disabled { opacity: .45; cursor: not-allowed; }
 .game-panel.is-master-mode .master-control-button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 9%, var(--paper)); color: var(--blue); }
 .game-panel.is-master-mode .master-control-icon,.game-panel.is-master-mode .game-control-icon { display: block; width: 1.2rem; height: 1.2rem; flex: none; font-size: 1.2rem; }
-.game-panel.is-master-mode .master-abandon-button { align-self: start; margin-top: .2rem; padding-inline: 0; }
 @media (max-width: 1150px) {
   .game-panel.is-master-mode .board-tools { align-items: center; flex-direction: column; gap: .55rem; }
   .game-panel.is-master-mode .board-session-summary { text-align: center; }
@@ -1224,7 +1225,6 @@ onBeforeUnmount(() => {
   .game-panel.is-master-mode .master-zoom-tools { flex-direction: row; gap: .45rem; }
   .game-panel.is-master-mode .master-control-button { width: 2.35rem; min-width: 2.35rem; height: 2.35rem; min-height: 2.35rem; }
   .game-panel.is-master-mode .master-control-icon,.game-panel.is-master-mode .game-control-icon { width: 1.1rem; height: 1.1rem; font-size: 1.1rem; }
-  .game-panel.is-master-mode .master-abandon-button { align-self: center; }
 }
 .master-attempt-status { margin: .15rem 0 0; color: var(--blue); font-size: .74rem; font-weight: 750; }
 .master-attempt-status.is-practice, .master-attempt-status.is-guest { color: var(--muted); }
