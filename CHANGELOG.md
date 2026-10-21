@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.29] - 2026-10-21
+
+### Improved
+
+- Added a quick staggered entrance for puzzle pieces, with reduced-motion support.
+
 ## [0.10.28] - 2026-10-21
 
 ### Improved

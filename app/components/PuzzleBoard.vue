@@ -30,14 +30,14 @@
           <button
             v-for="(piece, slot) in order"
             :key="piece"
-            class="puzzle-piece"
+            class="puzzle-piece puzzle-piece--arriving"
             :class="[{
               'is-selected': selected === slot,
               'is-placed': !masterMode && piece === slot && !complete,
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
             }, placedGroupClasses(slot, piece)]"
-            :style="[pieceStyle(piece), dragStyle(piece)]"
+            :style="[pieceStyle(piece), dragStyle(piece), { '--piece-entrance-delay': `${slot * 7}ms` }]"
             :data-slot="slot"
             type="button"
             :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
@@ -1324,6 +1324,8 @@ onBeforeUnmount(() => {
 .master-login-prompt { margin: 0; font-size: .75rem; }
 .master-login-prompt a { color: var(--blue); font-weight: 750; text-underline-offset: .16rem; }
 .master-attempt-status:has(+ .completion-leaderboard-link) { text-align: center; }
+.puzzle-board .puzzle-piece--arriving { animation: puzzle-piece-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-delay, 0ms) both; }
+@keyframes puzzle-piece-arrival { from { opacity: .74; } to { opacity: 1; } }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }
@@ -1404,6 +1406,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .puzzle-board-frame { width: min(100%, calc(var(--board-max-width, 590px) - 16px)); padding: .3rem; box-shadow: 3px 4px 0 var(--yellow), 0 8px 12px -5px rgb(8 15 46 / 36%); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .puzzle-board .puzzle-piece--arriving { animation: none; }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }
   .completion-enter-from .completion-board { transform: none; } }
