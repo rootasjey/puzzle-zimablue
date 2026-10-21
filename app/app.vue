@@ -66,10 +66,11 @@
           :aria-label="t('app.account')"
           :aria-current="isNavigationSectionActive('account') ? 'page' : undefined"
         >
-          <span class="mobile-nav-icon i-lucide-user-round" aria-hidden="true" />
+          <img v-if="preferences.avatarUrl()" class="mobile-nav-icon account-nav-avatar account-nav-mobile-avatar" :src="preferences.avatarUrl()" alt="">
+          <span v-else class="mobile-nav-icon i-lucide-user-round" aria-hidden="true" />
           <span class="desktop-nav-label">
-            <img v-if="preferences.avatarUrl()" class="account-nav-avatar" :src="preferences.avatarUrl()" alt="">
-            {{ t('app.account') }}
+            <img v-if="preferences.avatarUrl()" class="account-nav-avatar account-nav-desktop-avatar" :src="preferences.avatarUrl()" alt="">
+            <span>{{ t('app.account') }}</span>
           </span>
           <span class="mobile-nav-label">{{ t('app.mobileAccount') }}</span>
         </NuxtLink>

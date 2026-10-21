@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.18] - 2026-10-21
+
+### Improved
+
+- Aligned the signed-in account avatar beside “Mon espace” in the daily puzzle navigation menu, using the avatar in place of the generic icon.
+
 ## [0.10.17] - 2026-10-21
 
 ### Improved
