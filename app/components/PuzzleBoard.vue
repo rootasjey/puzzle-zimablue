@@ -13,6 +13,7 @@
       :style="[masterViewportStyle, boardStyle]"
       @pointerdown.capture="startPan"
       @pointermove.capture="movePan"
+      @pointerleave="handleMasterPointerLeave"
       @pointerup="finishPan"
       @pointercancel="finishPan"
       @lostpointercapture="finishPan"
@@ -253,10 +254,13 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.startsWith('master:'))
+const masterBoardFocusMode = useState('master-board-focus-mode', () => false)
+const masterFocusIdleDelay = 6000
 const pieceEntranceDuration = 180
 const pieceEntranceDelays = shallowRef(new Map<number, number>())
 const arrivingPieces = shallowRef(new Set<number>())
 let pieceEntranceCleanupTimer: ReturnType<typeof setTimeout> | undefined
+let masterFocusTimer: ReturnType<typeof setTimeout> | undefined
 
 function preparePieceEntrance(initialOrder: readonly number[]) {
   if (pieceEntranceCleanupTimer) clearTimeout(pieceEntranceCleanupTimer)
@@ -990,6 +994,47 @@ watch(complete, async (isComplete) => {
   if (element instanceof HTMLElement) element.querySelector<HTMLButtonElement>('.puzzle-piece')?.focus()
 })
 
+function clearMasterFocusTimer() {
+  if (masterFocusTimer) clearTimeout(masterFocusTimer)
+  masterFocusTimer = undefined
+}
+
+function revealMasterBoardSurroundings() {
+  clearMasterFocusTimer()
+  masterBoardFocusMode.value = false
+}
+
+function noteMasterBoardActivity() {
+  if (!masterMode.value || complete.value) return
+  clearMasterFocusTimer()
+  masterBoardFocusMode.value = false
+  masterFocusTimer = setTimeout(() => {
+    masterFocusTimer = undefined
+    if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
+      masterBoardFocusMode.value = true
+    }
+  }, masterFocusIdleDelay)
+}
+
+function handleMasterOutsideInteraction(event: Event) {
+  if (!masterMode.value || !(event.target instanceof Element)) return
+
+  const target = event.target
+  const isBoardInteraction = target.closest('.master-board-viewport.is-master')
+  const isReferenceInteraction = target.closest('.reference-floating-preview, .reference-original-link')
+  if (isBoardInteraction && !isReferenceInteraction) return
+
+  revealMasterBoardSurroundings()
+}
+
+function handleMasterPointerLeave(event: PointerEvent) {
+  if (event.pointerType !== 'touch') revealMasterBoardSurroundings()
+}
+
+function handleMasterFocusVisibilityChange() {
+  if (document.visibilityState !== 'visible') revealMasterBoardSurroundings()
+}
+
 function startDrag(slot: number, event: PointerEvent) {
   if (complete.value || panMode.value || touchGestureActive.value || event.button !== 0) return
   const button = event.currentTarget
@@ -1027,6 +1072,7 @@ function movePiece(event: PointerEvent) {
   drag.y = event.clientY
   if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 8) return
   drag.moved = true
+  noteMasterBoardActivity()
   const target = pieceAtPoint(event.clientX, event.clientY)
   drag.target = target ? Number(target.dataset.slot) : null
 }
@@ -1069,6 +1115,7 @@ function cancelDrag() {
 
 function choosePiece(slot: number, event: MouseEvent) {
   if (panMode.value) return
+  noteMasterBoardActivity()
   if (ignoreClick.value) {
     ignoreClick.value = false
     if (ignoreClickTimer) clearTimeout(ignoreClickTimer)
@@ -1116,8 +1163,13 @@ function fitMasterBoard() {
 }
 
 function startPan(event: PointerEvent) {
-  if (!masterMode.value || !(event.currentTarget instanceof HTMLElement)) return
-  if (event.target instanceof Element && event.target.closest('.reference-floating-preview, .reference-original-link')) return
+  if (!masterMode.value) return
+  if (event.target instanceof Element && event.target.closest('.reference-floating-preview, .reference-original-link')) {
+    revealMasterBoardSurroundings()
+    return
+  }
+  noteMasterBoardActivity()
+  if (!(event.currentTarget instanceof HTMLElement)) return
 
   if (event.pointerType === 'touch') {
     activeTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -1157,6 +1209,7 @@ function movePan(event: PointerEvent) {
       masterZoom.value = transform.zoom
       masterPan.x = transform.panX
       masterPan.y = transform.panY
+      noteMasterBoardActivity()
       event.preventDefault()
       return
     }
@@ -1170,6 +1223,7 @@ function movePan(event: PointerEvent) {
   masterPan.x = panPointer.originX + deltaX
   masterPan.y = panPointer.originY + deltaY
   constrainMasterPan()
+  noteMasterBoardActivity()
 }
 
 function finishPan(event: PointerEvent) {
@@ -1267,6 +1321,11 @@ function pieceStyle(piece: number) {
 
 onMounted(async () => {
   updateViewportSize()
+  if (masterMode.value) {
+    document.addEventListener('pointerdown', handleMasterOutsideInteraction)
+    document.addEventListener('focusin', handleMasterOutsideInteraction)
+    document.addEventListener('visibilitychange', handleMasterFocusVisibilityChange)
+  }
   window.addEventListener('keydown', handleReferenceKeydown)
   window.addEventListener('pagehide', handleMasterPageHide)
   window.addEventListener('resize', updateViewportSize)
@@ -1287,7 +1346,14 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  clearMasterFocusTimer()
+  masterBoardFocusMode.value = false
   if (import.meta.client) {
+    if (masterMode.value) {
+      document.removeEventListener('pointerdown', handleMasterOutsideInteraction)
+      document.removeEventListener('focusin', handleMasterOutsideInteraction)
+      document.removeEventListener('visibilitychange', handleMasterFocusVisibilityChange)
+    }
     window.removeEventListener('keydown', handleReferenceKeydown)
     window.removeEventListener('resize', updateViewportSize)
     window.removeEventListener('pagehide', handleMasterPageHide)

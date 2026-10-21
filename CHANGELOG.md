@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.39] - 2026-10-22
+
+### Improved
+
+- Added a subtle Master focus mode that dims surrounding interface after a pause and restores it on interaction.
+
 ## [0.10.38] - 2026-10-21
 
 ### Improved

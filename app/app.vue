@@ -1,5 +1,5 @@
 <template>
-  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute }">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute, 'master-board-focus-mode': masterBoardFocusMode }">
     <header class="site-header page-wrap" :class="{ 'is-focused-play-route': isFocusedPuzzleRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo :show-name="!isFocusedPuzzleRoute" />
@@ -202,6 +202,7 @@ const gameNavigationOpen = ref(false)
 const languageSaveError = ref(false)
 const navBarsHidden = ref(false)
 const isMobileViewport = ref(false)
+const masterBoardFocusMode = useState('master-board-focus-mode', () => false)
 let mobileViewportQuery: MediaQueryList | undefined
 let previousScrollY = 0
 let scrollDirection = 0

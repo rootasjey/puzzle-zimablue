@@ -1,3 +1,5 @@
+@layer reset, base, components, app-focus, utilities;
+
 :root {
   color-scheme: light;
   --ink: #18224e;
@@ -81,6 +83,15 @@ button { font: inherit; }
 .page-turn-enter-to { clip-path: inset(0); opacity: 1; transform: translateX(0); }
 .page-turn-leave-to { opacity: 0; transform: translateX(-.5rem); }
 .site-header { display: flex; align-items: center; justify-content: space-between; height: 82px; border-bottom: 2px solid var(--ink); }
+@layer app-focus {
+  .site-header { transition: opacity .24s ease; }
+  .site-shell.master-board-focus-mode .site-header:not(:focus-within) { opacity: .42; }
+  .game-panel.is-master-mode .board-session-summary > .move-count { transition: opacity .24s ease; }
+  .site-shell.master-board-focus-mode .game-panel.is-master-mode .board-session-summary > .move-count { opacity: .56; }
+  @media (hover: hover) and (min-width: 761px) {
+    .site-shell.master-board-focus-mode .site-header:hover { opacity: 1; }
+  }
+}
 .site-header.is-focused-play-route { position: relative; z-index: 45; height: 64px; gap: .75rem; }
 .site-header.is-focused-play-route .wordmark { flex: none; }
 .site-header.is-focused-play-route .gameplay-header-title { max-width: min(34rem, 44vw); }
@@ -225,7 +236,7 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 html.calendar-fullscreen-open,html.calendar-fullscreen-open body { overflow: hidden; }
 button:not(.puzzle-piece):not(.theme-toggle):not(.language-switcher):not(.admin-menu-trigger):not(.sound-toggle):not(.restart-icon-button):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink) !important; }
 @media (max-width: 760px) {
-  .site-header { position: sticky; z-index: 45; top: 0; height: auto; min-height: 68px; gap: .5rem; padding-block: .45rem; background: var(--paper); transition: top .22s cubic-bezier(.16,1,.3,1); }
+  .site-header { position: sticky; z-index: 45; top: 0; height: auto; min-height: 68px; gap: .5rem; padding-block: .45rem; background: var(--paper); transition: top .22s cubic-bezier(.16,1,.3,1), opacity .24s ease; }
   .site-header.is-focused-play-route { height: auto; min-height: 58px; padding-block: .3rem; }
   .site-header.is-focused-play-route .gameplay-header-title { max-width: none; }
   .primary-nav { position: fixed; z-index: 40; inset-inline: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .15rem; padding: .35rem 1.1rem calc(.4rem + env(safe-area-inset-bottom)); border-top: 2px solid var(--ink); background: var(--paper); box-shadow: 0 -3px 0 var(--yellow); transition: transform .22s cubic-bezier(.16,1,.3,1), visibility 0s linear; }
