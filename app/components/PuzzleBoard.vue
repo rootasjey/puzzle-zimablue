@@ -1391,6 +1391,10 @@ onBeforeUnmount(() => {
 .puzzle-board .puzzle-piece--arriving { animation: puzzle-piece-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-delay, 0ms) both; }
 @keyframes puzzle-piece-arrival { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 @keyframes puzzle-board-mat-arrival { from { opacity: 1; } to { opacity: 0; } }
+@keyframes puzzle-piece-selection-pulse {
+  0%, 100% { outline-color: color-mix(in srgb, var(--blue) 58%, transparent); }
+  50% { outline-color: var(--blue); }
+}
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }
@@ -1448,7 +1452,7 @@ onBeforeUnmount(() => {
 .puzzle-piece.is-master-placed.placed-edge-right::after { border-right-width: 2px; }
 .puzzle-piece.is-master-placed.placed-edge-bottom::after { border-bottom-width: 2px; }
 .puzzle-piece.is-master-placed.placed-edge-left::after { border-left-width: 2px; }
-.puzzle-piece.is-selected { z-index: 1; box-shadow: inset 0 0 0 4px var(--yellow), 0 0 0 2px var(--coral); filter: brightness(1.08); }
+.puzzle-piece.is-selected { z-index: 1; outline: 2px solid var(--blue); outline-offset: -4px; animation: puzzle-piece-selection-pulse 1.25s ease-in-out infinite; filter: brightness(1.04); }
 .puzzle-piece.is-dragging { z-index: 3; cursor: grabbing; filter: brightness(1.1); pointer-events: none; transition: none; }
 .puzzle-piece.is-dragging::before { position: absolute; inset: 5px; border: 2px dashed rgb(255 255 255 / 72%); content: ''; pointer-events: none; }
 .puzzle-drag-ghost { position: fixed; z-index: 1000; overflow: hidden; border: 2px solid white; box-shadow: 0 8px 24px rgb(8 15 46 / 34%); opacity: .97; pointer-events: none; transform: scale(1.04) rotate(1deg); }
@@ -1466,13 +1470,14 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .completion-replay-button { max-width: 100%; padding-inline: .85rem; font-size: .8rem; } }
 @media (max-width: 470px) {
   .puzzle-board { gap: 2px; }
-  .puzzle-piece.is-selected { box-shadow: inset 0 0 0 3px var(--yellow), 0 0 0 2px var(--coral); } }
+}
 @media (max-width: 760px) {
   .puzzle-board-frame { width: min(100%, calc(var(--board-max-width, 590px) - 16px)); padding: .3rem; box-shadow: 3px 4px 0 var(--yellow), 0 8px 12px -5px rgb(8 15 46 / 36%); }
 }
 @media (prefers-reduced-motion: reduce) {
   .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
+  .puzzle-piece.is-selected { animation: none; outline-color: var(--blue); }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }
   .completion-enter-from .completion-board { transform: none; } }

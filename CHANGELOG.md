@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.35] - 2026-10-21
+
+### Improved
+
+- Replaced the selected puzzle piece's yellow and coral frame with a subtle animated blue outline.
+
 ## [0.10.34] - 2026-10-21
 
 ### Fixed
