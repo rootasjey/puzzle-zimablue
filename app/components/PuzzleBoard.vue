@@ -505,6 +505,19 @@ async function saveSession() {
   }
 }
 
+async function flushSessionSave() {
+  if (!sessionReady || !props.progressEnabled || !loggedIn.value) return
+  const hasPendingSave = Boolean(sessionSaveTimer) || sessionSaveInFlight || attemptToken.value !== lastServerAttempt
+  if (!hasPendingSave) return
+
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  sessionSaveTimer = undefined
+  while (sessionSaveInFlight) await new Promise<void>(resolve => setTimeout(resolve, 20))
+  if (sessionSaveTimer) clearTimeout(sessionSaveTimer)
+  sessionSaveTimer = undefined
+  if (attemptToken.value !== lastServerAttempt) await saveSession()
+}
+
 async function pollSession() {
   if (!sessionReady || !loggedIn.value || sessionSaveInFlight || document.visibilityState !== 'visible') return
   try {
@@ -697,7 +710,10 @@ async function claimMasterAttempt(attempt: string) {
 function scheduleMasterAttemptSave(attempt: string) {
   if (!masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
   if (masterSaveTimer) clearTimeout(masterSaveTimer)
-  masterSaveTimer = setTimeout(() => void saveMasterAttempt(attempt), 350)
+  masterSaveTimer = setTimeout(() => {
+    masterSaveTimer = undefined
+    void saveMasterAttempt(attempt)
+  }, 350)
 }
 
 async function saveMasterAttempt(attempt: string) {
@@ -714,6 +730,19 @@ async function saveMasterAttempt(attempt: string) {
   } finally {
     masterAttemptSaveCount.value = Math.max(0, masterAttemptSaveCount.value - 1)
   }
+}
+
+async function flushMasterAttemptSave() {
+  if (!masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
+  const hasPendingSave = Boolean(masterSaveTimer) || masterAttemptSaveCount.value > 0
+  if (!hasPendingSave) return
+
+  if (masterSaveTimer) clearTimeout(masterSaveTimer)
+  masterSaveTimer = undefined
+  while (masterAttemptSaveCount.value > 0) await new Promise<void>(resolve => setTimeout(resolve, 20))
+  if (masterSaveTimer) clearTimeout(masterSaveTimer)
+  masterSaveTimer = undefined
+  await saveMasterAttempt(attemptToken.value)
 }
 
 async function requestRestart() {
@@ -746,18 +775,31 @@ async function forfeitMasterAttempt(): Promise<boolean> {
   }
 }
 
-function shouldConfirmMasterLeave() {
-  return masterMode.value && !complete.value && moves.value > 0
-    && (masterAttemptStatus.value === 'in_progress' || masterAttemptStatus.value === 'claiming')
+async function handleMasterPageHide() {
+  if (!masterMode.value || !masterAttemptId.value || masterAttemptStatus.value !== 'in_progress') return
+
+  try {
+    await fetch(`/api/master/${encodeURIComponent(weekKey.value)}/attempt`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ attemptId: masterAttemptId.value, attempt: attemptToken.value }),
+      credentials: 'same-origin',
+      keepalive: true,
+    })
+  } catch {
+    // The current board is already stored locally and will be reconciled with the ranked attempt on return.
+  }
 }
 
-function handleMasterBeforeUnload(event: BeforeUnloadEvent) {
-  if (!shouldConfirmMasterLeave()) return
-  event.preventDefault()
-  event.returnValue = ''
-}
+onBeforeRouteLeave(() => {
+  if (!masterMode.value) return true
 
-onBeforeRouteLeave(() => !shouldConfirmMasterLeave() || window.confirm(t('master.leaveConfirm')))
+  void (async () => {
+    if (masterClaimPromise) await masterClaimPromise
+    await Promise.all([flushSessionSave(), flushMasterAttemptSave()])
+  })()
+  return true
+})
 
 function handleGuestStorage(event: StorageEvent) {
   if (loggedIn.value || event.key !== localSessionKey || !event.newValue) return
@@ -1130,7 +1172,7 @@ function pieceStyle(piece: number) {
 
 onMounted(async () => {
   updateViewportSize()
-  window.addEventListener('beforeunload', handleMasterBeforeUnload)
+  window.addEventListener('pagehide', handleMasterPageHide)
   window.addEventListener('resize', updateViewportSize)
   window.addEventListener('storage', handleGuestStorage)
   window.addEventListener('online', handleBrowserOnline)
@@ -1150,7 +1192,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('resize', updateViewportSize)
-    window.removeEventListener('beforeunload', handleMasterBeforeUnload)
+    window.removeEventListener('pagehide', handleMasterPageHide)
     window.removeEventListener('storage', handleGuestStorage)
     window.removeEventListener('online', handleBrowserOnline)
     document.removeEventListener('visibilitychange', pollSession)

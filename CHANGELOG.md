@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.23] - 2026-10-21
+
+### Improved
+
+- Removed the Master leave confirmation and flush pending saves when navigating away.
+
 ## [0.10.22] - 2026-10-21
 
 ### Improved

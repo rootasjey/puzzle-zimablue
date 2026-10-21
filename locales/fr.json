@@ -92,8 +92,7 @@
     "touchGestureHint": "À deux doigts, pince pour zoomer et déplace le plateau. À un doigt, sélectionne ou déplace une pièce.",
     "resetConfirm": "Recommencer ? Ta tentative classée sera consommée et ne pourra pas être rejouée. La nouvelle grille sera en entraînement.",
     "resetCompletedConfirm": "Recommencer en entraînement ? Ta tentative classée est terminée et ne pourra pas être rejouée.",
-    "forfeitError": "La tentative n’a pas pu être abandonnée. Vérifie ta connexion puis réessaie.",
-    "leaveConfirm": "Quitter le Master ? Ta tentative classée restera réservée et tu pourras la reprendre en revenant sur cette page."
+    "forfeitError": "La tentative n’a pas pu être abandonnée. Vérifie ta connexion puis réessaie."
   },
   "masterAdmin": {
     "back": "← Calendrier quotidien",

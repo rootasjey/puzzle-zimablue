@@ -98,8 +98,7 @@
     "touchGestureHint": "Use two fingers to pinch-zoom and move the board. Use one finger to select or move a piece.",
     "resetConfirm": "Restart? Your ranked attempt will be consumed and cannot be replayed. The new board will be practice.",
     "resetCompletedConfirm": "Restart in practice? Your ranked attempt is complete and cannot be replayed.",
-    "forfeitError": "Could not abandon the attempt. Check your connection and try again.",
-    "leaveConfirm": "Leave the Master? Your ranked attempt will stay reserved, and you can resume it when you return to this page."
+    "forfeitError": "Could not abandon the attempt. Check your connection and try again."
   },
   "masterAdmin": {
     "back": "← Daily calendar",
