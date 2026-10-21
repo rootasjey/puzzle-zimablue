@@ -269,6 +269,7 @@ const pieceEntranceDelays = computed(() => {
   slots.forEach((slot, rank) => { delays[slot] = rank * 7 })
   return delays
 })
+const pieceEntranceFinalDelay = computed(() => Math.max(0, (props.puzzle.gridRows * props.puzzle.gridColumns - 1) * 7))
 const puzzleDate = computed(() => 'date' in props.puzzle ? props.puzzle.date : '')
 const weekKey = computed(() => 'weekKey' in props.puzzle ? props.puzzle.weekKey : '')
 const { loggedIn } = useUserSession()
@@ -428,6 +429,7 @@ const boardStyle = computed(() => ({
   '--image-url': `url('${props.puzzle.imageUrl}')`,
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
+  '--piece-entrance-final-delay': `${pieceEntranceFinalDelay.value}ms`,
 }))
 const masterRootStyle = computed(() => masterMode.value ? { '--master-stage-size': `${boardMaxWidth.value}px` } : {})
 const masterViewportStyle = computed(() => ({ '--master-stage-size': `${boardMaxWidth.value}px` }))
@@ -1307,7 +1309,9 @@ onBeforeUnmount(() => {
 .reference-original-link-enter-active { transition: opacity .18s ease .12s, transform .18s ease .12s; }
 .reference-original-link-leave-active { transition: opacity .1s ease, transform .1s ease; }
 .reference-original-link-enter-from,.reference-original-link-leave-to { opacity: 0; transform: translateY(-.25rem); }
-.puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+.puzzle-board { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+.puzzle-board::before { position: absolute; z-index: 0; inset: 0; background: var(--paper); content: ''; opacity: 0; pointer-events: none; animation: puzzle-board-mat-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-final-delay, 0ms) both; }
+.puzzle-board .puzzle-piece { z-index: 1; }
 /* Keep the frame in this legacy unlayered component cascade so Uno's base reset cannot clear its mat and border. */
 .puzzle-board-frame { box-sizing: border-box; width: min(100%, calc(var(--board-max-width, 590px) - 20px)); margin-inline: auto; padding: .45rem; border: 2px solid var(--ink); background: var(--paper); box-shadow: 4px 5px 0 var(--yellow), 0 11px 18px -7px rgb(8 15 46 / 36%); }
 .game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
@@ -1346,6 +1350,7 @@ onBeforeUnmount(() => {
 .master-attempt-status:has(+ .completion-leaderboard-link) { text-align: center; }
 .puzzle-board .puzzle-piece--arriving { animation: puzzle-piece-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-delay, 0ms) both; }
 @keyframes puzzle-piece-arrival { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
+@keyframes puzzle-board-mat-arrival { from { opacity: 1; } to { opacity: 0; } }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }
@@ -1426,6 +1431,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .puzzle-board-frame { width: min(100%, calc(var(--board-max-width, 590px) - 16px)); padding: .3rem; box-shadow: 3px 4px 0 var(--yellow), 0 8px 12px -5px rgb(8 15 46 / 36%); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }

@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.32] - 2026-10-21
+
+### Improved
+
+- Matched the puzzle board reveal background to the active theme before the grid fades in.
+
 ## [0.10.31] - 2026-10-21
 
 ### Fixed
