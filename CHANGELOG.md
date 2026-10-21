@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.26] - 2026-10-21
+
+### Improved
+
+- Inset and shadowed the small floating reference image so it stands out from the puzzle board without clipping its shadow.
+
 ## [0.10.25] - 2026-10-21
 
 ### Improved

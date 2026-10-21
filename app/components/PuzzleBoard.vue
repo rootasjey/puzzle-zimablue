@@ -1272,8 +1272,8 @@ onBeforeUnmount(() => {
 .master-board-viewport.is-pan-mode { cursor: grab; }
 .master-board-viewport.is-pan-mode:active { cursor: grabbing; }
 /* Keep the overlay in this legacy unlayered SFC cascade so existing button defaults do not override its expanded state. */
-.reference-floating-preview { position: absolute; z-index: 4; inset: 0; display: block; box-sizing: border-box; width: 100%; height: 100%; padding: .2rem; border: 1px solid var(--line); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); cursor: zoom-in; transform: scale(.16); transform-origin: bottom right; transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease; }
-.reference-floating-preview:hover { transform: scale(.17); box-shadow: 4px 4px 0 var(--ink); }
+.reference-floating-preview { position: absolute; z-index: 4; inset: 0; display: block; box-sizing: border-box; width: 100%; height: 100%; padding: .2rem; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 36px 60px 16px color-mix(in srgb, var(--ink) 52%, transparent), 16px 16px 0 color-mix(in srgb, var(--ink) 90%, transparent); cursor: zoom-in; transform: scale(.16); transform-origin: calc(100% - .75rem) calc(100% - .75rem); transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease; }
+.reference-floating-preview:hover { transform: scale(.17); box-shadow: 0 42px 68px 18px color-mix(in srgb, var(--ink) 60%, transparent), 20px 20px 0 color-mix(in srgb, var(--ink) 94%, transparent); }
 .reference-floating-preview.is-expanded { z-index: 5; cursor: zoom-out; transform: scale(1); }
 .reference-floating-preview.is-expanded:hover { transform: scale(1); box-shadow: 3px 3px 0 var(--ink); }
 .reference-floating-preview:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
