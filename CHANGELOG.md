@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.37] - 2026-10-21
+
+### Improved
+
+- Reworked puzzle loading with a theme-aware board frame and hid game controls until the pieces are ready.
+
 ## [0.10.36] - 2026-10-21
 
 ### Improved

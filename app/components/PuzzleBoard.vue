@@ -1,8 +1,10 @@
 <template>
-  <section class="game-panel" :class="{ 'is-master-mode': masterMode }" :style="masterRootStyle" :aria-label="t('game.boardLabel')">
-    <div v-if="!imageLoaded" class="board-loading">
-      <BrandLoader v-if="!imageError" :label="t('game.loading')" />
-      <span v-else role="alert">{{ t('game.imageError') }}</span>
+  <section class="game-panel" :class="{ 'is-master-mode': masterMode }" :style="masterRootStyle" :aria-label="t('game.boardLabel')" :aria-busy="!imageLoaded && !imageError">
+    <div v-if="!imageLoaded" class="puzzle-board-frame board-loading-frame" :style="boardStyle">
+      <div class="board-loading">
+        <BrandLoader v-if="!imageError" :label="t('game.loading')" />
+        <span v-else role="alert">{{ t('game.imageError') }}</span>
+      </div>
     </div>
     <div
       v-else
@@ -87,7 +89,7 @@
         </div>
       </Transition>
     </Teleport>
-    <div class="board-tools" :style="boardStyle">
+    <div v-if="imageLoaded" class="board-tools" :style="boardStyle">
       <div class="board-session-summary">
         <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
         <p v-else class="move-count" aria-live="polite">
@@ -458,6 +460,8 @@ const completionBoardWidth = computed(() => {
 const boardStyle = computed(() => ({
   '--grid-rows': props.puzzle.gridRows,
   '--grid-columns': props.puzzle.gridColumns,
+  '--loading-cell-width': `${100 / props.puzzle.gridColumns}%`,
+  '--loading-cell-height': `${100 / props.puzzle.gridRows}%`,
   '--image-url': `url('${props.puzzle.imageUrl}')`,
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
@@ -1313,7 +1317,8 @@ onBeforeUnmount(() => {
 .reference-panel { display: grid; gap: .7rem; padding: .8rem; border: 2px solid var(--ink); background: var(--yellow); box-shadow: var(--shadow); }
 .reference-label { color: var(--yellow-foreground); font-size: .75rem; font-weight: 800; }
 .reference-panel img { display: block; width: 100%; aspect-ratio: 1; border: 2px solid var(--ink); object-fit: cover; background: var(--white); }
-.board-loading { display: grid; place-items: center; width: 100%; max-width: 590px; aspect-ratio: 1; margin-inline: auto; border: 2px solid var(--ink); background: var(--yellow); color: var(--yellow-foreground); font-size: .88rem; font-weight: 700; }
+.board-loading-frame { display: grid; place-items: center; }
+.board-loading { display: grid; box-sizing: border-box; width: 100%; aspect-ratio: var(--image-ratio, 1); place-items: center; border: 1px solid color-mix(in srgb, var(--master-board-line, var(--ink)) 38%, transparent); background-color: color-mix(in srgb, var(--line) 48%, var(--paper)); background-image: linear-gradient(to right, color-mix(in srgb, var(--master-board-line, var(--ink)) 22%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--master-board-line, var(--ink)) 22%, transparent) 1px, transparent 1px); background-size: var(--loading-cell-width) var(--loading-cell-height); color: var(--muted); font-size: .88rem; font-weight: 700; }
 
 @media (max-width: 760px) {
   .reference-panel { grid-template-columns: 1fr 96px; align-items: center; }
