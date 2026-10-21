@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.19] - 2026-10-21
+
+### Improved
+
+- Reworked the weekly Master play page around a centered board, vertical desktop controls, and a collapsible reference image, with a compact gameplay header.
+
 ## [0.10.18] - 2026-10-21
 
 ### Improved

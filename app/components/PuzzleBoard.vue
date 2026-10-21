@@ -1,5 +1,5 @@
 <template>
-  <section class="game-panel" :aria-label="t('game.boardLabel')">
+  <section class="game-panel" :class="{ 'is-master-mode': masterMode }" :style="masterRootStyle" :aria-label="t('game.boardLabel')">
     <div v-if="!imageLoaded" class="board-loading">
       <BrandLoader v-if="!imageError" :label="t('game.loading')" />
       <span v-else role="alert">{{ t('game.imageError') }}</span>
@@ -66,16 +66,22 @@
         <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
         <p v-if="masterMode && masterAttemptStatus === 'guest'" class="master-login-prompt"><NuxtLink :to="signInLink">{{ t('master.signInBeforeMove') }}</NuxtLink></p>
         <p v-if="masterActionError" class="master-attempt-status is-error" role="alert">{{ masterActionError }}</p>
+        <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
       </div>
-      <div class="board-tool-actions">
+      <div class="board-tool-actions" :class="{ 'is-master-control-rail': masterMode }">
         <div v-if="masterMode" class="master-zoom-tools" :aria-label="t('master.zoomControls')">
           <button type="button" :aria-label="t('master.zoomOut')" :disabled="masterZoom <= 1" @click="changeMasterZoom(-0.25)">−</button>
-          <button type="button" :aria-label="t('master.fitBoard')" @click="fitMasterBoard">{{ t('master.fit') }}</button>
+          <button type="button" :aria-label="t('master.fitBoard')" @click="fitMasterBoard">
+            <span class="master-zoom-label">{{ t('master.fit') }}</span>
+            <svg class="master-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3" /></svg>
+          </button>
           <button type="button" :aria-label="t('master.zoomIn')" :disabled="masterZoom >= 3" @click="changeMasterZoom(0.25)">+</button>
-          <button type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">{{ t(panMode ? 'master.panDone' : 'master.pan') }}</button>
+          <button type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">
+            <span class="master-zoom-label">{{ t(panMode ? 'master.panDone' : 'master.pan') }}</span>
+            <svg class="master-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18m-9-9 3 3m-3-3-3 3m12 6-3-3m3 3-3 3m-6-3 3-3m-3 3-3-3m3 6-3-3m3 3 3-3" /></svg>
+          </button>
         </div>
         <p v-if="masterMode" class="master-touch-hint">{{ t('master.touchGestureHint') }}</p>
-        <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
           <button v-if="showReferenceToggle" class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -319,9 +325,14 @@ const dragGhostStyle = computed(() => {
 const imageAspectRatio = computed(() => imageDimensions.value.width / imageDimensions.value.height)
 const boardMaxWidth = computed(() => {
   if (masterMode.value) {
-    const maxWidth = Math.max(220, viewportSize.value.width - (viewportSize.value.width <= 760 ? 28 : 48))
-    const heightBudget = viewportSize.value.height - (viewportSize.value.width <= 760 ? 460 : 360)
-    return Math.min(920, maxWidth, Math.max(220, heightBudget))
+    const width = viewportSize.value.width
+    const pagePadding = width <= 760 ? 20 : Math.min(48, width * 0.04)
+    const pageContentWidth = Math.min(width, 1120) - pagePadding * 2
+    const desktopLayout = width > 1150
+    const sideSpace = showReferenceImage.value ? 368 : 128
+    const maxWidth = desktopLayout ? pageContentWidth - sideSpace : Math.min(pageContentWidth, width - 40)
+    const heightBudget = viewportSize.value.height - (desktopLayout ? 360 : 250)
+    return Math.min(920, Math.max(220, maxWidth), Math.max(220, heightBudget))
   }
   const mobile = viewportSize.value.width <= 760
   const maxWidth = Math.max(180, Math.min(mobile ? viewportSize.value.width - 28 : 920, viewportSize.value.width - 48))
@@ -343,6 +354,7 @@ const boardStyle = computed(() => ({
   '--image-ratio': `${imageDimensions.value.width} / ${imageDimensions.value.height}`,
   '--board-max-width': `${boardMaxWidth.value}px`,
 }))
+const masterRootStyle = computed(() => masterMode.value ? { '--master-stage-size': `${boardMaxWidth.value}px` } : {})
 const masterViewportStyle = computed(() => ({ '--master-stage-size': `${boardMaxWidth.value}px` }))
 const masterTransformStyle = computed(() => masterMode.value ? {
   transform: `translate(${masterPan.x}px, ${masterPan.y}px) scale(${masterZoom.value})`,
@@ -1175,6 +1187,30 @@ onBeforeUnmount(() => {
 .board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
 .master-abandon-button { min-height: 2rem; border: 0; padding: .2rem .3rem; background: transparent; color: var(--coral); font: inherit; font-size: .7rem; font-weight: 750; text-decoration: underline; text-underline-offset: .18rem; cursor: pointer; }
 .master-abandon-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.game-panel.is-master-mode { position: relative; }
+.game-panel.is-master-mode .board-tools { align-items: flex-start; }
+.game-panel.is-master-mode .board-session-summary { width: 100%; }
+.game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: absolute; z-index: 3; top: calc(var(--master-stage-size) / 2); left: calc(50% - var(--master-stage-size) / 2 - 3.2rem); display: flex; width: 2.75rem; max-width: none; flex-direction: column; flex-wrap: nowrap; align-items: center; justify-content: center; gap: .45rem; transform: translateY(-50%); }
+.game-panel.is-master-mode .master-zoom-tools { flex-direction: column; gap: .3rem; }
+.game-panel.is-master-mode .master-zoom-tools button { width: 2.35rem; min-width: 2.35rem; min-height: 2.35rem; }
+.game-panel.is-master-mode .master-zoom-label { display: none; }
+.game-panel.is-master-mode .master-control-icon { display: block; width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.game-panel.is-master-mode .board-tool-actions .sound-toggle,.game-panel.is-master-mode .board-tool-actions .restart-icon-button { width: 2.35rem; height: 2.35rem; }
+.game-panel.is-master-mode .master-touch-hint { display: none; }
+.game-panel.is-master-mode .master-abandon-button { align-self: start; margin-top: .2rem; padding-inline: 0; }
+@media (max-width: 1150px) {
+  .game-panel.is-master-mode .board-tools { align-items: center; flex-direction: column; gap: .55rem; }
+  .game-panel.is-master-mode .board-session-summary { text-align: center; }
+  .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; gap: .5rem; transform: none; }
+  .game-panel.is-master-mode .master-zoom-tools { flex-direction: row; }
+  .game-panel.is-master-mode .master-zoom-tools button { width: auto; min-width: 2.15rem; min-height: 2.15rem; }
+  .game-panel.is-master-mode .master-zoom-tools button:nth-child(2),.game-panel.is-master-mode .master-zoom-tools button:nth-child(4) { width: auto; min-width: 2.15rem; padding-inline: .45rem; }
+  .game-panel.is-master-mode .master-zoom-label { display: inline; }
+  .game-panel.is-master-mode .master-control-icon { display: none; }
+  .game-panel.is-master-mode .board-tool-actions .sound-toggle,.game-panel.is-master-mode .board-tool-actions .restart-icon-button { width: 2.15rem; height: 2.15rem; }
+  .game-panel.is-master-mode .master-touch-hint { display: block; flex-basis: 100%; text-align: center; }
+  .game-panel.is-master-mode .master-abandon-button { align-self: center; }
+}
 .master-attempt-status { margin: .15rem 0 0; color: var(--blue); font-size: .74rem; font-weight: 750; }
 .master-attempt-status.is-practice, .master-attempt-status.is-guest { color: var(--muted); }
 .master-attempt-status.is-error { color: var(--coral); }

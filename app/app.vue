@@ -1,18 +1,18 @@
 <template>
-  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-daily-play-route': isDailyPlayRoute }">
-    <header class="site-header page-wrap" :class="{ 'is-daily-play-route': isDailyPlayRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute }">
+    <header class="site-header page-wrap" :class="{ 'is-focused-play-route': isFocusedPuzzleRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo />
       </NuxtLink>
       <nav
         ref="primaryNav"
         class="primary-nav"
-        :class="{ 'is-gameplay-route': isGameplayRoute, 'is-daily-play-route': isDailyPlayRoute, 'is-open': gameNavigationOpen }"
+        :class="{ 'is-gameplay-route': isGameplayRoute, 'is-focused-play-route': isFocusedPuzzleRoute, 'is-open': gameNavigationOpen }"
         :aria-label="t('app.navigation')"
         @keydown.esc.prevent.stop="closeGameNavigationAndFocus"
       >
         <button
-          v-if="isDailyPlayRoute"
+          v-if="isFocusedPuzzleRoute"
           ref="gameNavigationTrigger"
           class="play-navigation-trigger"
           type="button"
@@ -25,7 +25,7 @@
           <span class="sr-only">{{ t('app.navigation') }}</span>
         </button>
         <Transition name="menu-pop">
-          <div v-if="!isDailyPlayRoute || gameNavigationOpen" id="primary-nav-links" class="primary-nav-links" :class="{ 'is-gameplay-menu': isDailyPlayRoute }">
+          <div v-if="!isFocusedPuzzleRoute || gameNavigationOpen" id="primary-nav-links" class="primary-nav-links" :class="{ 'is-gameplay-menu': isFocusedPuzzleRoute }">
         <NuxtLink
           class="nav-link mobile-nav-link"
           :class="{ 'is-current-section': isNavigationSectionActive('home') }"
@@ -86,7 +86,7 @@
           <span class="desktop-nav-label">{{ t('app.signIn') }}</span>
           <span class="mobile-nav-label">{{ t('app.mobileAccount') }}</span>
         </NuxtLink>
-            <template v-if="isDailyPlayRoute && loggedIn && user?.role === 'admin'">
+            <template v-if="isFocusedPuzzleRoute && loggedIn && user?.role === 'admin'">
               <NuxtLink class="game-admin-link" :to="$localePath({ name: 'admin-calendar' })">{{ t('admin.calendarTitle') }}</NuxtLink>
               <NuxtLink class="game-admin-link" :to="$localePath('/admin/master')">{{ t('app.configureMaster') }}</NuxtLink>
             </template>
@@ -95,7 +95,7 @@
       </nav>
       <div class="header-tools">
         <div
-          v-if="loggedIn && user?.role === 'admin' && !isDailyPlayRoute"
+          v-if="loggedIn && user?.role === 'admin' && !isFocusedPuzzleRoute"
           ref="adminMenu"
           class="admin-menu"
           @keydown.esc.prevent.stop="closeAdminMenuAndFocus"
@@ -158,7 +158,7 @@
     </header>
     <AccountSectionNavigation v-if="showAccountNavigation" />
     <NuxtPage :page-key="route => route.fullPath" />
-    <footer v-if="!isDailyPlayRoute" class="site-footer page-wrap">
+    <footer v-if="!isFocusedPuzzleRoute" class="site-footer page-wrap">
       <NuxtLink class="site-footer-about" :to="$localePath({ name: 'about' })">{{ t('app.about') }}</NuxtLink>
       <NuxtLink class="site-footer-leaderboard" :to="$localePath({ name: 'leaderboard' })">{{ t('app.leaderboard') }}</NuxtLink>
       <span>{{ t('app.footerLine') }} <a href="https://zimablue.cc" target="_blank" rel="noreferrer">Zimablue</a>.</span>
@@ -212,6 +212,7 @@ const showAccountNavigation = computed(() => loggedIn.value && (
 ))
 const routeName = computed(() => String(route.name ?? '').split('___')[0] ?? '')
 const isDailyPlayRoute = computed(() => /\/(?:play|jouer)\/[^/]+\/?$/.test(route.path))
+const isFocusedPuzzleRoute = computed(() => isDailyPlayRoute.value || routeName.value === 'master')
 const isGameplayRoute = computed(() => isDailyPlayRoute.value || routeName.value === 'master' || routeName.value.startsWith('master-'))
 const themeLabels = computed(() => Object.fromEntries(themeOptions.map(option => [option.value, t(option.label)])) as Record<ThemePreference, string>)
 const currentLanguage = computed(() => $getLocale())
