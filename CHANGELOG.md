@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.24] - 2026-10-21
+
+### Improved
+
+- Made the floating reference image expand over the puzzle with an animated transition and added a discreet link to the original illustration.
+
 ## [0.10.23] - 2026-10-21
 
 ### Improved

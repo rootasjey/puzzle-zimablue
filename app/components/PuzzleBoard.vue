@@ -49,17 +49,32 @@
       />
     </TransitionGroup>
     </div>
-    <a
+    <button
       v-if="showReferenceImage && imageLoaded && !complete"
+      ref="referencePreviewButton"
       class="reference-floating-preview"
-      :href="illustrationLink"
-      target="_blank"
-      rel="noreferrer"
-      :aria-label="t('play.viewIllustration')"
-      :title="t('play.reference')"
+      :class="{ 'is-expanded': referenceExpanded }"
+      type="button"
+      :aria-pressed="referenceExpanded"
+      :aria-label="t(referenceExpanded ? 'play.shrinkReference' : 'play.enlargeReference')"
+      :title="t(referenceExpanded ? 'play.shrinkReference' : 'play.enlargeReference')"
+      @click.stop="toggleReferenceExpanded"
     >
-      <img :src="puzzle.imageUrl" :alt="t('play.referenceAlt', { name: puzzle.imageName })" loading="lazy" decoding="async">
-    </a>
+      <img :src="puzzle.imageUrl" alt="" loading="lazy" decoding="async">
+    </button>
+    <Transition name="reference-original-link">
+      <a
+        v-if="referenceExpanded"
+        class="reference-original-link"
+        :href="illustrationLink"
+        target="_blank"
+        rel="noreferrer"
+        :aria-label="t('play.viewIllustration')"
+        :title="t('play.viewIllustration')"
+      >
+        <span class="i-lucide-external-link" aria-hidden="true" />
+      </a>
+    </Transition>
     </div>
     <Teleport to="body">
       <Transition name="ghost-lift" appear>
@@ -226,6 +241,8 @@ import { usePuzzleGame } from '~/composables/usePuzzleGame'
 const props = withDefaults(defineProps<{ puzzle: DailyPuzzle | WeeklyPuzzle; progressEnabled?: boolean; masterMode?: boolean; showReferenceToggle?: boolean }>(), { progressEnabled: true, masterMode: false, showReferenceToggle: true })
 const accountPreferences = useAccountPreferences()
 const showReferenceImage = computed(() => accountPreferences.preferences.value.showReferenceImage)
+const referenceExpanded = ref(false)
+const referencePreviewButton = ref<HTMLButtonElement | null>(null)
 const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
@@ -237,7 +254,18 @@ const { $localePath } = useNuxtApp()
 const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzleSounds()
 
 function toggleReferenceImage() {
+  referenceExpanded.value = false
   void accountPreferences.save({ showReferenceImage: !showReferenceImage.value })
+}
+
+function toggleReferenceExpanded() {
+  referenceExpanded.value = !referenceExpanded.value
+}
+
+function handleReferenceKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape' || !referenceExpanded.value) return
+  referenceExpanded.value = false
+  referencePreviewButton.value?.focus()
 }
 
 function placedGroupClasses(slot: number, piece: number) {
@@ -266,6 +294,12 @@ const illustrationLink = computed(() => `https://zimablue.cc/illustrations/${enc
 const downloadLink = computed(() => puzzleDate.value ? `/api/puzzles/${encodeURIComponent(puzzleDate.value)}/download` : props.puzzle.imageUrl)
 const downloadFilename = computed(() => `${props.puzzle.imageSlug || puzzleDate.value || weekKey.value}.jpg`)
 const { order, selected, moves, moveHistory, attemptGeneration, complete, moveLimitReached, newBoard, restoreBoard, swap } = usePuzzleGame(props.puzzle)
+watch([showReferenceImage, complete], ([isVisible, isComplete]) => {
+  if (!isVisible || isComplete) referenceExpanded.value = false
+})
+watch(() => props.puzzle.puzzleId, () => {
+  referenceExpanded.value = false
+})
 const attemptLayout = computed(() => ({ puzzleId: props.puzzle.puzzleId, gridRows: props.puzzle.gridRows, gridColumns: props.puzzle.gridColumns }))
 const attemptToken = computed(() => encodePuzzleAttempt(attemptLayout.value, attemptGeneration.value, moveHistory.value))
 const leaderboardPath = computed(() => masterMode.value
@@ -1022,7 +1056,7 @@ function fitMasterBoard() {
 
 function startPan(event: PointerEvent) {
   if (!masterMode.value || !(event.currentTarget instanceof HTMLElement)) return
-  if (event.target instanceof Element && event.target.closest('.reference-floating-preview')) return
+  if (event.target instanceof Element && event.target.closest('.reference-floating-preview, .reference-original-link')) return
 
   if (event.pointerType === 'touch') {
     activeTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -1172,6 +1206,7 @@ function pieceStyle(piece: number) {
 
 onMounted(async () => {
   updateViewportSize()
+  window.addEventListener('keydown', handleReferenceKeydown)
   window.addEventListener('pagehide', handleMasterPageHide)
   window.addEventListener('resize', updateViewportSize)
   window.addEventListener('storage', handleGuestStorage)
@@ -1191,6 +1226,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (import.meta.client) {
+    window.removeEventListener('keydown', handleReferenceKeydown)
     window.removeEventListener('resize', updateViewportSize)
     window.removeEventListener('pagehide', handleMasterPageHide)
     window.removeEventListener('storage', handleGuestStorage)
@@ -1235,10 +1271,20 @@ onBeforeUnmount(() => {
 .master-board-viewport.is-pan-mode .master-board-transform, .master-board-viewport.is-touch-gesture .master-board-transform { transition: none; }
 .master-board-viewport.is-pan-mode { cursor: grab; }
 .master-board-viewport.is-pan-mode:active { cursor: grabbing; }
-.reference-floating-preview { position: absolute; z-index: 4; right: .55rem; bottom: .55rem; display: block; width: clamp(3rem, 16%, 9rem); aspect-ratio: 1; padding: .2rem; border: 1px solid var(--line); background: var(--paper); box-shadow: 2px 2px 0 var(--ink); transition: transform .16s ease, box-shadow .16s ease; }
-.reference-floating-preview:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+/* Keep the overlay in this legacy unlayered SFC cascade so existing button defaults do not override its expanded state. */
+.reference-floating-preview { position: absolute; z-index: 4; inset: 0; display: block; box-sizing: border-box; width: 100%; height: 100%; padding: .2rem; border: 1px solid var(--line); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); cursor: zoom-in; transform: scale(.16); transform-origin: bottom right; transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease; }
+.reference-floating-preview:hover { transform: scale(.17); box-shadow: 4px 4px 0 var(--ink); }
+.reference-floating-preview.is-expanded { z-index: 5; cursor: zoom-out; transform: scale(1); }
+.reference-floating-preview.is-expanded:hover { transform: scale(1); box-shadow: 3px 3px 0 var(--ink); }
 .reference-floating-preview:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
 .reference-floating-preview img { display: block; width: 100%; height: 100%; border: 1px solid var(--line); background: var(--paper); object-fit: contain; }
+.reference-original-link { position: absolute; z-index: 6; top: .7rem; right: .7rem; display: grid; width: 2.2rem; height: 2.2rem; place-items: center; border: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 94%, transparent); box-shadow: 2px 2px 0 var(--ink); color: var(--blue); text-decoration: none; transition: transform .15s ease, color .15s ease, box-shadow .15s ease; }
+.reference-original-link:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); color: var(--coral); }
+.reference-original-link:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.reference-original-link span { display: block; width: 1rem; height: 1rem; font-size: 1rem; }
+.reference-original-link-enter-active { transition: opacity .18s ease .12s, transform .18s ease .12s; }
+.reference-original-link-leave-active { transition: opacity .1s ease, transform .1s ease; }
+.reference-original-link-enter-from,.reference-original-link-leave-to { opacity: 0; transform: translateY(-.25rem); }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
 .game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
 .master-zoom-tools { display: flex; align-items: center; gap: .28rem; }

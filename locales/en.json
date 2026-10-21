@@ -231,6 +231,8 @@
     "referenceAlt": "Preview of {name}",
     "hideReference": "Hide the image preview",
     "showReference": "Show the image preview",
+    "enlargeReference": "Enlarge the image reference",
+    "shrinkReference": "Shrink the image reference",
     "seoDescription": "Piece together the illustration {name}.",
     "referenceHelp": "Look at the colours, then swap two pieces at a time.",
     "notFound": "This puzzle is not in the archive yet."

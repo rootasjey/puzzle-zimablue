@@ -225,6 +225,8 @@
     "referenceAlt": "Aperçu de {name}",
     "hideReference": "Masquer l’aperçu de l’image",
     "showReference": "Afficher l’aperçu de l’image",
+    "enlargeReference": "Agrandir l’image de référence",
+    "shrinkReference": "Réduire l’image de référence",
     "seoDescription": "Reconstitue l’illustration {name}.",
     "referenceHelp": "Observe les couleurs, puis échange les pièces en deux touches.",
     "notFound": "Ce puzzle n’est pas encore dans l’archive."
