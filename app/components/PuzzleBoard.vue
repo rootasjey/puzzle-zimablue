@@ -116,19 +116,19 @@
         </div>
         <p v-if="masterMode" id="master-touch-hint" class="sr-only">{{ t('master.touchGestureHint') }}</p>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button v-if="showReferenceToggle" :class="['sound-toggle', 'reference-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" :title="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
+          <button v-if="showReferenceToggle" :class="['sound-toggle', 'reference-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
             <span class="game-control-icon" :class="showReferenceImage ? 'i-lucide-eye' : 'i-lucide-eye-off'" aria-hidden="true" />
           </button>
           <template #content>{{ t(showReferenceImage ? 'play.hideReference' : 'play.showReference') }}</template>
         </NTooltip>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button :class="['sound-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" :title="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+          <button :class="['sound-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
             <span class="game-control-icon" :class="soundEnabled ? 'i-lucide-volume-2' : 'i-lucide-volume-x'" aria-hidden="true" />
           </button>
           <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
         </NTooltip>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button :class="['restart-icon-button', { 'master-control-button': masterMode }]" type="button" :aria-label="t('game.restart')" :title="t('game.restart')" @click="requestRestart">
+          <button :class="['restart-icon-button', { 'master-control-button': masterMode }]" type="button" :aria-label="t('game.restart')" @click="requestRestart">
             <span class="game-control-icon i-lucide-rotate-ccw" aria-hidden="true" />
           </button>
           <template #content>{{ t('game.restart') }}</template>

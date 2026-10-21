@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.31] - 2026-10-21
+
+### Fixed
+
+- Removed duplicate native tooltips from puzzle controls while keeping the custom tooltips.
+
 ## [0.10.30] - 2026-10-21
 
 ### Improved
