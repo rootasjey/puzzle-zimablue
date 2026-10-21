@@ -12,7 +12,7 @@ const genericResponse = {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ email?: unknown }>(event)
+  const body = await readBody<{ email?: unknown; scope?: unknown; locale?: unknown }>(event)
   if (typeof body?.email !== 'string' || body.email.length > 254) return genericResponse
   const email = normalizeEmail(body.email)
   if (!email.includes('@') || !await consumeRateLimit(event, 'password-reset', email, 4)) return genericResponse
@@ -36,7 +36,12 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig(event)
   const baseUrl = String(config.public.siteUrl).replace(/\/$/, '')
-  const resetUrl = `${baseUrl}/admin/reinitialiser?token=${encodeURIComponent(token)}`
+  const scope = body.scope === 'account' ? 'account' : 'admin'
+  const locale = body.locale === 'en' ? 'en' : 'fr'
+  const resetPath = scope === 'account'
+    ? locale === 'en' ? '/en/account/reset-password' : '/compte/reinitialiser'
+    : locale === 'en' ? '/en/admin/reset-password' : '/admin/reinitialiser'
+  const resetUrl = `${baseUrl}${resetPath}?token=${encodeURIComponent(token)}`
   const emailBinding = getWorkerBindings(event).EMAIL
   try {
     if (!emailBinding) throw new Error('The EMAIL binding is not configured.')

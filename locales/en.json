@@ -409,6 +409,7 @@
     "security": "Account security",
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
+    "passwordMinimum": "At least 12 characters.",
     "passwordMismatch": "The passwords do not match.",
     "passwordChanged": "Password changed. You can sign in now.",
     "savePassword": "Save password",

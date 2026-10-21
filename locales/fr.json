@@ -403,6 +403,7 @@
     "security": "Sécurité du compte",
     "newPassword": "Nouveau mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
+    "passwordMinimum": "12 caractères minimum.",
     "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
     "passwordChanged": "Mot de passe modifié. Tu peux te connecter.",
     "savePassword": "Enregistrer le mot de passe",

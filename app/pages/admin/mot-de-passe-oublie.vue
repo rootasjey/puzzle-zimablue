@@ -23,13 +23,13 @@ const email = ref('')
 const sent = ref(false)
 const error = ref('')
 const busy = ref(false)
-const { $t } = useI18n()
+const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 async function requestReset() {
   busy.value = true
   error.value = ''
   try {
-    await $fetch('/api/auth/forgot-password', { method: 'POST', body: { email: email.value } })
+    await $fetch('/api/auth/forgot-password', { method: 'POST', body: { email: email.value, scope: 'admin', locale: $getLocale() } })
     sent.value = true
   } catch {
     error.value = t('auth.recoveryError')
