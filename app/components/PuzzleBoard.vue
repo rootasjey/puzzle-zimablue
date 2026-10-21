@@ -16,38 +16,40 @@
       @lostpointercapture="finishPan"
     >
     <div class="master-board-transform" :style="masterTransformStyle">
-    <TransitionGroup
-      name="piece"
-      tag="div"
-      class="puzzle-board"
-      ref="board"
-      :style="boardStyle"
-      role="group"
-      :aria-label="t('game.gridLabel', { rows: puzzle.gridRows, columns: puzzle.gridColumns, title: displayedTitle })"
-      @pointermove="movePiece"
-    >
-      <button
-        v-for="(piece, slot) in order"
-        :key="piece"
-        class="puzzle-piece"
-        :class="[{
-          'is-selected': selected === slot,
-          'is-placed': !masterMode && piece === slot && !complete,
-          'is-dragging': dragging?.piece === piece && dragging.moved,
-          'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
-        }, placedGroupClasses(slot, piece)]"
-        :style="[pieceStyle(piece), dragStyle(piece)]"
-        :data-slot="slot"
-        type="button"
-        :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
-        :aria-pressed="selected === slot"
-        @pointerdown="startDrag(slot, $event)"
-        @pointerup="finishDrag"
-        @pointercancel="cancelDrag"
-        @lostpointercapture="cancelDrag"
-        @click="choosePiece(slot, $event)"
-      />
-    </TransitionGroup>
+      <div class="puzzle-board-frame">
+        <TransitionGroup
+          name="piece"
+          tag="div"
+          class="puzzle-board"
+          ref="board"
+          :style="boardStyle"
+          role="group"
+          :aria-label="t('game.gridLabel', { rows: puzzle.gridRows, columns: puzzle.gridColumns, title: displayedTitle })"
+          @pointermove="movePiece"
+        >
+          <button
+            v-for="(piece, slot) in order"
+            :key="piece"
+            class="puzzle-piece"
+            :class="[{
+              'is-selected': selected === slot,
+              'is-placed': !masterMode && piece === slot && !complete,
+              'is-dragging': dragging?.piece === piece && dragging.moved,
+              'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
+            }, placedGroupClasses(slot, piece)]"
+            :style="[pieceStyle(piece), dragStyle(piece)]"
+            :data-slot="slot"
+            type="button"
+            :aria-label="t('game.pieceLabel', { piece: slot + 1, position: piece + 1, placed: piece === slot ? t('game.placed') : '' })"
+            :aria-pressed="selected === slot"
+            @pointerdown="startDrag(slot, $event)"
+            @pointerup="finishDrag"
+            @pointercancel="cancelDrag"
+            @lostpointercapture="cancelDrag"
+            @click="choosePiece(slot, $event)"
+          />
+        </TransitionGroup>
+      </div>
     </div>
     <button
       v-if="showReferenceImage && imageLoaded && !complete"
@@ -1286,6 +1288,8 @@ onBeforeUnmount(() => {
 .reference-original-link-leave-active { transition: opacity .1s ease, transform .1s ease; }
 .reference-original-link-enter-from,.reference-original-link-leave-to { opacity: 0; transform: translateY(-.25rem); }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+/* Keep the frame in this legacy unlayered component cascade so Uno's base reset cannot clear its mat and border. */
+.puzzle-board-frame { box-sizing: border-box; width: min(100%, calc(var(--board-max-width, 590px) - 20px)); margin-inline: auto; padding: .45rem; border: 2px solid var(--ink); background: var(--paper); box-shadow: 4px 5px 0 var(--yellow), 0 11px 18px -7px rgb(8 15 46 / 36%); }
 .game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
 .master-zoom-tools { display: flex; align-items: center; gap: .28rem; }
 .master-zoom-tools button { cursor: pointer; }
@@ -1396,6 +1400,9 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
 @media (max-width: 470px) {
   .puzzle-board { gap: 2px; }
   .puzzle-piece.is-selected { box-shadow: inset 0 0 0 3px var(--yellow), 0 0 0 2px var(--coral); } }
+@media (max-width: 760px) {
+  .puzzle-board-frame { width: min(100%, calc(var(--board-max-width, 590px) - 16px)); padding: .3rem; box-shadow: 3px 4px 0 var(--yellow), 0 8px 12px -5px rgb(8 15 46 / 36%); }
+}
 @media (prefers-reduced-motion: reduce) {
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }

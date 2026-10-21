@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.28] - 2026-10-21
+
+### Improved
+
+- Framed gameplay boards with a paper mat, a dark border, and a subtle yellow offset shadow that adapts on mobile.
+
 ## [0.10.27] - 2026-10-21
 
 ### Improved
