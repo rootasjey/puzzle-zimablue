@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.20] - 2026-10-21
+
+### Improved
+
+- Put the weekly Master board first, removed secondary copy from the play header, and unified its game controls.
+
 ## [0.10.19] - 2026-10-21
 
 ### Improved

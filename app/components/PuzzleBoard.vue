@@ -62,54 +62,43 @@
         <p v-if="complete" class="success-note" role="status">{{ t(moves === 1 ? 'game.successOne' : 'game.successMany', { count: moves }) }}</p>
         <p v-else class="move-count" aria-live="polite">{{ t(moves === 1 ? 'game.movesOne' : 'game.movesMany', { count: moves }) }}</p>
         <p v-if="moveLimitReached" class="move-limit-note" role="status">{{ t('game.moveLimitReached') }}</p>
-        <p v-if="progressEnabled" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
+        <p v-if="progressEnabled && (!masterMode || sessionStatus === 'error' || sessionStatus === 'conflict')" class="session-save-status" :class="`is-${sessionStatus}`" role="status">{{ t(sessionStatusKey) }}</p>
         <p v-if="masterMode" class="master-attempt-status" :class="`is-${masterAttemptStatus}`" role="status">{{ t(masterStatusKey) }}</p>
         <p v-if="masterMode && masterAttemptStatus === 'guest'" class="master-login-prompt"><NuxtLink :to="signInLink">{{ t('master.signInBeforeMove') }}</NuxtLink></p>
         <p v-if="masterActionError" class="master-attempt-status is-error" role="alert">{{ masterActionError }}</p>
         <button v-if="masterMode && masterAttemptStatus === 'in_progress' && !complete" class="master-abandon-button" type="button" @click="abandonMasterAttempt">{{ t('master.abandon') }}</button>
       </div>
       <div class="board-tool-actions" :class="{ 'is-master-control-rail': masterMode }">
-        <div v-if="masterMode" class="master-zoom-tools" :aria-label="t('master.zoomControls')">
-          <button type="button" :aria-label="t('master.zoomOut')" :disabled="masterZoom <= 1" @click="changeMasterZoom(-0.25)">−</button>
-          <button type="button" :aria-label="t('master.fitBoard')" @click="fitMasterBoard">
-            <span class="master-zoom-label">{{ t('master.fit') }}</span>
-            <svg class="master-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3" /></svg>
+        <div v-if="masterMode" class="master-zoom-tools" :aria-label="t('master.zoomControls')" aria-describedby="master-touch-hint">
+          <button class="master-control-button" type="button" :aria-label="t('master.zoomOut')" :title="t('master.zoomOut')" :disabled="masterZoom <= 1" @click="changeMasterZoom(-0.25)">
+            <span class="master-control-icon i-lucide-zoom-out" aria-hidden="true" />
           </button>
-          <button type="button" :aria-label="t('master.zoomIn')" :disabled="masterZoom >= 3" @click="changeMasterZoom(0.25)">+</button>
-          <button type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">
-            <span class="master-zoom-label">{{ t(panMode ? 'master.panDone' : 'master.pan') }}</span>
-            <svg class="master-control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18m-9-9 3 3m-3-3-3 3m12 6-3-3m3 3-3 3m-6-3 3-3m-3 3-3-3m3 6-3-3m3 3 3-3" /></svg>
+          <button class="master-control-button" type="button" :aria-label="t('master.fitBoard')" :title="t('master.fitBoard')" @click="fitMasterBoard">
+            <span class="master-control-icon i-lucide-scan" aria-hidden="true" />
+          </button>
+          <button class="master-control-button" type="button" :aria-label="t('master.zoomIn')" :title="t('master.zoomIn')" :disabled="masterZoom >= 3" @click="changeMasterZoom(0.25)">
+            <span class="master-control-icon i-lucide-zoom-in" aria-hidden="true" />
+          </button>
+          <button class="master-control-button" type="button" :disabled="masterZoom <= 1" :aria-pressed="panMode" :aria-label="t(panMode ? 'master.finishPan' : 'master.panBoard')" :title="t(panMode ? 'master.finishPan' : 'master.panBoard')" @click="panMode = !panMode">
+            <span class="master-control-icon i-lucide-move" aria-hidden="true" />
           </button>
         </div>
-        <p v-if="masterMode" class="master-touch-hint">{{ t('master.touchGestureHint') }}</p>
+        <p v-if="masterMode" id="master-touch-hint" class="sr-only">{{ t('master.touchGestureHint') }}</p>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button v-if="showReferenceToggle" class="sound-toggle reference-toggle" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
-              <circle v-if="showReferenceImage" cx="12" cy="12" r="2.5" />
-              <path v-else d="m4 4 16 16" />
-            </svg>
+          <button v-if="showReferenceToggle" :class="['sound-toggle', 'reference-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="showReferenceImage" :aria-label="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" :title="t(showReferenceImage ? 'play.hideReference' : 'play.showReference')" @click="toggleReferenceImage">
+            <span class="game-control-icon" :class="showReferenceImage ? 'i-lucide-eye' : 'i-lucide-eye-off'" aria-hidden="true" />
           </button>
           <template #content>{{ t(showReferenceImage ? 'play.hideReference' : 'play.showReference') }}</template>
         </NTooltip>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button class="sound-toggle" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M11 5 6 9H3v6h3l5 4z" />
-              <template v-if="soundEnabled">
-                <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-                <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-              </template>
-              <template v-else>
-                <path d="m16 9 5 6m0-6-5 6" />
-              </template>
-            </svg>
+          <button :class="['sound-toggle', { 'master-control-button': masterMode }]" type="button" :aria-pressed="soundEnabled" :aria-label="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" :title="t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds')" @click="toggleSound">
+            <span class="game-control-icon" :class="soundEnabled ? 'i-lucide-volume-2' : 'i-lucide-volume-x'" aria-hidden="true" />
           </button>
           <template #content>{{ t(soundEnabled ? 'game.muteSounds' : 'game.enableSounds') }}</template>
         </NTooltip>
         <NTooltip :delay-duration="250" :_tooltip-content="{ class: 'completion-action-tooltip' }">
-          <button class="restart-icon-button" type="button" :aria-label="t('game.restart')" @click="requestRestart">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5" /><path d="M19 12a7 7 0 0 0-12-4L5 10m-1 7v-5h5" /><path d="M5 12a7 7 0 0 0 12 4l2-2" /></svg>
+          <button :class="['restart-icon-button', { 'master-control-button': masterMode }]" type="button" :aria-label="t('game.restart')" :title="t('game.restart')" @click="requestRestart">
+            <span class="game-control-icon i-lucide-rotate-ccw" aria-hidden="true" />
           </button>
           <template #content>{{ t('game.restart') }}</template>
         </NTooltip>
@@ -326,12 +315,13 @@ const imageAspectRatio = computed(() => imageDimensions.value.width / imageDimen
 const boardMaxWidth = computed(() => {
   if (masterMode.value) {
     const width = viewportSize.value.width
-    const pagePadding = width <= 760 ? 20 : Math.min(48, width * 0.04)
+    const mobile = width <= 760
+    const pagePadding = mobile ? 12 : Math.min(48, width * 0.04)
     const pageContentWidth = Math.min(width, 1120) - pagePadding * 2
     const desktopLayout = width > 1150
-    const sideSpace = showReferenceImage.value ? 368 : 128
-    const maxWidth = desktopLayout ? pageContentWidth - sideSpace : Math.min(pageContentWidth, width - 40)
-    const heightBudget = viewportSize.value.height - (desktopLayout ? 360 : 250)
+    const sideSpace = showReferenceImage.value ? 328 : 0
+    const maxWidth = desktopLayout ? pageContentWidth - sideSpace : Math.min(pageContentWidth, width - (mobile ? 24 : 40))
+    const heightBudget = viewportSize.value.height - (desktopLayout ? 272 : mobile ? 196 : 220)
     return Math.min(920, Math.max(220, maxWidth), Math.max(220, heightBudget))
   }
   const mobile = viewportSize.value.width <= 760
@@ -1176,13 +1166,10 @@ onBeforeUnmount(() => {
 .master-board-viewport.is-pan-mode { cursor: grab; }
 .master-board-viewport.is-pan-mode:active { cursor: grabbing; }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+.game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
 .master-zoom-tools { display: flex; align-items: center; gap: .28rem; }
-.master-zoom-tools button { min-width: 2rem; min-height: 2rem; border: 1.5px solid var(--ink); background: var(--white); color: var(--blue); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; }
-.master-zoom-tools button[aria-pressed="true"] { background: var(--yellow); color: var(--yellow-foreground); }
-.master-zoom-tools button:disabled { opacity: .45; cursor: not-allowed; }
-.master-zoom-tools button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
-.master-touch-hint { display: none; }
-@media (max-width: 760px) { .master-touch-hint { display: block; flex-basis: 100%; margin: 0; color: var(--muted); font-size: .66rem; line-height: 1.4; text-align: right; } }
+.master-zoom-tools button { cursor: pointer; }
+.master-zoom-tools button:disabled { cursor: not-allowed; }
 .board-tools:has(.master-zoom-tools) { flex-wrap: wrap; align-items: flex-start; }
 .board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
 .master-abandon-button { min-height: 2rem; border: 0; padding: .2rem .3rem; background: transparent; color: var(--coral); font: inherit; font-size: .7rem; font-weight: 750; text-decoration: underline; text-underline-offset: .18rem; cursor: pointer; }
@@ -1192,23 +1179,21 @@ onBeforeUnmount(() => {
 .game-panel.is-master-mode .board-session-summary { width: 100%; }
 .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: absolute; z-index: 3; top: calc(var(--master-stage-size) / 2); left: calc(50% - var(--master-stage-size) / 2 - 3.2rem); display: flex; width: 2.75rem; max-width: none; flex-direction: column; flex-wrap: nowrap; align-items: center; justify-content: center; gap: .45rem; transform: translateY(-50%); }
 .game-panel.is-master-mode .master-zoom-tools { flex-direction: column; gap: .3rem; }
-.game-panel.is-master-mode .master-zoom-tools button { width: 2.35rem; min-width: 2.35rem; min-height: 2.35rem; }
-.game-panel.is-master-mode .master-zoom-label { display: none; }
-.game-panel.is-master-mode .master-control-icon { display: block; width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.game-panel.is-master-mode .board-tool-actions .sound-toggle,.game-panel.is-master-mode .board-tool-actions .restart-icon-button { width: 2.35rem; height: 2.35rem; }
-.game-panel.is-master-mode .master-touch-hint { display: none; }
+.game-panel.is-master-mode .master-control-button { display: grid; box-sizing: border-box; width: 2.5rem; min-width: 2.5rem; height: 2.5rem; min-height: 2.5rem; flex: none; place-items: center; padding: 0; border: 1.5px solid var(--ink); border-radius: 0; background: var(--white); box-shadow: 2px 2px 0 var(--ink); color: var(--blue); line-height: 1; transition: transform .15s ease, border-color .15s ease, background-color .15s ease, color .15s ease, box-shadow .15s ease; }
+.game-panel.is-master-mode .master-control-button:hover { transform: translateY(-1px); border-color: var(--blue); color: var(--coral); }
+.game-panel.is-master-mode .master-control-button:active { transform: translate(2px, 2px); box-shadow: none; }
+.game-panel.is-master-mode .master-control-button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.game-panel.is-master-mode .master-control-button:disabled { opacity: .45; cursor: not-allowed; }
+.game-panel.is-master-mode .master-control-button[aria-pressed="true"] { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 9%, var(--paper)); color: var(--blue); }
+.game-panel.is-master-mode .master-control-icon,.game-panel.is-master-mode .game-control-icon { display: block; width: 1.2rem; height: 1.2rem; flex: none; font-size: 1.2rem; }
 .game-panel.is-master-mode .master-abandon-button { align-self: start; margin-top: .2rem; padding-inline: 0; }
 @media (max-width: 1150px) {
   .game-panel.is-master-mode .board-tools { align-items: center; flex-direction: column; gap: .55rem; }
   .game-panel.is-master-mode .board-session-summary { text-align: center; }
-  .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; gap: .5rem; transform: none; }
-  .game-panel.is-master-mode .master-zoom-tools { flex-direction: row; }
-  .game-panel.is-master-mode .master-zoom-tools button { width: auto; min-width: 2.15rem; min-height: 2.15rem; }
-  .game-panel.is-master-mode .master-zoom-tools button:nth-child(2),.game-panel.is-master-mode .master-zoom-tools button:nth-child(4) { width: auto; min-width: 2.15rem; padding-inline: .45rem; }
-  .game-panel.is-master-mode .master-zoom-label { display: inline; }
-  .game-panel.is-master-mode .master-control-icon { display: none; }
-  .game-panel.is-master-mode .board-tool-actions .sound-toggle,.game-panel.is-master-mode .board-tool-actions .restart-icon-button { width: 2.15rem; height: 2.15rem; }
-  .game-panel.is-master-mode .master-touch-hint { display: block; flex-basis: 100%; text-align: center; }
+  .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: .45rem; transform: none; }
+  .game-panel.is-master-mode .master-zoom-tools { flex-direction: row; gap: .45rem; }
+  .game-panel.is-master-mode .master-control-button { width: 2.35rem; min-width: 2.35rem; height: 2.35rem; min-height: 2.35rem; }
+  .game-panel.is-master-mode .master-control-icon,.game-panel.is-master-mode .game-control-icon { width: 1.1rem; height: 1.1rem; font-size: 1.1rem; }
   .game-panel.is-master-mode .master-abandon-button { align-self: center; }
 }
 .master-attempt-status { margin: .15rem 0 0; color: var(--blue); font-size: .74rem; font-weight: 750; }
