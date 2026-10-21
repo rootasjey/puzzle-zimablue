@@ -2,8 +2,13 @@
   <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute }">
     <header class="site-header page-wrap" :class="{ 'is-focused-play-route': isFocusedPuzzleRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
-        <BrandLogo />
+        <BrandLogo :show-name="!isFocusedPuzzleRoute" />
       </NuxtLink>
+      <GameplayHeaderTitle
+        v-if="activeGameplayHeader"
+        :title="activeGameplayHeader.title"
+        :details="activeGameplayHeader.details"
+      />
       <nav
         ref="primaryNav"
         class="primary-nav"
@@ -174,6 +179,7 @@ type ThemePreference = 'system' | 'light' | 'dark'
 const { loggedIn, user } = useUserSession()
 const route = useRoute()
 const preferences = useAccountPreferences()
+const gameplayHeader = useGameplayHeader()
 const { public: { appVersion } } = useRuntimeConfig()
 const { $getLocale, $localePath, $switchLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
@@ -214,6 +220,7 @@ const routeName = computed(() => String(route.name ?? '').split('___')[0] ?? '')
 const isDailyPlayRoute = computed(() => /\/(?:play|jouer)\/[^/]+\/?$/.test(route.path))
 const isFocusedPuzzleRoute = computed(() => isDailyPlayRoute.value || routeName.value === 'master')
 const isGameplayRoute = computed(() => isDailyPlayRoute.value || routeName.value === 'master' || routeName.value.startsWith('master-'))
+const activeGameplayHeader = computed(() => gameplayHeader.context.value?.routePath === route.path ? gameplayHeader.context.value : null)
 const themeLabels = computed(() => Object.fromEntries(themeOptions.map(option => [option.value, t(option.label)])) as Record<ThemePreference, string>)
 const currentLanguage = computed(() => $getLocale())
 const nextLanguageCode = computed(() => currentLanguage.value === 'fr' ? 'EN' : 'FR')

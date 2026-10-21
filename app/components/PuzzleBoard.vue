@@ -8,7 +8,7 @@
       v-else
       class="master-board-viewport"
       :class="{ 'is-master': masterMode, 'is-pan-mode': panMode, 'is-touch-gesture': touchGestureActive }"
-      :style="masterViewportStyle"
+      :style="[masterViewportStyle, boardStyle]"
       @pointerdown.capture="startPan"
       @pointermove.capture="movePan"
       @pointerup="finishPan"
@@ -30,12 +30,12 @@
         v-for="(piece, slot) in order"
         :key="piece"
         class="puzzle-piece"
-        :class="{
+        :class="[{
           'is-selected': selected === slot,
-          'is-placed': piece === slot && !complete,
+          'is-placed': !masterMode && piece === slot && !complete,
           'is-dragging': dragging?.piece === piece && dragging.moved,
           'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
-        }"
+        }, placedGroupClasses(slot, piece)]"
         :style="[pieceStyle(piece), dragStyle(piece)]"
         :data-slot="slot"
         type="button"
@@ -49,6 +49,17 @@
       />
     </TransitionGroup>
     </div>
+    <a
+      v-if="showReferenceImage && imageLoaded && !complete"
+      class="reference-floating-preview"
+      :href="illustrationLink"
+      target="_blank"
+      rel="noreferrer"
+      :aria-label="t('play.viewIllustration')"
+      :title="t('play.reference')"
+    >
+      <img :src="puzzle.imageUrl" :alt="t('play.referenceAlt', { name: puzzle.imageName })" loading="lazy" decoding="async">
+    </a>
     </div>
     <Teleport to="body">
       <Transition name="ghost-lift" appear>
@@ -205,6 +216,7 @@ import type { DailyPuzzle, WeeklyPuzzle } from '#shared/types/puzzle'
 import type { MasterAttemptSnapshot, MasterAttemptStatus } from '#shared/types/master'
 import type { LocalPuzzleSession, PuzzleSessionSnapshot } from '#shared/types/puzzle-session'
 import { decodePuzzleAttempt, encodePuzzleAttempt } from '#shared/utils/puzzle-attempt'
+import { getPlacedGroupEdges } from '#shared/utils/placed-group-edges'
 import { createMasterGestureStart, updateMasterGesture } from '~/utils/master-gesture'
 import { usePuzzleGame } from '~/composables/usePuzzleGame'
 
@@ -223,6 +235,19 @@ const { enabled: soundEnabled, toggle: toggleSound, play: playSound } = usePuzzl
 
 function toggleReferenceImage() {
   void accountPreferences.save({ showReferenceImage: !showReferenceImage.value })
+}
+
+function placedGroupClasses(slot: number, piece: number) {
+  if (!masterMode.value || complete.value || piece !== slot) return {}
+  const edges = getPlacedGroupEdges(order.value, props.puzzle.gridRows, props.puzzle.gridColumns, slot)
+  if (!edges) return {}
+  return {
+    'is-master-placed': true,
+    'placed-edge-top': edges.top,
+    'placed-edge-right': edges.right,
+    'placed-edge-bottom': edges.bottom,
+    'placed-edge-left': edges.left,
+  }
 }
 const completionSaveError = ref(false)
 const completionSavePending = ref(false)
@@ -319,9 +344,8 @@ const boardMaxWidth = computed(() => {
     const pagePadding = mobile ? 12 : Math.min(48, width * 0.04)
     const pageContentWidth = Math.min(width, 1120) - pagePadding * 2
     const desktopLayout = width > 1150
-    const sideSpace = showReferenceImage.value ? 328 : 0
-    const maxWidth = desktopLayout ? pageContentWidth - sideSpace : Math.min(pageContentWidth, width - (mobile ? 24 : 40))
-    const heightBudget = viewportSize.value.height - (desktopLayout ? 272 : mobile ? 196 : 220)
+    const maxWidth = desktopLayout ? pageContentWidth : Math.min(pageContentWidth, width - (mobile ? 24 : 40))
+    const heightBudget = viewportSize.value.height - (desktopLayout ? 176 : mobile ? 148 : 184)
     return Math.min(920, Math.max(220, maxWidth), Math.max(220, heightBudget))
   }
   const mobile = viewportSize.value.width <= 760
@@ -954,6 +978,7 @@ function fitMasterBoard() {
 
 function startPan(event: PointerEvent) {
   if (!masterMode.value || !(event.currentTarget instanceof HTMLElement)) return
+  if (event.target instanceof Element && event.target.closest('.reference-floating-preview')) return
 
   if (event.pointerType === 'touch') {
     activeTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -1158,13 +1183,18 @@ onBeforeUnmount(() => {
   .reference-panel p { grid-column: 1; }
 }
 
-.master-board-viewport:not(.is-master) { display: contents; }
+.master-board-viewport:not(.is-master) { position: relative; display: block; width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; overflow: visible; }
 .master-board-transform { width: 100%; }
-.master-board-viewport.is-master { display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
+.master-board-viewport:not(.is-master) .master-board-transform { height: 100%; }
+.master-board-viewport.is-master { position: relative; display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
 .master-board-viewport.is-master .master-board-transform { display: grid; height: 100%; place-items: center; transition: transform .12s ease-out; }
 .master-board-viewport.is-pan-mode .master-board-transform, .master-board-viewport.is-touch-gesture .master-board-transform { transition: none; }
 .master-board-viewport.is-pan-mode { cursor: grab; }
 .master-board-viewport.is-pan-mode:active { cursor: grabbing; }
+.reference-floating-preview { position: absolute; z-index: 4; right: .55rem; bottom: .55rem; display: block; width: clamp(3rem, 16%, 9rem); aspect-ratio: 1; padding: .2rem; border: 1px solid var(--line); background: var(--paper); box-shadow: 2px 2px 0 var(--ink); transition: transform .16s ease, box-shadow .16s ease; }
+.reference-floating-preview:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+.reference-floating-preview:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.reference-floating-preview img { display: block; width: 100%; height: 100%; border: 1px solid var(--line); background: var(--paper); object-fit: contain; }
 .puzzle-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
 .game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
 .master-zoom-tools { display: flex; align-items: center; gap: .28rem; }
@@ -1254,6 +1284,11 @@ onBeforeUnmount(() => {
 .puzzle-piece:active { cursor: grabbing; }
 .puzzle-piece:hover { filter: brightness(1.06); }
 .puzzle-piece.is-placed::after { position: absolute; top: .3rem; right: .3rem; display: grid; width: 18px; height: 18px; place-items: center; border: 2px solid var(--ink); border-radius: 50%; outline: 2px solid var(--paper); background: var(--yellow); box-shadow: 0 1px 4px rgb(8 15 46 / 45%); color: var(--yellow-foreground); content: '✓'; font-size: 11px; font-weight: 900; line-height: 1; pointer-events: none; }
+.puzzle-piece.is-master-placed::after { position: absolute; inset: 0; display: block; border: 0 solid var(--success-foreground); border-radius: 0; outline: none; background: none; box-shadow: none; content: ''; pointer-events: none; }
+.puzzle-piece.is-master-placed.placed-edge-top::after { border-top-width: 2px; }
+.puzzle-piece.is-master-placed.placed-edge-right::after { border-right-width: 2px; }
+.puzzle-piece.is-master-placed.placed-edge-bottom::after { border-bottom-width: 2px; }
+.puzzle-piece.is-master-placed.placed-edge-left::after { border-left-width: 2px; }
 .puzzle-piece.is-selected { z-index: 1; box-shadow: inset 0 0 0 4px var(--yellow), 0 0 0 2px var(--coral); filter: brightness(1.08); }
 .puzzle-piece.is-dragging { z-index: 3; cursor: grabbing; filter: brightness(1.1); pointer-events: none; transition: none; }
 .puzzle-piece.is-dragging::before { position: absolute; inset: 5px; border: 2px dashed rgb(255 255 255 / 72%); content: ''; pointer-events: none; }

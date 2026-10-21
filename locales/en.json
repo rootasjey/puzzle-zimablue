@@ -220,6 +220,13 @@
   },
   "play": {
     "back": "Back to previous days",
+    "puzzleDetails": "Puzzle details",
+    "openPuzzleDetails": "Show details for {title}",
+    "closeDetails": "Close",
+    "dateLabel": "Date",
+    "weekLabel": "Week",
+    "formatLabel": "Grid",
+    "gridSummary": "{rows} × {columns} · {count} pieces",
     "viewIllustration": "View illustration",
     "reference": "The image to reveal",
     "referenceAlt": "Preview of {name}",

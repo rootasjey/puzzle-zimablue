@@ -2,6 +2,13 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.21] - 2026-10-21
+
+### Improved
+
+- Focused daily and Master gameplay around the board, with puzzle details in the header and a floating reference preview.
+- Replaced Master placement checkmarks with a shared outline around correctly placed groups of pieces.
+
 ## [0.10.20] - 2026-10-21
 
 ### Improved

@@ -214,6 +214,13 @@
   },
   "play": {
     "back": "Revenir aux jours précédents",
+    "puzzleDetails": "Détails du puzzle",
+    "openPuzzleDetails": "Afficher les détails de {title}",
+    "closeDetails": "Fermer",
+    "dateLabel": "Date",
+    "weekLabel": "Semaine",
+    "formatLabel": "Grille",
+    "gridSummary": "{rows} × {columns} · {count} pièces",
     "viewIllustration": "Voir l’illustration",
     "reference": "L’image à retrouver",
     "referenceAlt": "Aperçu de {name}",

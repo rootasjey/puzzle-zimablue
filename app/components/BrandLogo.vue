@@ -1,3 +1,7 @@
+<script setup lang="ts">
+withDefaults(defineProps<{ showName?: boolean }>(), { showName: true })
+</script>
+
 <template>
   <span class="brand-logo" aria-hidden="true">
     <svg class="brand-logo-mark" viewBox="0 0 40 40" fill="none">
@@ -14,7 +18,7 @@
         <rect x="18" y="14" width="19.5" height="19.5" rx="1.8" fill="#3986FF" stroke="#18224E" stroke-width="1.8" />
       </g>
     </svg>
-    <span class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
+    <span v-if="showName" class="brand-logo-name"><span>zima</span><span class="wordmark-blue">blue</span></span>
   </span>
 </template>
 

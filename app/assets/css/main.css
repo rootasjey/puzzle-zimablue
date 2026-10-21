@@ -82,6 +82,8 @@ button { font: inherit; }
 .page-turn-leave-to { opacity: 0; transform: translateX(-.5rem); }
 .site-header { display: flex; align-items: center; justify-content: space-between; height: 82px; border-bottom: 2px solid var(--ink); }
 .site-header.is-focused-play-route { position: relative; z-index: 45; height: 64px; gap: .75rem; }
+.site-header.is-focused-play-route .wordmark { flex: none; }
+.site-header.is-focused-play-route .gameplay-header-title { max-width: min(34rem, 44vw); }
 .wordmark { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); }
 .primary-nav { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); }
 .primary-nav-links { display: contents; }
@@ -212,6 +214,7 @@ button:not(.puzzle-piece):not(.theme-toggle):not(.language-switcher):not(.admin-
 @media (max-width: 760px) {
   .site-header { position: sticky; z-index: 45; top: 0; height: auto; min-height: 68px; gap: .5rem; padding-block: .45rem; background: var(--paper); transition: top .22s cubic-bezier(.16,1,.3,1); }
   .site-header.is-focused-play-route { height: auto; min-height: 58px; padding-block: .3rem; }
+  .site-header.is-focused-play-route .gameplay-header-title { max-width: none; }
   .primary-nav { position: fixed; z-index: 40; inset-inline: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .15rem; padding: .35rem 1.1rem calc(.4rem + env(safe-area-inset-bottom)); border-top: 2px solid var(--ink); background: var(--paper); box-shadow: 0 -3px 0 var(--yellow); transition: transform .22s cubic-bezier(.16,1,.3,1), visibility 0s linear; }
   .primary-nav.is-gameplay-route { display: none; }
   .primary-nav.is-focused-play-route { position: relative; z-index: 46; inset: auto; bottom: auto; display: flex; grid-template-columns: none; gap: 0; margin-left: .45rem; padding: 0; border: 0; background: transparent; box-shadow: none; transition: none; }
