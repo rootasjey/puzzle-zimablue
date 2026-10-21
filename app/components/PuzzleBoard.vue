@@ -1290,7 +1290,7 @@ onBeforeUnmount(() => {
 .master-board-viewport:not(.is-master) { position: relative; display: block; width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; overflow: visible; }
 .master-board-transform { width: 100%; }
 .master-board-viewport:not(.is-master) .master-board-transform { height: 100%; }
-.master-board-viewport.is-master { position: relative; display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
+.master-board-viewport.is-master { position: relative; display: grid; width: 100%; max-width: var(--master-stage-size, 900px); height: var(--master-stage-size, 900px); margin-inline: auto; place-items: center; overflow: hidden; border: 2px solid var(--master-board-line, var(--ink)); background: color-mix(in srgb, var(--ink) 5%, var(--paper)); touch-action: none; }
 .master-board-viewport.is-master .master-board-transform { display: grid; height: 100%; place-items: center; transition: transform .12s ease-out; }
 .master-board-viewport.is-pan-mode .master-board-transform, .master-board-viewport.is-touch-gesture .master-board-transform { transition: none; }
 .master-board-viewport.is-pan-mode { cursor: grab; }
@@ -1310,10 +1310,11 @@ onBeforeUnmount(() => {
 .reference-original-link-leave-active { transition: opacity .1s ease, transform .1s ease; }
 .reference-original-link-enter-from,.reference-original-link-leave-to { opacity: 0; transform: translateY(-.25rem); }
 .puzzle-board { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(100%, var(--board-max-width, 590px)); aspect-ratio: var(--image-ratio, 1); margin-inline: auto; gap: 3px; border: 2px solid var(--ink); background: var(--ink); touch-action: none; }
+.game-panel.is-master-mode .puzzle-board { border-color: var(--master-board-line, var(--ink)); background: var(--master-board-line, var(--ink)); }
 .puzzle-board::before { position: absolute; z-index: 0; inset: 0; background: var(--paper); content: ''; opacity: 0; pointer-events: none; animation: puzzle-board-mat-arrival 180ms cubic-bezier(.2,.8,.2,1) var(--piece-entrance-final-delay, 0ms) both; }
 .puzzle-board .puzzle-piece { z-index: 1; }
 /* Keep the frame in this legacy unlayered component cascade so Uno's base reset cannot clear its mat and border. */
-.puzzle-board-frame { box-sizing: border-box; width: min(100%, calc(var(--board-max-width, 590px) - 20px)); margin-inline: auto; padding: .45rem; border: 2px solid var(--ink); background: var(--paper); box-shadow: 4px 5px 0 var(--yellow), 0 11px 18px -7px rgb(8 15 46 / 36%); }
+.puzzle-board-frame { box-sizing: border-box; width: min(100%, calc(var(--board-max-width, 590px) - 20px)); margin-inline: auto; padding: .45rem; border: 2px solid var(--master-board-line, var(--ink)); background: var(--paper); box-shadow: 4px 5px 0 var(--yellow), 0 11px 18px -7px rgb(8 15 46 / 36%); }
 .game-control-icon { display: block; width: 1.1rem; height: 1.1rem; flex: none; font-size: 1.1rem; }
 .master-zoom-tools { display: flex; align-items: center; gap: .28rem; }
 .master-zoom-tools button { cursor: pointer; }
@@ -1322,7 +1323,11 @@ onBeforeUnmount(() => {
 .board-tool-actions:has(.master-zoom-tools) { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
 .master-ranked-badge,.master-saving-status { display: inline-flex; align-items: center; margin-left: .4rem; border: 1px solid var(--line); padding: .05rem .32rem; color: var(--muted); font-size: .62rem; font-weight: 750; line-height: 1.35; vertical-align: middle; }
 .master-saving-status { color: var(--blue); }
-.game-panel.is-master-mode { position: relative; }
+.game-panel.is-master-mode { position: relative; --master-board-line: var(--ink); }
+:root[data-theme="dark"] .game-panel.is-master-mode { --master-board-line: var(--line); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .game-panel.is-master-mode { --master-board-line: var(--line); }
+}
 .game-panel.is-master-mode .board-tools { align-items: flex-start; }
 .game-panel.is-master-mode .board-session-summary { width: 100%; }
 .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { position: absolute; z-index: 3; top: calc(var(--master-stage-size) / 2); left: calc(50% - var(--master-stage-size) / 2 - 3.2rem); display: flex; width: 2.75rem; max-width: none; flex-direction: column; flex-wrap: nowrap; align-items: center; justify-content: center; gap: .45rem; transform: translateY(-50%); }
