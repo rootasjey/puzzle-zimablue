@@ -1392,8 +1392,8 @@ onBeforeUnmount(() => {
 @keyframes puzzle-piece-arrival { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 @keyframes puzzle-board-mat-arrival { from { opacity: 1; } to { opacity: 0; } }
 @keyframes puzzle-piece-selection-pulse {
-  0%, 100% { outline-color: color-mix(in srgb, var(--blue) 58%, transparent); }
-  50% { outline-color: var(--blue); }
+  0%, 100% { outline-color: var(--blue); }
+  50% { outline-color: var(--coral); }
 }
 .puzzle-board .piece-move { transition: transform .34s cubic-bezier(.2,.8,.2,1); }
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }

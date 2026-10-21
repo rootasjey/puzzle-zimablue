@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.36] - 2026-10-21
+
+### Improved
+
+- Animated the selected piece outline between brand blue and coral so it stays distinct over blue artwork.
+
 ## [0.10.35] - 2026-10-21
 
 ### Improved
