@@ -12,7 +12,7 @@
       </p>
     </header>
 
-    <div v-if="pending" class="calendar-loading"><BrandLoader :label="t('leaderboard.loading')" /></div>
+    <div v-if="pending" class="page-loading-state page-loading-state--narrow" aria-busy="true"><BrandLoader :label="t('leaderboard.loading')" /></div>
     <p v-else-if="error" class="leaderboard-empty" role="alert">{{ t('leaderboard.loadError') }}</p>
     <template v-else-if="data?.puzzle && data.metrics">
       <section class="leaderboard-metrics" :aria-label="t('leaderboard.metricsTitle')">

@@ -1,7 +1,7 @@
 <template>
   <main class="page-wrap public-player-page">
     <NuxtLink class="soft-link back-link" :to="$localePath({ name: 'leaderboard' })">{{ t('publicProfile.back') }}</NuxtLink>
-    <div v-if="pending" class="calendar-loading"><BrandLoader :label="t('publicProfile.loading')" /></div>
+    <div v-if="pending" class="page-loading-state page-loading-state--narrow" aria-busy="true"><BrandLoader :label="t('publicProfile.loading')" /></div>
     <p v-else-if="error" class="leaderboard-empty" role="alert">{{ t('publicProfile.loadError') }}</p>
     <template v-else-if="data">
       <header class="leaderboard-intro public-player-intro">

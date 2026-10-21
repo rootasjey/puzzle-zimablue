@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.38] - 2026-10-21
+
+### Improved
+
+- Harmonized full-page loading states across leaderboards, player profiles, and admin pages, with a calendar-shaped placeholder.
+
 ## [0.10.37] - 2026-10-21
 
 ### Improved

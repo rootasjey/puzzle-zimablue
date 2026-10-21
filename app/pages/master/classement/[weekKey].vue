@@ -23,7 +23,7 @@
       </div>
       <p v-else class="empty-state">{{ t('master.leaderboardEmpty') }}</p>
     </template>
-    <p v-else-if="pending" class="empty-state">{{ t('leaderboard.loading') }}</p>
+    <div v-else-if="pending" class="page-loading-state page-loading-state--narrow" aria-busy="true"><BrandLoader :label="t('leaderboard.loading')" /></div>
     <p v-else class="empty-state" role="alert">{{ t('leaderboard.loadError') }}</p>
   </main>
 </template>
