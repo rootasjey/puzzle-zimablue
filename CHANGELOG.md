@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.25] - 2026-10-21
+
+### Improved
+
+- Simplified the account sign-in page and corrected the layout of its form fields and primary action.
+
 ## [0.10.24] - 2026-10-21
 
 ### Improved

@@ -1,10 +1,8 @@
 <template>
   <main class="auth-page">
-    <section class="auth-sheet">
+    <section class="auth-sheet auth-sign-in">
       <NuxtLink :to="$localePath({ name: 'account' })" class="auth-back">{{ t('auth.back') }}</NuxtLink>
-      <p class="section-kicker">{{ t('account.kicker') }}</p>
       <h1>{{ t('auth.loginTitle') }}</h1>
-      <p class="auth-intro">{{ t('account.signInDescription') }}</p>
       <form class="auth-form" @submit.prevent="login">
         <label>{{ t('auth.email') }}<input v-model="email" type="email" autocomplete="username" required></label>
         <label>{{ t('auth.password') }}<input v-model="password" type="password" autocomplete="current-password" required></label>

@@ -179,6 +179,15 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .auth-back { display: inline-block; margin-bottom: 2rem; color: var(--blue); font-size: .84rem; font-weight: 750; text-decoration: none; }
 .auth-sheet h1,.admin-topline h1 { margin: 0; font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 850; letter-spacing: -.065em; line-height: 1.05; }
 .auth-intro { margin: .8rem 0 1.5rem; color: var(--muted); font-size: .92rem; line-height: 1.65; }
+.auth-sign-in .auth-back { margin-bottom: 1.15rem; }
+.auth-sign-in h1 { margin-bottom: 1.35rem; }
+.auth-sign-in .auth-form { display: grid; gap: .95rem; }
+.auth-sign-in .auth-form label { display: grid; gap: .4rem; color: var(--ink); font-size: .82rem; font-weight: 750; line-height: 1.35; }
+.auth-sign-in .auth-form input { width: 100%; min-height: 3rem; padding: .65rem .75rem; border: 2px solid var(--line-divider); border-radius: 0; background: var(--white); color: var(--ink); font: inherit; font-size: .92rem; }
+.auth-sign-in .auth-form input:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.auth-sign-in .auth-form .admin-primary { width: 100%; margin-top: .15rem; }
+.auth-sign-in .auth-small-link { margin-top: 1rem; }
+.auth-sign-in .account-secondary-link { margin-top: 1.15rem; line-height: 1.5; }
 .admin-primary,.admin-secondary,.admin-delete { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; gap: .4rem; padding: .55rem .9rem; border: 2px solid var(--ink); border-radius: 0; font: inherit; font-size: .84rem; font-weight: 800; cursor: pointer; }
 .admin-primary { background: var(--blue); color: var(--blue-foreground); box-shadow: 3px 3px 0 var(--ink); }
 .admin-secondary { background: var(--yellow); color: var(--yellow-foreground); box-shadow: 3px 3px 0 var(--ink); }
