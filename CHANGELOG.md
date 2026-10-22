@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.1] - 2026-10-22
+
+### Improved
+
+- Restore the penultimate Master focus level only when hovering outside the puzzle board.
+
 ## [0.11.0] - 2026-10-22
 
 ### Improved

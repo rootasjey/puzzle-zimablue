@@ -1039,6 +1039,19 @@ function handleMasterOutsideInteraction(event: Event) {
   revealMasterBoardSurroundings()
 }
 
+function handleMasterOutsideHover(event: PointerEvent) {
+  if (
+    !masterMode.value ||
+    masterBoardFocusLevel.value <= 2 ||
+    (event.pointerType !== 'mouse' && event.pointerType !== 'pen') ||
+    !(event.target instanceof Element) ||
+    event.target.closest('.master-board-viewport.is-master')
+  ) return
+
+  masterBoardFocusLevel.value = 2
+  noteMasterBoardActivity()
+}
+
 function handleMasterFocusVisibilityChange() {
   clearMasterFocusTimer()
   if (document.visibilityState === 'visible') noteMasterBoardActivity()
@@ -1202,15 +1215,6 @@ function startPan(event: PointerEvent) {
 }
 
 function movePan(event: PointerEvent) {
-  if (
-    masterMode.value &&
-    masterBoardFocusLevel.value > 2 &&
-    (event.pointerType === 'mouse' || event.pointerType === 'pen')
-  ) {
-    masterBoardFocusLevel.value = 2
-    noteMasterBoardActivity()
-  }
-
   if (event.pointerType === 'touch') {
     const point = activeTouchPointers.get(event.pointerId)
     if (!point) return
@@ -1342,6 +1346,7 @@ onMounted(async () => {
   if (masterMode.value) {
     document.addEventListener('pointerdown', handleMasterOutsideInteraction)
     document.addEventListener('focusin', handleMasterOutsideInteraction)
+    document.addEventListener('pointermove', handleMasterOutsideHover)
     document.addEventListener('visibilitychange', handleMasterFocusVisibilityChange)
   }
   window.addEventListener('keydown', handleReferenceKeydown)
@@ -1370,6 +1375,7 @@ onBeforeUnmount(() => {
     if (masterMode.value) {
       document.removeEventListener('pointerdown', handleMasterOutsideInteraction)
       document.removeEventListener('focusin', handleMasterOutsideInteraction)
+      document.removeEventListener('pointermove', handleMasterOutsideHover)
       document.removeEventListener('visibilitychange', handleMasterFocusVisibilityChange)
     }
     window.removeEventListener('keydown', handleReferenceKeydown)
