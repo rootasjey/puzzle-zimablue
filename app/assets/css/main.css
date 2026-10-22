@@ -86,10 +86,13 @@ button { font: inherit; }
 @layer app-focus {
   .site-header { transition: opacity .24s ease; }
   .site-shell.master-board-focus-mode .site-header:not(:focus-within) { opacity: .42; }
+  .site-shell.master-board-focus-mode-deep .site-header:not(:focus-within) { opacity: .14; }
   .game-panel.is-master-mode .board-session-summary,
   .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { transition: opacity .24s ease; }
   .site-shell.master-board-focus-mode .game-panel.is-master-mode .board-session-summary,
   .site-shell.master-board-focus-mode .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { opacity: .56; }
+  .site-shell.master-board-focus-mode-deep .game-panel.is-master-mode .board-session-summary,
+  .site-shell.master-board-focus-mode-deep .game-panel.is-master-mode .board-tool-actions.is-master-control-rail { opacity: .18; }
 }
 .site-header.is-focused-play-route { position: relative; z-index: 45; height: 64px; gap: .75rem; }
 .site-header.is-focused-play-route .wordmark { flex: none; }

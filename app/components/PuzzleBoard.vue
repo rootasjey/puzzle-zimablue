@@ -253,8 +253,9 @@ const { $getLocale, $t } = useI18n()
 const t = (key: string, params?: Record<string, string | number>): string => String($t(key as any, params) ?? '')
 const displayedTitle = computed(() => $getLocale() === 'en' && props.puzzle.titleEn ? props.puzzle.titleEn : props.puzzle.title)
 const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.startsWith('master:'))
-const masterBoardFocusMode = useState('master-board-focus-mode', () => false)
+const masterBoardFocusLevel = useState('master-board-focus-level', () => 0)
 const masterFocusIdleDelay = 6000
+const masterFocusDeepDelay = 6000
 const pieceEntranceDuration = 180
 const pieceEntranceDelays = shallowRef(new Map<number, number>())
 const arrivingPieces = shallowRef(new Set<number>())
@@ -1000,16 +1001,23 @@ function clearMasterFocusTimer() {
 
 function revealMasterBoardSurroundings() {
   clearMasterFocusTimer()
-  masterBoardFocusMode.value = false
+  masterBoardFocusLevel.value = 0
 }
 
 function noteMasterBoardActivity() {
   if (!masterMode.value || complete.value) return
   clearMasterFocusTimer()
+  if (masterBoardFocusLevel.value > 1) masterBoardFocusLevel.value = 1
   masterFocusTimer = setTimeout(() => {
     masterFocusTimer = undefined
     if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
-      masterBoardFocusMode.value = true
+      masterBoardFocusLevel.value = Math.max(masterBoardFocusLevel.value, 1)
+      masterFocusTimer = setTimeout(() => {
+        masterFocusTimer = undefined
+        if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
+          masterBoardFocusLevel.value = 2
+        }
+      }, masterFocusDeepDelay)
     }
   }, masterFocusIdleDelay)
 }
@@ -1341,7 +1349,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   clearMasterFocusTimer()
-  masterBoardFocusMode.value = false
+  masterBoardFocusLevel.value = 0
   if (import.meta.client) {
     if (masterMode.value) {
       document.removeEventListener('pointerdown', handleMasterOutsideInteraction)
