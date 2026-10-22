@@ -35,9 +35,7 @@
             class="puzzle-piece"
             :class="[{
               'puzzle-piece--arriving': arrivingPieces.has(piece),
-              'is-selected': selected === slot,
-              'is-master-selected': masterMode && selected === slot,
-              'is-placed': !masterMode && piece === slot && !complete,
+              'is-active': selected === slot,
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
             }, placedGroupClasses(slot, piece)]"
@@ -55,7 +53,7 @@
           >
             <span
               class="puzzle-piece-art"
-              :class="{ 'is-lifted': masterMode && selected === slot && !(dragging?.moved && dragging.piece === piece) }"
+              :class="{ 'is-lifted': selected === slot && !(dragging?.moved && dragging.piece === piece) }"
               aria-hidden="true"
             />
           </button>
@@ -338,11 +336,11 @@ function handleReferenceKeydown(event: KeyboardEvent) {
 }
 
 function placedGroupClasses(slot: number, piece: number) {
-  if (!masterMode.value || complete.value || piece !== slot) return {}
+  if (complete.value || piece !== slot) return {}
   const edges = getPlacedGroupEdges(order.value, props.puzzle.gridRows, props.puzzle.gridColumns, slot)
   if (!edges) return {}
   return {
-    'is-master-placed': true,
+    'is-placed': true,
     'placed-edge-top': edges.top,
     'placed-edge-right': edges.right,
     'placed-edge-bottom': edges.bottom,
@@ -1549,16 +1547,14 @@ onBeforeUnmount(() => {
 .puzzle-piece-art { position: absolute; z-index: 2; inset: 0; display: block; background-image: var(--image-url); background-position: var(--piece-background-position, 0% 0%); background-size: calc(var(--grid-columns) * 100%) calc(var(--grid-rows) * 100%); background-repeat: no-repeat; pointer-events: auto; transform-origin: center; transition: transform .18s ease-out, filter .18s ease-out; }
 .puzzle-piece:active { cursor: grabbing; }
 .puzzle-piece:hover { filter: brightness(1.06); }
-.puzzle-piece.is-placed::after { position: absolute; top: .3rem; right: .3rem; display: grid; width: 18px; height: 18px; place-items: center; border: 2px solid var(--ink); border-radius: 50%; outline: 2px solid var(--paper); background: var(--yellow); box-shadow: 0 1px 4px rgb(8 15 46 / 45%); color: var(--yellow-foreground); content: '✓'; font-size: 11px; font-weight: 900; line-height: 1; pointer-events: none; }
-.puzzle-piece.is-master-placed::after { position: absolute; z-index: 3; inset: -1px; display: block; border: 0 solid var(--success-foreground); border-radius: 0; outline: none; background: none; filter: drop-shadow(0 0 1px var(--paper)); content: ''; pointer-events: none; }
-.puzzle-piece.is-master-placed.placed-edge-top::after { border-top-width: 3px; }
-.puzzle-piece.is-master-placed.placed-edge-right::after { border-right-width: 3px; }
-.puzzle-piece.is-master-placed.placed-edge-bottom::after { border-bottom-width: 3px; }
-.puzzle-piece.is-master-placed.placed-edge-left::after { border-left-width: 3px; }
-.puzzle-piece.is-selected { z-index: 1; outline: 2px solid var(--blue); outline-offset: -4px; animation: puzzle-piece-selection-pulse 1.25s ease-in-out infinite; filter: brightness(1.04); }
-/* Keep Master overlays above button resets; exposed placement edges join into one continuous group perimeter. */
-.puzzle-piece.is-master-selected { z-index: 3; outline: none; animation: none; filter: none; }
-.puzzle-piece.is-master-selected::before { position: absolute; z-index: 1; inset: -1px; border: 2px solid var(--blue); outline: 1px solid var(--paper); outline-offset: 1px; background: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); content: ''; pointer-events: none; animation: puzzle-piece-selection-marker 1.9s ease-in-out infinite; }
+.puzzle-piece.is-placed::after { position: absolute; z-index: 3; inset: -1px; display: block; border: 0 solid var(--success-foreground); border-radius: 0; outline: none; background: none; filter: drop-shadow(0 0 1px var(--paper)); content: ''; pointer-events: none; }
+.puzzle-piece.is-placed.placed-edge-top::after { border-top-width: 3px; }
+.puzzle-piece.is-placed.placed-edge-right::after { border-right-width: 3px; }
+.puzzle-piece.is-placed.placed-edge-bottom::after { border-bottom-width: 3px; }
+.puzzle-piece.is-placed.placed-edge-left::after { border-left-width: 3px; }
+/* Exposed placement edges join into one continuous group perimeter in both puzzle modes. */
+.puzzle-piece.is-active { z-index: 3; outline: none; animation: none; filter: none; }
+.puzzle-piece.is-active::before { position: absolute; z-index: 1; inset: -1px; border: 2px solid var(--blue); outline: 1px solid var(--paper); outline-offset: 1px; background: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); content: ''; pointer-events: none; animation: puzzle-piece-selection-marker 1.9s ease-in-out infinite; }
 .puzzle-piece-art.is-lifted { will-change: transform, filter; animation: puzzle-piece-art-float 1.9s ease-in-out infinite; }
 @keyframes puzzle-piece-selection-marker {
   0%, 100% { border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
@@ -1592,8 +1588,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
 @media (prefers-reduced-motion: reduce) {
   .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
-  .puzzle-piece.is-selected { animation: none; outline-color: var(--blue); }
-  .puzzle-piece.is-master-selected::before { animation: none; border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
+  .puzzle-piece.is-active::before { animation: none; border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
   .puzzle-piece-art.is-lifted { will-change: auto; animation: none; transform: none; filter: drop-shadow(0 3px 4px color-mix(in srgb, var(--ink) 28%, transparent)); }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }

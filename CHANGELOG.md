@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.5] - 2026-10-23
+
+### Improved
+
+- Apply the Master floating selection and placed-group borders to daily puzzles.
+
 ## [0.11.4] - 2026-10-22
 
 ### Fixed
