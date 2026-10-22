@@ -1007,7 +1007,6 @@ function revealMasterBoardSurroundings() {
 function noteMasterBoardActivity() {
   if (!masterMode.value || complete.value) return
   clearMasterFocusTimer()
-  if (masterBoardFocusLevel.value > 1) masterBoardFocusLevel.value = 1
   masterFocusTimer = setTimeout(() => {
     masterFocusTimer = undefined
     if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
@@ -1034,7 +1033,8 @@ function handleMasterOutsideInteraction(event: Event) {
 }
 
 function handleMasterFocusVisibilityChange() {
-  if (document.visibilityState !== 'visible') revealMasterBoardSurroundings()
+  clearMasterFocusTimer()
+  if (document.visibilityState === 'visible') noteMasterBoardActivity()
 }
 
 function startDrag(slot: number, event: PointerEvent) {
