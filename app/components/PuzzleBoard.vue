@@ -13,7 +13,6 @@
       :style="[masterViewportStyle, boardStyle]"
       @pointerdown.capture="startPan"
       @pointermove.capture="movePan"
-      @pointerleave="handleMasterPointerLeave"
       @pointerup="finishPan"
       @pointercancel="finishPan"
       @lostpointercapture="finishPan"
@@ -1025,10 +1024,6 @@ function handleMasterOutsideInteraction(event: Event) {
   if (isBoardInteraction && !isReferenceInteraction) return
 
   revealMasterBoardSurroundings()
-}
-
-function handleMasterPointerLeave(event: PointerEvent) {
-  if (event.pointerType !== 'touch') revealMasterBoardSurroundings()
 }
 
 function handleMasterFocusVisibilityChange() {

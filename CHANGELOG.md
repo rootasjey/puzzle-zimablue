@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.40] - 2026-10-22
+
+### Improved
+
+- Extended Master focus mode to dim the control rail and session details, and keep the interface subdued until the next interaction.
+
 ## [0.10.39] - 2026-10-22
 
 ### Improved
