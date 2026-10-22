@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.4] - 2026-10-22
+
+### Fixed
+
+- Preserve the correct image crop while dragging puzzle pieces.
+
 ## [0.11.3] - 2026-10-22
 
 ### Improved

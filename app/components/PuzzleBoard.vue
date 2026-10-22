@@ -1573,7 +1573,7 @@ onBeforeUnmount(() => {
 .puzzle-drag-ghost { position: fixed; z-index: 1000; overflow: hidden; border: 2px solid white; box-shadow: 0 8px 24px rgb(8 15 46 / 34%); opacity: .97; pointer-events: none; transform: scale(1.04) rotate(1deg); }
 .puzzle-drag-ghost.touch { transform: translateY(-14px) scale(1.04) rotate(1deg); }
 .puzzle-drag-ghost.settling { transition: left .34s cubic-bezier(.2,.8,.2,1), top .34s cubic-bezier(.2,.8,.2,1), transform .34s cubic-bezier(.2,.8,.2,1), box-shadow .34s ease; box-shadow: 0 2px 5px rgb(8 15 46 / 12%); transform: none; }
-.puzzle-drag-ghost-image { width: 100%; height: 100%; background-image: var(--image-url); background-size: calc(var(--grid-columns) * 100%) calc(var(--grid-rows) * 100%); }
+.puzzle-drag-ghost-image { width: 100%; height: 100%; background-image: var(--image-url); background-position: var(--piece-background-position, 0% 0%); background-size: calc(var(--grid-columns) * 100%) calc(var(--grid-rows) * 100%); background-repeat: no-repeat; }
 .puzzle-piece.is-drop-target { z-index: 2; box-shadow: inset 0 0 0 4px var(--coral), 0 0 0 2px var(--yellow); }
 .puzzle-piece:focus-visible { z-index: 2; outline: 3px solid var(--yellow); outline-offset: -4px; }
 button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !important; }
