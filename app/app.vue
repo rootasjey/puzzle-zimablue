@@ -1,5 +1,5 @@
 <template>
-  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute, 'master-board-focus-mode': masterBoardFocusLevel > 0, 'master-board-focus-mode-deep': masterBoardFocusLevel > 1 }">
+  <div class="site-shell" :class="{ 'has-mobile-bottom-nav': !isGameplayRoute, 'nav-bars-hidden': navBarsHidden, 'is-focused-play-route': isFocusedPuzzleRoute, 'master-board-focus-mode': masterBoardFocusLevel > 0, 'master-board-focus-mode-deep': masterBoardFocusLevel > 1, 'master-board-focus-mode-hidden': masterBoardFocusLevel > 2 }">
     <header class="site-header page-wrap" :class="{ 'is-focused-play-route': isFocusedPuzzleRoute }" :inert="navBarsHidden" @focusin="showNavigationBars">
       <NuxtLink :to="$localePath({ name: 'index' })" class="wordmark" :aria-label="t('app.homeLabel')">
         <BrandLogo :show-name="!isFocusedPuzzleRoute" />

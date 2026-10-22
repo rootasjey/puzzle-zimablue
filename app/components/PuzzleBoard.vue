@@ -256,6 +256,7 @@ const masterMode = computed(() => props.masterMode || props.puzzle.puzzleId.star
 const masterBoardFocusLevel = useState('master-board-focus-level', () => 0)
 const masterFocusIdleDelay = 6000
 const masterFocusDeepDelay = 6000
+const masterFocusHiddenDelay = 6000
 const pieceEntranceDuration = 180
 const pieceEntranceDelays = shallowRef(new Map<number, number>())
 const arrivingPieces = shallowRef(new Set<number>())
@@ -1014,7 +1015,13 @@ function noteMasterBoardActivity() {
       masterFocusTimer = setTimeout(() => {
         masterFocusTimer = undefined
         if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
-          masterBoardFocusLevel.value = 2
+          masterBoardFocusLevel.value = Math.max(masterBoardFocusLevel.value, 2)
+          masterFocusTimer = setTimeout(() => {
+            masterFocusTimer = undefined
+            if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
+              masterBoardFocusLevel.value = 3
+            }
+          }, masterFocusHiddenDelay)
         }
       }, masterFocusDeepDelay)
     }
@@ -1195,6 +1202,15 @@ function startPan(event: PointerEvent) {
 }
 
 function movePan(event: PointerEvent) {
+  if (
+    masterMode.value &&
+    masterBoardFocusLevel.value > 2 &&
+    (event.pointerType === 'mouse' || event.pointerType === 'pen')
+  ) {
+    masterBoardFocusLevel.value = 2
+    noteMasterBoardActivity()
+  }
+
   if (event.pointerType === 'touch') {
     const point = activeTouchPointers.get(event.pointerId)
     if (!point) return

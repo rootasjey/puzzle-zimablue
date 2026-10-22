@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2026-10-22
+
+### Improved
+
+- Hide the Master surroundings after eighteen seconds; hovering the board restores the previous focus level.
+
 ## [0.10.43] - 2026-10-22
 
 ### Improved
