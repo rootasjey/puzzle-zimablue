@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.10.41] - 2026-10-22
+
+### Improved
+
+- Keep Master surroundings dim while the player interacts with the puzzle board.
+
 ## [0.10.40] - 2026-10-22
 
 ### Improved

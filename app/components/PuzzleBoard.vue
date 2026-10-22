@@ -1006,7 +1006,6 @@ function revealMasterBoardSurroundings() {
 function noteMasterBoardActivity() {
   if (!masterMode.value || complete.value) return
   clearMasterFocusTimer()
-  masterBoardFocusMode.value = false
   masterFocusTimer = setTimeout(() => {
     masterFocusTimer = undefined
     if (document.visibilityState === 'visible' && masterMode.value && !complete.value) {
