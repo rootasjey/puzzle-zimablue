@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.3] - 2026-10-22
+
+### Improved
+
+- Lift the selected Master tile above its stationary slot marker, with a soft shadow and reduced-motion support.
+
 ## [0.11.2] - 2026-10-22
 
 ### Improved
