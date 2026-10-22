@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.2] - 2026-10-22
+
+### Improved
+
+- Give the selected Master tile a gentle floating frame and make correctly placed groups easier to distinguish.
+
 ## [0.11.1] - 2026-10-22
 
 ### Improved

@@ -36,6 +36,7 @@
             :class="[{
               'puzzle-piece--arriving': arrivingPieces.has(piece),
               'is-selected': selected === slot,
+              'is-master-selected': masterMode && selected === slot,
               'is-placed': !masterMode && piece === slot && !complete,
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
@@ -51,7 +52,9 @@
             @pointercancel="cancelDrag"
             @lostpointercapture="cancelDrag"
             @click="choosePiece(slot, $event)"
-          />
+          >
+            <span v-if="masterMode && selected === slot" class="puzzle-piece-selection-frame" aria-hidden="true" />
+          </button>
         </TransitionGroup>
       </div>
     </div>
@@ -1542,12 +1545,19 @@ onBeforeUnmount(() => {
 .puzzle-piece:active { cursor: grabbing; }
 .puzzle-piece:hover { filter: brightness(1.06); }
 .puzzle-piece.is-placed::after { position: absolute; top: .3rem; right: .3rem; display: grid; width: 18px; height: 18px; place-items: center; border: 2px solid var(--ink); border-radius: 50%; outline: 2px solid var(--paper); background: var(--yellow); box-shadow: 0 1px 4px rgb(8 15 46 / 45%); color: var(--yellow-foreground); content: '✓'; font-size: 11px; font-weight: 900; line-height: 1; pointer-events: none; }
-.puzzle-piece.is-master-placed::after { position: absolute; inset: 0; display: block; border: 0 solid var(--success-foreground); border-radius: 0; outline: none; background: none; box-shadow: none; content: ''; pointer-events: none; }
-.puzzle-piece.is-master-placed.placed-edge-top::after { border-top-width: 2px; }
-.puzzle-piece.is-master-placed.placed-edge-right::after { border-right-width: 2px; }
-.puzzle-piece.is-master-placed.placed-edge-bottom::after { border-bottom-width: 2px; }
-.puzzle-piece.is-master-placed.placed-edge-left::after { border-left-width: 2px; }
+.puzzle-piece.is-master-placed::after { position: absolute; inset: -1px; display: block; border: 0 solid var(--success-foreground); border-radius: 0; outline: none; background: none; filter: drop-shadow(0 0 1px var(--paper)); content: ''; pointer-events: none; }
+.puzzle-piece.is-master-placed.placed-edge-top::after { border-top-width: 3px; }
+.puzzle-piece.is-master-placed.placed-edge-right::after { border-right-width: 3px; }
+.puzzle-piece.is-master-placed.placed-edge-bottom::after { border-bottom-width: 3px; }
+.puzzle-piece.is-master-placed.placed-edge-left::after { border-left-width: 3px; }
 .puzzle-piece.is-selected { z-index: 1; outline: 2px solid var(--blue); outline-offset: -4px; animation: puzzle-piece-selection-pulse 1.25s ease-in-out infinite; filter: brightness(1.04); }
+/* Keep Master overlays above button resets; exposed placement edges join into one continuous group perimeter. */
+.puzzle-piece.is-master-selected { z-index: 3; outline: none; animation: none; }
+.puzzle-piece-selection-frame { position: absolute; z-index: 4; inset: -1px; border: 2px solid var(--blue); outline: 1px solid var(--paper); outline-offset: 1px; box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); pointer-events: none; animation: puzzle-piece-selection-float 1.9s ease-in-out infinite; }
+@keyframes puzzle-piece-selection-float {
+  0%, 100% { transform: translateY(0); border-color: var(--blue); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
+  50% { transform: translateY(-2px); border-color: var(--coral); box-shadow: 0 5px 9px color-mix(in srgb, var(--ink) 42%, transparent); }
+}
 .puzzle-piece.is-dragging { z-index: 3; cursor: grabbing; filter: brightness(1.1); pointer-events: none; transition: none; }
 .puzzle-piece.is-dragging::before { position: absolute; inset: 5px; border: 2px dashed rgb(255 255 255 / 72%); content: ''; pointer-events: none; }
 .puzzle-drag-ghost { position: fixed; z-index: 1000; overflow: hidden; border: 2px solid white; box-shadow: 0 8px 24px rgb(8 15 46 / 34%); opacity: .97; pointer-events: none; transform: scale(1.04) rotate(1deg); }
@@ -1573,6 +1583,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
   .puzzle-piece.is-selected { animation: none; outline-color: var(--blue); }
+  .puzzle-piece-selection-frame { animation: none; transform: none; border-color: var(--blue); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }
   .completion-enter-from .completion-board { transform: none; } }
