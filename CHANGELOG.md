@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.6] - 2026-10-23
+
+### Improved
+
+- Refine the selected puzzle-piece float with a slower, smaller lift and no scaling.
+
 ## [0.11.5] - 2026-10-23
 
 ### Improved

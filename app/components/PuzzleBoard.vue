@@ -36,6 +36,7 @@
             :class="[{
               'puzzle-piece--arriving': arrivingPieces.has(piece),
               'is-active': selected === slot,
+              'is-floating': selected === slot && !(dragging?.moved && dragging.piece === piece),
               'is-dragging': dragging?.piece === piece && dragging.moved,
               'is-drop-target': dragging?.moved && dragging.target === slot && dragging.from !== slot,
             }, placedGroupClasses(slot, piece)]"
@@ -51,11 +52,7 @@
             @lostpointercapture="cancelDrag"
             @click="choosePiece(slot, $event)"
           >
-            <span
-              class="puzzle-piece-art"
-              :class="{ 'is-lifted': selected === slot && !(dragging?.moved && dragging.piece === piece) }"
-              aria-hidden="true"
-            />
+            <span class="puzzle-piece-art" aria-hidden="true" />
           </button>
         </TransitionGroup>
       </div>
@@ -1555,14 +1552,14 @@ onBeforeUnmount(() => {
 /* Exposed placement edges join into one continuous group perimeter in both puzzle modes. */
 .puzzle-piece.is-active { z-index: 3; outline: none; animation: none; filter: none; }
 .puzzle-piece.is-active::before { position: absolute; z-index: 1; inset: -1px; border: 2px solid var(--blue); outline: 1px solid var(--paper); outline-offset: 1px; background: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); content: ''; pointer-events: none; animation: puzzle-piece-selection-marker 1.9s ease-in-out infinite; }
-.puzzle-piece-art.is-lifted { will-change: transform, filter; animation: puzzle-piece-art-float 1.9s ease-in-out infinite; }
+.puzzle-piece.is-floating { will-change: translate, filter; animation: puzzle-piece-float 2.8s cubic-bezier(.37,0,.63,1) infinite; }
 @keyframes puzzle-piece-selection-marker {
   0%, 100% { border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
   50% { border-color: var(--coral); background-color: color-mix(in srgb, var(--coral) 14%, var(--paper)); box-shadow: 0 2px 7px color-mix(in srgb, var(--ink) 36%, transparent); }
 }
-@keyframes puzzle-piece-art-float {
-  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--ink) 15%, transparent)); }
-  50% { transform: translateY(-3px) scale(1.025); filter: drop-shadow(0 5px 4px color-mix(in srgb, var(--ink) 34%, transparent)); }
+@keyframes puzzle-piece-float {
+  0%, 100% { translate: 0 0; filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--ink) 14%, transparent)); }
+  50% { translate: 0 -2px; filter: drop-shadow(0 4px 3px color-mix(in srgb, var(--ink) 25%, transparent)); }
 }
 .puzzle-piece.is-dragging { z-index: 3; cursor: grabbing; filter: brightness(1.1); pointer-events: none; transition: none; }
 .puzzle-piece.is-dragging::before { position: absolute; inset: 5px; border: 2px dashed rgb(255 255 255 / 72%); content: ''; pointer-events: none; }
@@ -1589,7 +1586,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
   .puzzle-piece.is-active::before { animation: none; border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
-  .puzzle-piece-art.is-lifted { will-change: auto; animation: none; transform: none; filter: drop-shadow(0 3px 4px color-mix(in srgb, var(--ink) 28%, transparent)); }
+  .puzzle-piece.is-floating { will-change: auto; animation: none; translate: none; filter: drop-shadow(0 2px 3px color-mix(in srgb, var(--ink) 24%, transparent)); }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }
   .completion-enter-from .completion-board { transform: none; } }
