@@ -1496,7 +1496,7 @@ onBeforeUnmount(() => {
 .completion-screen { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: safe center; overflow: auto; padding: 1.25rem; background: var(--paper); }
 .completion-content { display: grid; width: 100%; justify-items: center; gap: clamp(.75rem, 2.8vh, 1.25rem); }
 .completion-board { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0,1fr)); grid-template-rows: repeat(var(--grid-rows), minmax(0,1fr)); width: min(88vw, 48svh, 640px); aspect-ratio: var(--image-ratio, 1); gap: 3px; border: 2px solid var(--ink); background: var(--ink); box-shadow: 7px 7px 0 var(--yellow); transform-origin: center; }
-.completion-piece { min-width: 0; min-height: 0; background-color: var(--line); background-image: var(--image-url); background-size: calc(var(--grid-columns) * 100%) calc(var(--grid-rows) * 100%); }
+.completion-piece { min-width: 0; min-height: 0; background-color: var(--line); background-image: var(--image-url); background-position: var(--piece-background-position, 0% 0%); background-repeat: no-repeat; background-size: calc(var(--grid-columns) * 100%) calc(var(--grid-rows) * 100%); }
 .completion-title { color: var(--blue); font-size: clamp(2rem, 5vw, 3rem); font-weight: 850; line-height: 1; text-align: center; }
 .completion-result { display: grid; justify-items: center; gap: .4rem; }
 .completion-copy { margin: 0; color: var(--muted); font-size: .9rem; font-weight: 650; text-align: center; }

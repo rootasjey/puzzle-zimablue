@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.8] - 2026-10-23
+
+### Fixed
+
+- Render each source-image fragment in its correct position on the completion screen.
+
 ## [0.11.7] - 2026-10-23
 
 ### Improved
