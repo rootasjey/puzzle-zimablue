@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.7] - 2026-10-23
+
+### Improved
+
+- Make the selected piece's floating shadow deeper and more visible.
+
 ## [0.11.6] - 2026-10-23
 
 ### Improved

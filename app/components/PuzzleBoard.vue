@@ -1558,8 +1558,8 @@ onBeforeUnmount(() => {
   50% { border-color: var(--coral); background-color: color-mix(in srgb, var(--coral) 14%, var(--paper)); box-shadow: 0 2px 7px color-mix(in srgb, var(--ink) 36%, transparent); }
 }
 @keyframes puzzle-piece-float {
-  0%, 100% { translate: 0 0; filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--ink) 14%, transparent)); }
-  50% { translate: 0 -2px; filter: drop-shadow(0 4px 3px color-mix(in srgb, var(--ink) 25%, transparent)); }
+  0%, 100% { translate: 0 0; filter: drop-shadow(0 2px 3px rgb(8 15 46 / 24%)); }
+  50% { translate: 0 -2px; filter: drop-shadow(0 7px 7px rgb(8 15 46 / 42%)); }
 }
 .puzzle-piece.is-dragging { z-index: 3; cursor: grabbing; filter: brightness(1.1); pointer-events: none; transition: none; }
 .puzzle-piece.is-dragging::before { position: absolute; inset: 5px; border: 2px dashed rgb(255 255 255 / 72%); content: ''; pointer-events: none; }
@@ -1586,7 +1586,7 @@ button:not(.puzzle-piece):disabled:active { transform: none; box-shadow: none !i
   .puzzle-board::before { animation: none; }
   .puzzle-board .puzzle-piece--arriving { animation: none; }
   .puzzle-piece.is-active::before { animation: none; border-color: var(--blue); background-color: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); }
-  .puzzle-piece.is-floating { will-change: auto; animation: none; translate: none; filter: drop-shadow(0 2px 3px color-mix(in srgb, var(--ink) 24%, transparent)); }
+  .puzzle-piece.is-floating { will-change: auto; animation: none; translate: none; filter: drop-shadow(0 4px 6px rgb(8 15 46 / 36%)); }
   .puzzle-board .piece-move { transition: none !important; }
   .completion-enter-active .completion-board, .completion-leave-active .completion-board { transition: opacity .01ms linear !important; }
   .completion-enter-from .completion-board { transform: none; } }
