@@ -2,6 +2,12 @@
 
 Notable changes to Puzzle Zimablue are recorded here. Releases follow [Semantic Versioning](https://semver.org/).
 
+## [0.11.9] - 2026-10-27
+
+### Improved
+
+- Add a compact checkmark to correctly placed pieces in daily puzzles.
+
 ## [0.11.8] - 2026-10-23
 
 ### Fixed

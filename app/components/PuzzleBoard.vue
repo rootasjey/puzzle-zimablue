@@ -53,6 +53,7 @@
             @click="choosePiece(slot, $event)"
           >
             <span class="puzzle-piece-art" aria-hidden="true" />
+            <span v-if="!masterMode && piece === slot && !complete" class="puzzle-piece-correct-mark" aria-hidden="true">✓</span>
           </button>
         </TransitionGroup>
       </div>
@@ -1549,6 +1550,7 @@ onBeforeUnmount(() => {
 .puzzle-piece.is-placed.placed-edge-right::after { border-right-width: 3px; }
 .puzzle-piece.is-placed.placed-edge-bottom::after { border-bottom-width: 3px; }
 .puzzle-piece.is-placed.placed-edge-left::after { border-left-width: 3px; }
+.puzzle-piece-correct-mark { position: absolute; z-index: 4; top: 3px; right: 3px; display: grid; width: clamp(12px, 32%, 19px); aspect-ratio: 1; place-items: center; border: 1px solid color-mix(in srgb, var(--success-foreground) 70%, var(--paper)); border-radius: 50%; background: var(--success-foreground); color: var(--paper); font-size: clamp(8px, 16%, 11px); font-weight: 800; line-height: 1; box-shadow: 0 1px 3px rgb(0 0 0 / 25%); pointer-events: none; }
 /* Exposed placement edges join into one continuous group perimeter in both puzzle modes. */
 .puzzle-piece.is-active { z-index: 3; outline: none; animation: none; filter: none; }
 .puzzle-piece.is-active::before { position: absolute; z-index: 1; inset: -1px; border: 2px solid var(--blue); outline: 1px solid var(--paper); outline-offset: 1px; background: color-mix(in srgb, var(--blue) 10%, var(--paper)); box-shadow: 0 2px 5px color-mix(in srgb, var(--ink) 30%, transparent); content: ''; pointer-events: none; animation: puzzle-piece-selection-marker 1.9s ease-in-out infinite; }
